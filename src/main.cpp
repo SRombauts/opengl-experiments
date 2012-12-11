@@ -15,16 +15,27 @@
 
 
 /**
- * Simple display function - code from:
- *     http://fly.cc.fer.hr/~unreal/theredbook/chapter01.html
- * This is the actual usage of the OpenGL library.
- * The following code is the same for any platform
+ * @brief GLUT reshape callback function
+ *
+ * @param[in] aW    Largeur utile de la fenêtre
+ * @param[in] aH    Hauteur utile de la fenêtre
  */
-void renderFunction()
+void reshapeCallback(int aW, int aH)
+{
+    std::cout << "reshapeCallback(" << aW << "," << aH << ")" << std::endl;
+
+	glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
+}
+
+/**
+ * @brief GLUT display callback function
+ */
+void displayCallback(void)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glColor3f(1.0f, 1.0f, 1.0f);
     glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
     glBegin(GL_POLYGON);
@@ -34,8 +45,29 @@ void renderFunction()
         glVertex2f(0.5f, -0.5f);
     glEnd();
     glFlush();
+
     glutSwapBuffers();
     glutPostRedisplay();
+}
+
+/**
+ * @brief GLUT keyboard callback function
+ *
+ * @param[in] aKey  ASCII code of the key pressed
+ * @param[in] aX    X coordinate of the mouse cursor (0 is the left of the render surface of the window : can be negative !)
+ * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
+ */
+void keyboardCallback(unsigned char aKey, int aX, int aY)
+{
+    std::cout << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")" << std::endl;
+    switch (aKey)
+    {
+        case 27: // ESC
+            glutLeaveMainLoop();
+            break;
+        default:
+            ;
+    }
 }
 
 /**
@@ -54,8 +86,14 @@ int main(int argc, char** argv)
     std::cout << "creating window..." << std::endl;
     /* int window = */ glutCreateWindow("OpenGL Experiments");
     
-    glutDisplayFunc(renderFunction);
+    glutReshapeFunc(reshapeCallback);
+    glutDisplayFunc(displayCallback);
+    glutKeyboardFunc(keyboardCallback);
+
+    // Main Loop
     glutMainLoop();
+
+    std::cout << "bye..." << std::endl;
 
     return 0;
 }
