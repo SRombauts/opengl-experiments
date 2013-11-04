@@ -2,3 +2,6 @@ Debug
 Release
 .settings
 *~
+OpenGL.sln
+OpenGL.vcproj*
+OpenGL.vcxproj*

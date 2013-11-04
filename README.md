@@ -10,9 +10,22 @@ or copy at http://opensource.org/licenses/MIT)
 
 ### Building and Running
 
-Under Linux :
+On Linux :
+
 sudo apt-get install libxrandr-dev libxi-dev
 
+cd glsdk
+../premake/premake4 gmake
 make
-Debug/opengl
+cd ..
+premake/premake4 gmake
+make
 
+On Windows :
+
+cd unofficial-opengl-sdk
+..\premake\premake4 vs2010
+[open and build solution]
+cd ..
+premake\premake4 vs2010
+[open and build solution]
