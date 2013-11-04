@@ -1,3 +1,6 @@
 [submodule "premake"]
 	path = premake
 	url = https://github.com/SRombauts/premake-binaries.git
+[submodule "unofficial-opengl-sdk"]
+	path = unofficial-opengl-sdk
+	url = https://github.com/SRombauts/unofficial-opengl-sdk.git
