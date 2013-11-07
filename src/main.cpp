@@ -10,10 +10,110 @@
  */
 
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
+#include <glload/gl_3_2_comp.h>
 #include <GL/freeglut.h>
+#include <glutil/Shader.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>     // NOLINT(readability/streams) pour std::cout
+#include <iostream>     // NOLINT(readability/streams) for logs
+#include <fstream>      // NOLINT(readability/streams) for files
+#include <sstream>
+#include <string>
+#include <vector>
 
+/// Vertex of a simple triangle, drawn clockwise, followed by its color data
+static const float g_vertexData[] = {
+    // les 3 vertex (x,y,z,w) du triangle
+    0.0f,  0.65f, 0.0f, 1.0f,
+    0.6f, -0.5f,  0.0f, 1.0f,
+    -0.6f, -0.5f,  0.0f, 1.0f,
+    // les 3 couleurs (r,g,b,a)
+    0.8f, 0.0f, 0.0f, 1.0f,
+    0.0f, 0.8f, 0.0f, 1.0f,
+    0.0f, 0.0f, 0.8f, 1.0f
+};
+
+GLuint g_program;
+GLuint g_attribPosition;
+GLuint g_attribColor;
+GLuint g_uniformModelToWorldMatrix;
+GLuint g_uniformWorldToCameraMatrix;
+GLuint g_uniformCameraToClipMatrix;
+
+GLuint g_vertexBufferObject;
+
+
+/**
+ * @brief Compile a given type shader from the content of a file, and add it to the list
+ *
+ * @param[in,out]   aShaderList         List of compiled shaders, to be completed by this function
+ * @param[in]       aShaderType         Type of shader to be compiled
+ * @param[in]       apShaderFilename    Name of the shader file to compile
+ *
+ * @throw a std::exception in case of error (glutil::CompileLinkException or std::runtime_error)
+ */
+void CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename)  {
+    try {
+        std::ifstream ifShader(apShaderFilename);
+        if (ifShader.is_open()) {
+            std::ostringstream isShader;
+            isShader << ifShader.rdbuf();
+            std::cout << "CompileShader: compiling \"" << apShaderFilename << "\"..." << std::endl;
+            aShaderList.push_back(glutil::CompileShader(aShaderType, isShader.str()));
+        } else {
+            std::cout << "CompileShader: unavailable file \"" << apShaderFilename << "\"" << std::endl;
+            throw std::runtime_error(std::string("CompileShader: unavailable file ") + apShaderFilename);
+        }
+    }
+    catch(glutil::CompileLinkException& e) {
+        std::cout << "CompileShader: \"" << apShaderFilename << "\":\n" << e.what() << std::endl;
+        throw;  // rethrow to abort program
+    }
+}
+
+/**
+ * @brief compile shaders and link them in a program
+ */
+void initProgram(void) {
+    std::vector<GLuint> shaderList;
+    // Compile the shader files (into intermediate compiled object)
+    CompileShader(shaderList, GL_VERTEX_SHADER,   "data/ModelWorldCameraClip.vert");
+    CompileShader(shaderList, GL_FRAGMENT_SHADER, "data/PassthroughColor.frag");
+    // Link them in a program (into the final executable to send to the GPU)
+    std::cout << "initProgram: linking program..." << std::endl;
+    g_program = glutil::LinkProgram(shaderList);
+    // Now, the intermediate compiled shader can be deleted (the program contain them)
+    std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
+
+    // Get id of uniforms (input variable of vertex shader)
+    g_attribPosition    = glGetAttribLocation(g_program, "position");   // layout(location = 0) in vec4 position;
+    g_attribColor       = glGetAttribLocation(g_program, "color");      // layout(location = 1) in vec4 color;
+    g_uniformModelToWorldMatrix     = glGetUniformLocation(g_program, "modelToWorldMatrix");
+    g_uniformWorldToCameraMatrix    = glGetUniformLocation(g_program, "worldToCameraMatrix");
+    g_uniformCameraToClipMatrix     = glGetUniformLocation(g_program, "cameraToClipMatrix");
+
+    // Define a unit matrix for all transformations
+    glm::mat4 unityMatrix(1.0f);
+
+    // Set uniform values that are constants (matrix transformation)
+    glUseProgram(g_program);
+    glUniformMatrix4fv(g_uniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(unityMatrix));
+    glUniformMatrix4fv(g_uniformWorldToCameraMatrix, 1, GL_FALSE, glm::value_ptr(unityMatrix));
+    glUniformMatrix4fv(g_uniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(unityMatrix));
+    glUseProgram(0);
+}
+
+/**
+ * @brief init the vertex buffer
+ */
+void initVertexBufferObject(void) {
+    glGenBuffers(1, &g_vertexBufferObject);
+
+    glBindBuffer(GL_ARRAY_BUFFER, g_vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertexData), g_vertexData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
 /**
  * @brief GLUT reshape callback function
@@ -35,15 +135,21 @@ void displayCallback(void) {
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    glBegin(GL_POLYGON);
-        glVertex2f(-0.5f, -0.5f);
-        glVertex2f(-0.5f, 0.5f);
-        glVertex2f(0.5f, 0.5f);
-        glVertex2f(0.5f, -0.5f);
-    glEnd();
-    glFlush();
+    // Use the linked program of compiled shaders
+    glUseProgram(g_program);
+
+    // Bind the vertex buffer, and init vertex position and colors
+    glBindBuffer(GL_ARRAY_BUFFER, g_vertexBufferObject);
+    glEnableVertexAttribArray(g_attribPosition);   // layout(location = 0) in vec4 position;
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(g_attribColor);      // layout(location = 1) in vec4 color;
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(g_vertexData)/2));
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glDisableVertexAttribArray(g_attribPosition);
+    glDisableVertexAttribArray(g_attribColor);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -59,21 +165,21 @@ void displayCallback(void) {
 void keyboardCallback(unsigned char aKey, int aX, int aY) {
     std::cout << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")" << std::endl;
     switch (aKey) {
-        case 27:  // ESC
+        case 27:   // ESC : EXIT
             glutLeaveMainLoop();
             break;
-        case 'w':
-        case 'z':
+        case 'w':  // QWERTY keyboard disposition
+        case 'z':  // AZERTY keyboard disposition
             std::cout << "up" << std::endl;
             break;
-        case 'a':
-        case 'q':
+        case 'a':  // QWERTY
+        case 'q':  // AZERTY
             std::cout << "left" << std::endl;
             break;
-        case 's':
+        case 's':  // QWERTY & AZERTY
             std::cout << "down" << std::endl;
             break;
-        case 'd':
+        case 'd':  // QWERTY & AZERTY
             std::cout << "right" << std::endl;
             break;
         default:
@@ -132,7 +238,7 @@ int main(int argc, char** argv) {
     glload::LoadFunctions();
     std::cout << "OpenGL version is " << glload::GetMajorVersion() << "." << glload::GetMinorVersion() << std::endl;
 
-    if (!glload::IsVersionGEQ(3, 3)) {
+    if (0 == glload::IsVersionGEQ(3, 3)) {
         std::cout << "You must have at least OpenGL 3.3" << std::endl;
         glutDestroyWindow(window);
         return 0;
@@ -140,6 +246,12 @@ int main(int argc, char** argv) {
 
     std::cout << "set functions..." << std::endl;
 
+    // 1) compile shaders and link them in a program
+    initProgram();
+    // 2) init the vertex buffer
+    initVertexBufferObject();
+
+    // Register GLUT Callbacks
     glutReshapeFunc(reshapeCallback);
     glutDisplayFunc(displayCallback);
     glutKeyboardFunc(keyboardCallback);
