@@ -11,6 +11,7 @@
 
 #include <iostream>
 
+#include <glload/gl_load.hpp>
 #include <GL/freeglut.h>
 
 
@@ -84,11 +85,26 @@ int main(int argc, char** argv)
     glutInitWindowPosition(100,100);
 
     std::cout << "creating window..." << std::endl;
-    /* int window = */ glutCreateWindow("OpenGL Experiments");
+    int window = glutCreateWindow("OpenGL Experiments");
     
+    std::cout << "loading functions..." << std::endl;
+    glload::LoadFunctions();
+    std::cout << "OpenGL version is " << glload::GetMajorVersion() << "." << glload::GetMinorVersion() << std::endl;
+
+    if(!glload::IsVersionGEQ(3, 3))
+    {
+        std::cout << "You must have at least OpenGL 3.3" << std::endl;
+        glutDestroyWindow(window);
+        return 0;
+    }
+
+    std::cout << "set functions..." << std::endl;
+
     glutReshapeFunc(reshapeCallback);
     glutDisplayFunc(displayCallback);
     glutKeyboardFunc(keyboardCallback);
+
+    std::cout << "main loop starting..." << std::endl;
 
     // Main Loop
     glutMainLoop();

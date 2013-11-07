@@ -1,7 +1,6 @@
+Makefile
 Debug
 Release
 .settings
 *~
-OpenGL.sln
-OpenGL.vcproj*
-OpenGL.vcxproj*
+/OpenGL*
