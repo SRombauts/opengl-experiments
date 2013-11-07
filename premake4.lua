@@ -10,6 +10,7 @@ project "OpenGL"
     kind "ConsoleApp"
     language "c++"
 
+    files {"README.md", "LICENSE.txt", "premake4.lua"}
     files {"src/*.cpp", "src/*.h"}
     files {"data/*.vert", "data/*.frag"}
     
