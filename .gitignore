@@ -3,4 +3,5 @@ Debug
 Release
 .settings
 *~
+ipch
 /OpenGL*

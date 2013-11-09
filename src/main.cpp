@@ -163,23 +163,51 @@ void displayCallback(void) {
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */
 void keyboardCallback(unsigned char aKey, int aX, int aY) {
-    std::cout << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")" << std::endl;
+    std::cout << "keyboardCallback(" << static_cast<int>(aKey) << "='" << aKey
+              << "'," << aX << "," << aY << ")" << std::endl;
     switch (aKey) {
         case 27:   // ESC : EXIT
             glutLeaveMainLoop();
             break;
-        case 'w':  // QWERTY keyboard disposition
-        case 'z':  // AZERTY keyboard disposition
+        case 'w': case 'W':  // QWERTY keyboard disposition
+        case 'z': case 'Z':  // AZERTY keyboard disposition
             std::cout << "up" << std::endl;
             break;
-        case 'a':  // QWERTY
-        case 'q':  // AZERTY
+        case 'a': case 'A':  // QWERTY
+        case 'q': case 'Q':  // AZERTY
             std::cout << "left" << std::endl;
             break;
-        case 's':  // QWERTY & AZERTY
+        case 's': case 'S':  // QWERTY & AZERTY
             std::cout << "down" << std::endl;
             break;
-        case 'd':  // QWERTY & AZERTY
+        case 'd': case 'D':  // QWERTY & AZERTY
+            std::cout << "right" << std::endl;
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ * @brief GLUT special kyes keyboard callback function
+ *
+ * @param[in] aKey  ASCII code of the key pressed
+ * @param[in] aX    X coordinate of the mouse cursor (0 is the left of the render surface of the window : can be negative !)
+ * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
+ */
+void keyboardSpecialCallback(int aKey, int aX, int aY) {
+    std::cout << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")" << std::endl;
+    switch (aKey) {
+        case GLUT_KEY_UP:
+            std::cout << "up" << std::endl;
+            break;
+        case GLUT_KEY_LEFT:
+            std::cout << "left" << std::endl;
+            break;
+        case GLUT_KEY_DOWN:
+            std::cout << "down" << std::endl;
+            break;
+        case GLUT_KEY_RIGHT:
             std::cout << "right" << std::endl;
             break;
         default:
@@ -196,7 +224,8 @@ void keyboardCallback(unsigned char aKey, int aX, int aY) {
  * @param[in] aY        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */    
 void mouseCallback(int aButton, int aState, int aX, int aY) {
-    std::cout << "mouseCallback(" << aButton << "," << aState << "," << aX << "," << aY << ")" << std::endl;
+    std::cout << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
+              << "," << aX << "," << aY << ")" << std::endl;
 }
 
 /**
@@ -205,8 +234,8 @@ void mouseCallback(int aButton, int aState, int aX, int aY) {
  * @param[in] aX    X coordinate of the mouse cursor (0 is the left of the render surface of the window : can be negative !)
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */    
-void motionCallback(int aX, int aY) {
-    std::cout << "motionCallback(" << aX << "," << aY << ")" << std::endl;
+void mouseMotionCallback(int aX, int aY) {
+    std::cout << "mouseMotionCallback(" << aX << "," << aY << ")" << std::endl;
 }
 
 /**
@@ -215,8 +244,42 @@ void motionCallback(int aX, int aY) {
  * @param[in] aX    X coordinate of the mouse cursor (0 is the left of the render surface of the window : can be negative !)
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */    
-void passiveMotionCallback(int aX, int aY) {
-    std::cout << "passiveMotionCallback(" << aX << "," << aY << ")" << std::endl;
+void mousePassiveMotionCallback(int aX, int aY) {
+    std::cout << "mousePassiveMotionCallback(" << aX << "," << aY << ")" << std::endl;
+}
+
+/**
+ * @brief GLUT mouse wheel callback function (LOW SENSITIVITY under Windows)
+ *
+ * @param[in] aNum      Wheel number (0)   
+ * @param[in] aDirection Direction 1=up, or -1=down
+ * @param[in] aX        X coordinate of the mouse cursor (0 is the left of the render surface of the window : can be negative !)
+ * @param[in] aY        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
+ */
+void mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
+    std::cout << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")" << std::endl;
+}
+
+/**
+ * @brief GLUT jostick callback function
+ *
+ * @param[in] aButtonMask   Mask of buttons 
+ * @param[in] aX        X coordinate of the mouse cursor (0 is the left of the render surface of the window : can be negative !)
+ * @param[in] aY        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
+ * @param[in] aZ        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
+ */
+void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ) {
+    static unsigned int lastButtonMask = 0;
+    static int lastX = 0;
+    static int lastY = 0;
+    static int lastZ = 0;
+    if ( (lastButtonMask != aButtonMask) || (lastX != aX) || (lastY != aY) || (lastZ != aZ) ) {
+        std::cout << "joystickCallback(" << aButtonMask << "," << aX << "," << aY << "," << aZ << ")" << std::endl;
+        lastButtonMask = aButtonMask;
+        lastX = aX;
+        lastY = aY;
+        lastZ = aZ;
+    }
 }
 
 /**
@@ -255,9 +318,12 @@ int main(int argc, char** argv) {
     glutReshapeFunc(reshapeCallback);
     glutDisplayFunc(displayCallback);
     glutKeyboardFunc(keyboardCallback);
+    glutSpecialFunc(keyboardSpecialCallback);
     glutMouseFunc(mouseCallback);
-    glutMotionFunc(motionCallback);
-    glutPassiveMotionFunc(passiveMotionCallback);
+    glutMotionFunc(mouseMotionCallback);
+    glutPassiveMotionFunc(mousePassiveMotionCallback);
+    glutMouseWheelFunc(mouseWheelCallback);
+    glutJoystickFunc(joystickCallback, 10);
 
     std::cout << "main loop starting..." << std::endl;
 
