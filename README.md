@@ -12,10 +12,7 @@ or copy at http://opensource.org/licenses/MIT)
 
 Complete the unofficial-opengl-sdk :
 
-TODO not working (missing lua "ex" and "ufs" extensions)
-#cd unofficial-opengl-sdk
-#sudo apt-get install lua5.2 lua-socket liblua5.2-0
-#lua get_externals.lua
+The script "get_externals.lua" is not working (missing lua "ex" and "ufs" extensions)
 Instead, download the unofficial-opengl-sdk package and copy the 4 missing libraries :
 - unofficial-opengl-sdk/freeglut
 - unofficial-opengl-sdk/glfw
@@ -24,6 +21,7 @@ Instead, download the unofficial-opengl-sdk package and copy the 4 missing libra
 
 On Linux :
 
+```bash
 sudo apt-get install libxrandr-dev libxi-dev
 
 cd unofficial-opengl-sdk
@@ -32,12 +30,15 @@ make
 cd ..
 premake/premake4 gmake
 make
+```
 
 On Windows :
 
+```bash
 cd unofficial-opengl-sdk
-..\premake\premake4 vs2010
+..\premake\premake4.exe vs2010
 [open and build solution]
 cd ..
-premake\premake4 vs2010
+premake\premake4.exe vs2010
 [open and build solution]
+```
