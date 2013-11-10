@@ -21,7 +21,7 @@ project "OpenGL"
         links {"glu32", "opengl32", "gdi32", "winmm", "user32"}
          
     configuration "linux"
-        links {"GL", "GLU"}
+        links {"GL", "GLU", "Xrandr", "Xi"}
     
     configuration "Debug"
         defines {"DEBUG", "_DEBUG"}
