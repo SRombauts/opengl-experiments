@@ -86,9 +86,10 @@ void initProgram(void) {
     // Now, the intermediate compiled shader can be deleted (the program contain them)
     std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 
-    // Get id of uniforms (input variable of vertex shader)
+    // Get location of (vertex) attributes - input streams of (vertex) shader
     g_attribPosition    = glGetAttribLocation(g_program, "position");   // layout(location = 0) in vec4 position;
     g_attribColor       = glGetAttribLocation(g_program, "color");      // layout(location = 1) in vec4 color;
+    // Get id of uniforms - input variables of shader
     g_uniformModelToWorldMatrix     = glGetUniformLocation(g_program, "modelToWorldMatrix");
     g_uniformWorldToCameraMatrix    = glGetUniformLocation(g_program, "worldToCameraMatrix");
     g_uniformCameraToClipMatrix     = glGetUniformLocation(g_program, "cameraToClipMatrix");
