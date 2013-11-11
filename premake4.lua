@@ -5,7 +5,32 @@ solution "OpenGL"
     configurations { "Debug", "Release" }
     defines {"_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE", "_SCL_SECURE_NO_WARNINGS", "TIXML_USE_STL"}
     defines {"FREEGLUT_STATIC"}
-    
+
+project("LoggerCpp")
+    kind "StaticLib"
+    language "c++"
+    targetdir "LoggerCpp/lib"
+
+    includedirs "LoggerCpp/include/"
+    files {"LoggerCpp/src/*.cpp",
+           "LoggerCpp/include/LoggerCpp/*.h",
+           "LoggerCpp/include/LoggerCpp/*.hpp"}
+	
+    configuration "windows"
+        defines {"WIN32"}
+	
+    configuration "Debug"
+        defines {"DEBUG", "_DEBUG"};
+        objdir "Debug";
+        flags "Symbols";
+        targetname "LoggerCppD";
+
+    configuration "Release"
+        defines {"NDEBUG", "RELEASE"};
+        flags {"OptimizeSpeed", "NoFramePointer", "ExtraWarnings", "NoEditAndContinue"};
+        objdir "Release";
+        targetname "LoggerCpp"
+
 project "OpenGL"
     kind "ConsoleApp"
     language "c++"
@@ -13,6 +38,9 @@ project "OpenGL"
     files {"README.md", "LICENSE.txt", "premake4.lua"}
     files {"src/*.cpp", "src/*.h"}
     files {"data/*.vert", "data/*.frag"}
+    
+    includedirs "LoggerCpp/include/"
+    links {"LoggerCpp"}
     
     UseLibs {"glload", "freeglut", "glutil", "glm"}
     

@@ -3,5 +3,8 @@ Debug
 Release
 .settings
 *~
+*.vcproj*
+*.vcxproj*
 ipch
 /OpenGL*
+log*.txt
