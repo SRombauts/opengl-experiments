@@ -1,9 +1,12 @@
 @echo "Getting dependencies..."
 git submodule init
-git submodule update --recursive
+git submodule update
+cd unofficial-opengl-sdk
+git submodule init
+git submodule update
 
 @echo "Building freeglut..."
-cd unofficial-opengl-sdk\freeglut\freeglut
+cd freeglut\freeglut
 cmake . -G "Visual Studio 10"
 cmake --build . --target freeglut_static --config Debug
 move lib\Debug\* lib

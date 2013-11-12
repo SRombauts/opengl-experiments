@@ -5,6 +5,7 @@ Release
 *~
 *.vcproj*
 *.vcxproj*
+*.make
 ipch
 /OpenGL*
 log*.txt
