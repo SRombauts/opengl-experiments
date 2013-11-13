@@ -30,6 +30,11 @@
  * @brief Main method - main entry point of application
  *
  *  freeglut does the window creation work for us regardless of the platform.
+ *
+ * @param[in] argc   Number or argument given on the command line (starting with 1, the executable itself)
+ * @param[in] argv   Array of pointers of strings containing the arguments
+ *
+ * @return 0
  */
 int main(int argc, char** argv) {
     // Configure the default severity Level of new Channel objects

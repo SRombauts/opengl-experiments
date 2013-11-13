@@ -23,7 +23,7 @@
 #include <cassert>
 
 
-/// Vertex of a simple triangle, drawn clockwise, followed by its color data
+/// Vertex data of a simple triangle, drawn clockwise, followed by its color data
 static const float vertexData[] = {
     // les 3 vertex (x,y,z,w) du triangle
     0.0f,  0.65f, 0.0f, 1.0f,
@@ -40,7 +40,14 @@ App* App::mpSelf = NULL;
 
 
 App::App() :
-    mLog("App") {
+    mLog("App"),
+    mProgram(0),
+    mAttribPosition(0),
+    mAttribColor(0),
+    mUniformModelToWorldMatrix(0),
+    mUniformWorldToCameraMatrix(0),
+    mUniformCameraToClipMatrix(0),
+    mVertexBufferObject(0) {
     mpSelf = this;
 }
 App::~App() {
@@ -93,10 +100,10 @@ void App::initProgram() {
     // Now, the intermediate compiled shader can be deleted (the program contain them)
     std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 
-    // Get location of (vertex) attributes - input streams of (vertex) shader
-    mAttribPosition    = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
-    mAttribColor       = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
-    // Get id of uniforms - input variables of shader
+    // Get location of (vertex) attributes (input streams of (vertex) shader
+    mAttribPosition = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
+    mAttribColor    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
+    // Get location of uniforms - input variables of (vertex) shader
     mUniformModelToWorldMatrix     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
     mUniformWorldToCameraMatrix    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
     mUniformCameraToClipMatrix     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
@@ -113,7 +120,7 @@ void App::initProgram() {
 }
 
 /**
- * @brief init the vertex buffer
+ * @brief init the vertex buffer object with the data of our mesh (triangle)
  */
 void App::initVertexBufferObject() {
     mLog.debug() << "initializing vertex buffer objet...";
@@ -130,15 +137,15 @@ void App::initVertexBufferObject() {
  */
 void App::registerCallbacks() {
     mLog.debug() << "registerCallbacks...";
-    glutReshapeFunc(reshapeCallback);
-    glutDisplayFunc(displayCallback);
-    glutKeyboardFunc(keyboardCallback);
-    glutSpecialFunc(keyboardSpecialCallback);
-    glutMouseFunc(mouseCallback);
-    glutMotionFunc(mouseMotionCallback);
-    glutPassiveMotionFunc(mousePassiveMotionCallback);
-    glutMouseWheelFunc(mouseWheelCallback);
-    glutJoystickFunc(joystickCallback, 10);
+    glutReshapeFunc        (reshapeCallback);
+    glutDisplayFunc        (displayCallback);
+    glutKeyboardFunc       (keyboardCallback);
+    glutSpecialFunc        (keyboardSpecialCallback);
+    glutMouseFunc          (mouseCallback);
+    glutMotionFunc         (mouseMotionCallback);
+    glutPassiveMotionFunc  (mousePassiveMotionCallback);
+    glutMouseWheelFunc     (mouseWheelCallback);
+    glutJoystickFunc       (joystickCallback, 10);
 }
 
 /**

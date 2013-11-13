@@ -9,3 +9,6 @@ Release
 ipch
 /OpenGL*
 log*.txt
+
+doc
+core

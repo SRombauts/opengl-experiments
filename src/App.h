@@ -27,6 +27,7 @@ public:
     void initVertexBufferObject();
     void registerCallbacks();
 
+    // glut static callback
     static void reshapeCallback(int aW, int aH);
     static void displayCallback();
     static void keyboardCallback(unsigned char aKey, int aX, int aY);
@@ -41,15 +42,15 @@ private:
     void CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
 
 private:
-    static App* mpSelf;
-    Log::Logger mLog;
+    static App* mpSelf; ///< Static pointer to the unique App instance, for glut static callback
+    Log::Logger mLog;   ///< Logger object to output runtime information
 
-    GLuint mProgram;
-    GLuint mAttribPosition;
-    GLuint mAttribColor;
-    GLuint mUniformModelToWorldMatrix;
-    GLuint mUniformWorldToCameraMatrix;
-    GLuint mUniformCameraToClipMatrix;
+    GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
+    GLuint mAttribPosition;             ///< Location of the "position" vertex shader attribute (input stream)
+    GLuint mAttribColor;                ///< Location of the "color" vertex shader attribute (input stream)
+    GLuint mUniformModelToWorldMatrix;  ///< Location of the "modelToWorldMatrix"  vertex shader uniform input variable
+    GLuint mUniformWorldToCameraMatrix; ///< Location of the "worldToCameraMatrix" vertex shader uniform input variable
+    GLuint mUniformCameraToClipMatrix;  ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
 
-    GLuint mVertexBufferObject;
+    GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh (triangle)
 };
