@@ -39,6 +39,9 @@ static const float vertexData[] = {
 App* App::mpSelf = NULL;
 
 
+/**
+ * @brief Constructor
+ */
 App::App() :
     mLog("App"),
     mProgram(0),
@@ -47,9 +50,15 @@ App::App() :
     mUniformModelToWorldMatrix(0),
     mUniformWorldToCameraMatrix(0),
     mUniformCameraToClipMatrix(0),
-    mVertexBufferObject(0) {
+    mVertexBufferObject(0),
+    mModelRotation(0.0f),
+    mModelTranslation(0.0f),
+    mModelToWorldMatrix(1.0f) {
     mpSelf = this;
 }
+/**
+ * @brief Destructor
+ */
 App::~App() {
     mpSelf = NULL;
 }
@@ -138,8 +147,8 @@ void App::initProgram() {
     glm::mat4 unityMatrix(1.0f);
 
     // Set uniform values that are constants (matrix transformation)
+    // NOTE: modelToWorldMatrix is non-constant
     glUseProgram(mProgram);
-    glUniformMatrix4fv(mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(unityMatrix));
     glUniformMatrix4fv(mUniformWorldToCameraMatrix, 1, GL_FALSE, glm::value_ptr(unityMatrix));
     glUniformMatrix4fv(mUniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(unityMatrix));
     glUseProgram(0);
@@ -183,6 +192,32 @@ void App::registerCallbacks() {
     glutJoystickFunc(joystickCallback, 10);
 }
 
+void App::up() {
+    mModelTranslation.y += 0.01f;
+    mModelToWorldMatrix[3].y = mModelTranslation.y;
+
+    mLog.info() << "up y=" << mModelTranslation.y;
+}
+void App::down() {
+    mModelTranslation.y -= 0.01f;
+    mModelToWorldMatrix[3].y = mModelTranslation.y;
+
+    mLog.info() << "down y=" << mModelTranslation.y;
+}
+
+void App::left() {
+    mModelTranslation.x -= 0.01f;
+    mModelToWorldMatrix[3].x = mModelTranslation.x;
+
+    mLog.info() << "left: x=" << mModelTranslation.x;
+}
+void App::right() {
+    mModelTranslation.x += 0.01f;
+    mModelToWorldMatrix[3].x = mModelTranslation.x;
+
+    mLog.info() << "right: x=" << mModelTranslation.x;
+}
+
 /**
  * @brief GLUT reshape callback function
  *
@@ -191,7 +226,6 @@ void App::registerCallbacks() {
  */
 void App::reshapeCallback(int aW, int aH) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
 
     glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
@@ -202,8 +236,7 @@ void App::reshapeCallback(int aW, int aH) {
  */
 void App::displayCallback() {
     assert(NULL != mpSelf);
-
-    mpSelf->mLog.debug() << "displayCallback()";
+    //mpSelf->mLog.debug() << "displayCallback()";
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
@@ -211,6 +244,9 @@ void App::displayCallback() {
 
     // Use the linked program of compiled shaders
     glUseProgram(mpSelf->mProgram);
+
+    // Set uniform values that are variable (matrix transformation)
+    glUniformMatrix4fv(mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(mpSelf->mModelToWorldMatrix));
 
     // Bind the vertex buffer, and init vertex position and colors
     glBindBuffer(GL_ARRAY_BUFFER, mpSelf->mVertexBufferObject);
@@ -238,7 +274,6 @@ void App::displayCallback() {
  */
 void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.debug() << "keyboardCallback(" << static_cast<int>(aKey) << "='" << aKey
                         << "'," << aX << "," << aY << ")";
     switch (aKey) {
@@ -247,17 +282,17 @@ void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
             break;
         case 'w': case 'W':  // QWERTY keyboard disposition
         case 'z': case 'Z':  // AZERTY keyboard disposition
-            mpSelf->mLog.info() << "up";
+            mpSelf->up();
             break;
         case 'a': case 'A':  // QWERTY
         case 'q': case 'Q':  // AZERTY
-            mpSelf->mLog.info() << "left";
+            mpSelf->left();
             break;
         case 's': case 'S':  // QWERTY & AZERTY
-            mpSelf->mLog.info() << "down";
+            mpSelf->down();
             break;
         case 'd': case 'D':  // QWERTY & AZERTY
-            mpSelf->mLog.info() << "right";
+            mpSelf->right();
             break;
         default:
             break;
@@ -273,21 +308,20 @@ void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
  */
 void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.info() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
 
     switch (aKey) {
         case GLUT_KEY_UP:
-            mpSelf->mLog.info() << "up";
+            mpSelf->up();
             break;
         case GLUT_KEY_LEFT:
-            mpSelf->mLog.info() << "left";
+            mpSelf->left();
             break;
         case GLUT_KEY_DOWN:
-            mpSelf->mLog.info() << "down";
+            mpSelf->down();
             break;
         case GLUT_KEY_RIGHT:
-            mpSelf->mLog.info() << "right";
+            mpSelf->right();
             break;
         default:
             break;
@@ -304,7 +338,6 @@ void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
  */
 void App::mouseCallback(int aButton, int aState, int aX, int aY) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.info() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
               << "," << aX << "," << aY << ")";
 }
@@ -317,7 +350,6 @@ void App::mouseCallback(int aButton, int aState, int aX, int aY) {
  */    
 void App::mouseMotionCallback(int aX, int aY) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.info() << "mouseMotionCallback(" << aX << "," << aY << ")";
 }
 
@@ -329,7 +361,6 @@ void App::mouseMotionCallback(int aX, int aY) {
  */    
 void App::mousePassiveMotionCallback(int aX, int aY) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.info() << "mousePassiveMotionCallback(" << aX << "," << aY << ")";
 }
 
@@ -343,7 +374,6 @@ void App::mousePassiveMotionCallback(int aX, int aY) {
  */
 void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
     assert(NULL != mpSelf);
-
     mpSelf->mLog.info() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
 }
 

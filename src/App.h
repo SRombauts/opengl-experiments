@@ -13,12 +13,13 @@
 
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <glload/gl_3_2_comp.h>
+#include <glm/glm.hpp>
 
 #include <vector>
 
 
 /**
- * @brief TODO
+ * @brief Application managing the lifecycle of glut
  */
 class App {
 public:
@@ -45,6 +46,11 @@ private:
     void initVertexArrayObject();
     void registerCallbacks();
 
+    void up();
+    void down();
+    void left();
+    void right();
+
 private:
     static App* mpSelf; ///< Static pointer to the unique App instance, for glut static callback
     Log::Logger mLog;   ///< Logger object to output runtime information
@@ -58,4 +64,8 @@ private:
 
     GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh (triangle)
     GLuint mVertexArrayObject;          ///< Vertex array object
+
+    float       mModelRotation;         ///< Angle of rotation of the model
+    glm::vec3   mModelTranslation;      ///< Vector of translation of the model
+    glm::mat4   mModelToWorldMatrix;    ///< Basic model to World matrix
 };

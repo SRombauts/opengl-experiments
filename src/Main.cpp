@@ -46,13 +46,16 @@ int main(int argc, char** argv) {
 
     // Configure the Output objects
     Log::Config::Vector configList;
-    Log::Config::addOutput(configList, "OutputConsole");
+#ifdef NDEBUG
     Log::Config::addOutput(configList, "OutputFile");
     Log::Config::setOption(configList, "filename",          "log.txt");
     Log::Config::setOption(configList, "filename_old",      "log.old.txt");
     Log::Config::setOption(configList, "max_startup_size",  "0");
     Log::Config::setOption(configList, "max_size",          "10000");
-#ifdef WIN32
+#else
+    Log::Config::addOutput(configList, "OutputConsole");
+#endif
+#if defined(WIN32) && !defined(NDEBUG)
     Log::Config::addOutput(configList, "OutputDebug");
 #endif
     Log::Manager::configure(configList);
