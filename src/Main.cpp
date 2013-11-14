@@ -3,7 +3,7 @@
  * @ingroup opengl-experiments
  * @brief   Simple experiments in C++ using the Unofficial OpenGL SDK
  *
- * Copyright (c) 2012 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+ * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
@@ -23,7 +23,7 @@
 #include <cassert>
 
 
-#include "App.h"
+#include "App.h"    // NOLINT(build/include)
 
 
 /**

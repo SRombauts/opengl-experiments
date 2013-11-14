@@ -3,7 +3,7 @@
  * @ingroup opengl-experiments
  * @brief   Simple experiments in C++ using the Unofficial OpenGL SDK
  *
- * Copyright (c) 2012 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+ * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
@@ -13,6 +13,8 @@
 
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <glload/gl_3_2_comp.h>
+
+#include <vector>
 
 
 /**

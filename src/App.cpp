@@ -3,20 +3,20 @@
  * @ingroup opengl-experiments
  * @brief   Simple experiments in C++ using the Unofficial OpenGL SDK
  *
- * Copyright (c) 2012 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+ * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
  */
 
-#include "App.h"
+#include "App.h"        // NOLINT(build/include) no subdirectory (yet)
 
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <fstream>      // NOLINT(readability/streams) for files
+#include <fstream>      // NOLINT(readability/streams) for shader files
 #include <sstream>
 #include <string>
 #include <vector>
@@ -25,11 +25,11 @@
 
 /// Vertex data of a simple triangle, drawn clockwise, followed by its color data
 static const float vertexData[] = {
-    // les 3 vertex (x,y,z,w) du triangle
+    // the 3 vertices (x,y,z,w) of the triangle
     0.0f,  0.65f, 0.0f, 1.0f,
     0.6f, -0.5f,  0.0f, 1.0f,
     -0.6f, -0.5f,  0.0f, 1.0f,
-    // les 3 couleurs (r,g,b,a)
+    // the 3 colors (r,g,b,a) of each vertex
     0.8f, 0.0f, 0.0f, 1.0f,
     0.0f, 0.8f, 0.0f, 1.0f,
     0.0f, 0.0f, 0.8f, 1.0f
@@ -90,14 +90,14 @@ void App::CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderTy
 void App::init() {
     // 1) compile shaders and link them in a program
     initProgram();
-    
+
     // 2) init the vertex buffer and vertex array objects
     initVertexBufferObject();
     initVertexArrayObject();
 
     // 3) Register GLUT Callbacks
     registerCallbacks();
-    
+
     // 4) Initialize more OpenGL option
     // Face Culling
     glEnable(GL_CULL_FACE);
@@ -172,15 +172,15 @@ void App::initVertexArrayObject(void) {
  */
 void App::registerCallbacks() {
     mLog.debug() << "registerCallbacks...";
-    glutReshapeFunc        (reshapeCallback);
-    glutDisplayFunc        (displayCallback);
-    glutKeyboardFunc       (keyboardCallback);
-    glutSpecialFunc        (keyboardSpecialCallback);
-    glutMouseFunc          (mouseCallback);
-    glutMotionFunc         (mouseMotionCallback);
-    glutPassiveMotionFunc  (mousePassiveMotionCallback);
-    glutMouseWheelFunc     (mouseWheelCallback);
-    glutJoystickFunc       (joystickCallback, 10);
+    glutReshapeFunc(reshapeCallback);
+    glutDisplayFunc(displayCallback);
+    glutKeyboardFunc(keyboardCallback);
+    glutSpecialFunc(keyboardSpecialCallback);
+    glutMouseFunc(mouseCallback);
+    glutMotionFunc(mouseMotionCallback);
+    glutPassiveMotionFunc(mousePassiveMotionCallback);
+    glutMouseWheelFunc(mouseWheelCallback);
+    glutJoystickFunc(joystickCallback, 10);
 }
 
 /**
