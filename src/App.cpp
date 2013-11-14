@@ -85,6 +85,32 @@ void App::CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderTy
 }
 
 /**
+ * @brief Initialization
+ */
+void App::init() {
+    // 1) compile shaders and link them in a program
+    initProgram();
+    
+    // 2) init the vertex buffer and vertex array objects
+    initVertexBufferObject();
+    initVertexArrayObject();
+
+    // 3) Register GLUT Callbacks
+    registerCallbacks();
+    
+    // 4) Initialize more OpenGL option
+    // Face Culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
+    // Depth Test
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LEQUAL);
+    glDepthRange(0.0f, 1.0f);
+}
+
+/**
  * @brief compile shaders and link them in a program
  */
 void App::initProgram() {
@@ -133,6 +159,15 @@ void App::initVertexBufferObject() {
 }
 
 /**
+ * @brief init the vertex array object
+ */
+void App::initVertexArrayObject(void) {
+    mLog.debug() << "initializing vertex array objet...";
+    glGenVertexArrays(1, &mVertexArrayObject);
+    glBindVertexArray(mVertexArrayObject);
+}
+
+/**
  * @brief Register GLUT callbacks
  */
 void App::registerCallbacks() {
@@ -168,6 +203,8 @@ void App::reshapeCallback(int aW, int aH) {
 void App::displayCallback() {
     assert(NULL != mpSelf);
 
+    mpSelf->mLog.debug() << "displayCallback()";
+
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -189,7 +226,7 @@ void App::displayCallback() {
     glUseProgram(0);
 
     glutSwapBuffers();
-    glutPostRedisplay();
+    glutPostRedisplay();    // Ask for refresh ; only needed if animation are present (not yet the case)
 }
 
 /**

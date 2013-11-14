@@ -23,9 +23,7 @@ public:
     App();
     ~App();
 
-    void initProgram();
-    void initVertexBufferObject();
-    void registerCallbacks();
+    void init();
 
     // glut static callback
     static void reshapeCallback(int aW, int aH);
@@ -40,6 +38,10 @@ public:
 
 private:
     void CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
+    void initProgram();
+    void initVertexBufferObject();
+    void initVertexArrayObject();
+    void registerCallbacks();
 
 private:
     static App* mpSelf; ///< Static pointer to the unique App instance, for glut static callback
@@ -53,4 +55,5 @@ private:
     GLuint mUniformCameraToClipMatrix;  ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
 
     GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh (triangle)
+    GLuint mVertexArrayObject;          ///< Vertex array object
 };

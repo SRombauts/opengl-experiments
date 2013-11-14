@@ -74,24 +74,17 @@ int main(int argc, char** argv) {
     if (0 == glload::IsVersionGEQ(3, 3)) {
         log.error() << "You must have at least OpenGL 3.3";
         glutDestroyWindow(window);
-        return 0;
+    } else {
+        App app;
+
+        // Initialize the application
+        app.init();
+
+        // Main Loop
+        log.notice() << "main loop starting...";
+        glutMainLoop();
+        log.notice() << "bye...";
     }
-
-    App app;
-
-    // 1) compile shaders and link them in a program
-    app.initProgram();
-    
-    // 2) init the vertex buffer
-    app.initVertexBufferObject();
-
-    // 3) Register GLUT Callbacks
-    app.registerCallbacks();
-
-    // Main Loop
-    log.notice() << "main loop starting...";
-    glutMainLoop();
-    log.notice() << "bye...";
 
     return 0;
 }
