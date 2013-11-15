@@ -23,16 +23,33 @@
 #include <cassert>
 
 
-/// Vertex data of a simple triangle, drawn clockwise, followed by its color data
+static const float X_LEFT   = -0.5f;
+static const float X_RIGHT  = 0.5f;
+static const float Y_TOP    = 0.5f;
+static const float Y_BOTTOM = -0.5f;
+static const float Z_FRONT  = 0.5f;
+static const float Z_BACK   = -0.5f;
+
+/// Vertex data of a strip of triangles, drawn clockwise, followed by their color data
 static const float vertexData[] = {
-    // the 3 vertices (x,y,z,w) of the triangle
-    0.0f,  0.65f, 0.0f, 1.0f,
-    0.6f, -0.5f,  0.0f, 1.0f,
-    -0.6f, -0.5f,  0.0f, 1.0f,
-    // the 3 colors (r,g,b,a) of each vertex
+    // the vertices (x,y,z,w) of the triangles
+    X_LEFT,  Y_TOP,     Z_FRONT, 1.0f,
+    X_RIGHT, Y_TOP,     Z_FRONT, 1.0f,
+    X_LEFT,  Y_BOTTOM,  Z_FRONT, 1.0f,
+    X_RIGHT, Y_BOTTOM,  Z_FRONT, 1.0f,
+    X_LEFT,  Y_BOTTOM,  Z_BACK,  1.0f,
+    X_RIGHT, Y_BOTTOM,  Z_BACK,  1.0f,
+    X_LEFT,  Y_TOP,     Z_FRONT, 1.0f,
+    X_RIGHT, Y_TOP,     Z_FRONT, 1.0f,
+    // the colors (r,g,b,a) of each vertex
     0.8f, 0.0f, 0.0f, 1.0f,
     0.0f, 0.8f, 0.0f, 1.0f,
-    0.0f, 0.0f, 0.8f, 1.0f
+    0.0f, 0.0f, 0.8f, 1.0f,
+    0.8f, 0.0f, 0.0f, 1.0f,
+    0.0f, 0.8f, 0.0f, 1.0f,
+    0.0f, 0.0f, 0.8f, 1.0f,
+    0.8f, 0.0f, 0.0f, 1.0f,
+    0.0f, 0.8f, 0.0f, 1.0f
 };
 
 
@@ -231,6 +248,28 @@ void App::right() {
 }
 
 /**
+ * @brief Rotate the model
+ */
+void App::rotate(int aDeltaX, int aDeltaY) {
+    mModelRotation.x += (aDeltaX * 0.01f);
+    mModelRotation.y += (aDeltaY * 0.01f);
+
+    // Rotation arround the Y axis (from left to right)
+    mModelToWorldMatrix[0].x = cos(mModelRotation.x);
+    mModelToWorldMatrix[0].z = -sin(mModelRotation.x);
+    mModelToWorldMatrix[2].x = sin(mModelRotation.x);
+    mModelToWorldMatrix[2].z = cos(mModelRotation.x);
+
+    // Rotation arround the X axis (from top to bottom)
+    mModelToWorldMatrix[1].y = cos(mModelRotation.y);
+    mModelToWorldMatrix[1].z = sin(mModelRotation.y);
+    mModelToWorldMatrix[2].y = -sin(mModelRotation.y);
+    mModelToWorldMatrix[2].z = cos(mModelRotation.y);
+
+    mLog.info() << "rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
+}
+
+/**
  * @brief GLUT reshape callback function
  *
  * @param[in] aW    Largeur utile de la fenêtre
@@ -266,7 +305,7 @@ void App::displayCallback() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(mpSelf->mAttribColor);      // layout(location = 1) in vec4 color;
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(vertexData)/2));
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexData)/(4*sizeof(float))/2);
 
     glDisableVertexAttribArray(mpSelf->mAttribPosition);
     glDisableVertexAttribArray(mpSelf->mAttribColor);
@@ -361,8 +400,17 @@ void App::mouseCallback(int aButton, int aState, int aX, int aY) {
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */    
 void App::mouseMotionCallback(int aX, int aY) {
+    static int lastX = aX;
+    static int lastY = aY;
     assert(NULL != mpSelf);
     mpSelf->mLog.info() << "mouseMotionCallback(" << aX << "," << aY << ")";
+
+    if (   (aX != lastX)
+        || (aY != lastY) ) {
+        mpSelf->rotate((aX - lastX), (aY - lastY));
+        lastX = aX;
+        lastY = aY;
+    }
 }
 
 /**

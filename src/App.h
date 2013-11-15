@@ -50,6 +50,7 @@ private:
     void down();
     void left();
     void right();
+    void rotate(int aDeltaX, int aDeltaY);
 
 private:
     static App* mpSelf; ///< Static pointer to the unique App instance, for glut static callback
@@ -65,7 +66,7 @@ private:
     GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh (triangle)
     GLuint mVertexArrayObject;          ///< Vertex array object
 
-    float       mModelRotation;         ///< Angle of rotation of the model
+    glm::vec3   mModelRotation;         ///< Angle of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
     glm::mat4   mModelToWorldMatrix;    ///< Basic model to World matrix
 };
