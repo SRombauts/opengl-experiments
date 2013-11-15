@@ -192,12 +192,18 @@ void App::registerCallbacks() {
     glutJoystickFunc(joystickCallback, 10);
 }
 
+/**
+ * @brief Move up the model
+ */
 void App::up() {
     mModelTranslation.y += 0.01f;
     mModelToWorldMatrix[3].y = mModelTranslation.y;
 
     mLog.info() << "up y=" << mModelTranslation.y;
 }
+/**
+ * @brief Move down the model
+ */
 void App::down() {
     mModelTranslation.y -= 0.01f;
     mModelToWorldMatrix[3].y = mModelTranslation.y;
@@ -205,12 +211,18 @@ void App::down() {
     mLog.info() << "down y=" << mModelTranslation.y;
 }
 
+/**
+ * @brief Move the model to the left
+ */
 void App::left() {
     mModelTranslation.x -= 0.01f;
     mModelToWorldMatrix[3].x = mModelTranslation.x;
 
     mLog.info() << "left: x=" << mModelTranslation.x;
 }
+/**
+ * @brief Move the model to the right
+ */
 void App::right() {
     mModelTranslation.x += 0.01f;
     mModelToWorldMatrix[3].x = mModelTranslation.x;
@@ -236,7 +248,7 @@ void App::reshapeCallback(int aW, int aH) {
  */
 void App::displayCallback() {
     assert(NULL != mpSelf);
-    //mpSelf->mLog.debug() << "displayCallback()";
+    // mpSelf->mLog.debug() << "displayCallback()";
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
