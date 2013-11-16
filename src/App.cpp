@@ -82,22 +82,23 @@ static const float _zFar            = 100.0f;
 App::App() :
     mLog("App"),
     mProgram(0),
-    mAttribPosition(0),
-    mAttribColor(0),
-    mUniformModelToWorldMatrix(0),
-    mUniformWorldToCameraMatrix(0),
-    mUniformCameraToClipMatrix(0),
-    mVertexBufferObject(0),
+    mPositionAttrib(0),
+    mColorAttrib(0),
+    mModelToWorldMatrixUnif(0),
+    mWorldToCameraMatrixUnif(0),
+    mCameraToClipMatrixUnif(0),
     mModelRotation(0.0f),
     mModelTranslation(0.0f),
     mModelToWorldMatrix(1.0f),
     mCameraToClipMatrix(1.0f) {
     _mpSelf = this;
+    init();
 }
 /**
  * @brief Destructor
  */
 App::~App() {
+    uninitVertexArrayObject();
     _mpSelf = NULL;
 }
 
@@ -111,22 +112,21 @@ App::~App() {
  *
  * @throw a std::exception in case of error (glutil::CompileLinkException or std::runtime_error)
  */
-void App::CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const {
-    Log::Logger log("CompileShader");
+void App::compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const {
     try {
         std::ifstream ifShader(apShaderFilename);
         if (ifShader.is_open()) {
             std::ostringstream isShader;
             isShader << ifShader.rdbuf();
-            log.debug() << "CompileShader: compiling \"" << apShaderFilename << "\"...";
+            mLog.debug() << "compileShader: compiling \"" << apShaderFilename << "\"...";
             aShaderList.push_back(glutil::CompileShader(aShaderType, isShader.str()));
         } else {
-            log.critic() << "CompileShader: unavailable file \"" << apShaderFilename << "\"";
-            throw std::runtime_error(std::string("CompileShader: unavailable file ") + apShaderFilename);
+            mLog.critic() << "compileShader: unavailable file \"" << apShaderFilename << "\"";
+            throw std::runtime_error(std::string("compileShader: unavailable file ") + apShaderFilename);
         }
     }
     catch(glutil::CompileLinkException& e) {
-        _mpSelf->mLog.info() << "CompileShader: \"" << apShaderFilename << "\":\n" << e.what();
+        mLog.info() << "compileShader: \"" << apShaderFilename << "\":\n" << e.what();
         throw;  // rethrow to abort program
     }
 }
@@ -139,7 +139,6 @@ void App::init() {
     initProgram();
 
     // 2) init the vertex buffer and vertex array objects
-    initVertexBufferObject();
     initVertexArrayObject();
 
     // 3) Register GLUT Callbacks
@@ -165,8 +164,8 @@ void App::initProgram() {
 
     // Compile the shader files (into intermediate compiled object)
     mLog.debug() << "initProgram: compiling shaders...";
-    CompileShader(shaderList, GL_VERTEX_SHADER,   "data/ModelWorldCameraClip.vert");
-    CompileShader(shaderList, GL_FRAGMENT_SHADER, "data/PassthroughColor.frag");
+    compileShader(shaderList, GL_VERTEX_SHADER,   "data/ModelWorldCameraClip.vert");
+    compileShader(shaderList, GL_FRAGMENT_SHADER, "data/PassthroughColor.frag");
     // Link them in a program (into the final executable to send to the GPU)
     mLog.debug() << "initProgram: linking program...";
     mProgram = glutil::LinkProgram(shaderList);
@@ -174,12 +173,12 @@ void App::initProgram() {
     std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 
     // Get location of (vertex) attributes (input streams of (vertex) shader
-    mAttribPosition = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
-    mAttribColor    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
+    mPositionAttrib = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
+    mColorAttrib    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
     // Get location of uniforms - input variables of (vertex) shader
-    mUniformModelToWorldMatrix     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
-    mUniformWorldToCameraMatrix    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
-    mUniformCameraToClipMatrix     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
+    mModelToWorldMatrixUnif     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
+    mWorldToCameraMatrixUnif    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
+    mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
 
     // Define the "Camera to Clip" matrix for the perspective transformation
     mCameraToClipMatrix[0].x = _frustumScale;
@@ -190,32 +189,55 @@ void App::initProgram() {
 
     // Set uniform values for matrix transformations
     glUseProgram(mProgram);
-    glUniformMatrix4fv(mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
-    glUniformMatrix4fv(mUniformWorldToCameraMatrix, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); // unity matrix
-  //glUniformMatrix4fv(mUniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
+    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
+    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); // unity matrix
+  //glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
     glUseProgram(0);
 }
 
 /**
- * @brief init the vertex buffer object with the data of our mesh (triangle)
+ * @brief Initialize the vertex buffer and vertex array objects
+ *
+ *  Init the vertex buffer object with the data of our mesh (triangle strip)
+ * and bind it to a vertex array to 
  */
-void App::initVertexBufferObject() {
+void App::initVertexArrayObject(void) {
+    // Generate a VBO: Ask for a buffer of GPU memory
     mLog.debug() << "initializing vertex buffer objet...";
-
     glGenBuffers(1, &mVertexBufferObject);
 
+    // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
     glBufferData(GL_ARRAY_BUFFER, sizeof(_vertexData), _vertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // here _vertexData is of no more use (dynamic memory could be deallocated)
+
+    // Generate a VAO: Ask for a place on GPU to associate states with our data
+    mLog.debug() << "initializing vertex array objet...";
+    glGenVertexArrays(1, &mVertexArrayObject);
+    
+    // Bind the vertex array, so that it can memorise the following states
+    glBindVertexArray(mVertexArrayObject);
+
+    // Bind the vertex buffer, and init vertex position and colors input streams (shader attributes)
+    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
+    glEnableVertexAttribArray(mPositionAttrib);    // layout(location = 0) in vec4 position;
+    glEnableVertexAttribArray(mColorAttrib);       // layout(location = 1) in vec4 color;
+    // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(_vertexData)/2));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    glBindVertexArray(0);
 }
 
 /**
- * @brief init the vertex array object
+ * @brief Uninitialize the vertex buffer and vertex array objects
  */
-void App::initVertexArrayObject(void) {
-    mLog.debug() << "initializing vertex array objet...";
-    glGenVertexArrays(1, &mVertexArrayObject);
-    glBindVertexArray(mVertexArrayObject);
+void App::uninitVertexArrayObject(void) {
+    mLog.debug() << "uninitializing vertex buffer and array objet...";
+    glDeleteBuffers(1, &mVertexBufferObject);
+    glDeleteVertexArrays(1, &mVertexArrayObject);
 }
 
 /**
@@ -331,7 +353,7 @@ void App::reshapeCallback(int aW, int aH) {
 
     // Set uniform values with the new matrix transformation
     glUseProgram(_mpSelf->mProgram);
-    glUniformMatrix4fv(_mpSelf->mUniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mCameraToClipMatrix));
+    glUniformMatrix4fv(_mpSelf->mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(_mpSelf->mCameraToClipMatrix));
     glUseProgram(0);
 
     glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
@@ -351,21 +373,18 @@ void App::displayCallback() {
     // Use the linked program of compiled shaders
     glUseProgram(_mpSelf->mProgram);
 
-    // Bind the vertex buffer, and init vertex position and colors
-    glBindBuffer(GL_ARRAY_BUFFER, _mpSelf->mVertexBufferObject);
-    glEnableVertexAttribArray(_mpSelf->mAttribPosition);   // layout(location = 0) in vec4 position;
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(_mpSelf->mAttribColor);      // layout(location = 1) in vec4 color;
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(_vertexData)/2));
+    // Bind the Vertex Array Object, bound to buffers with vertex position and colors
+    glBindVertexArray(_mpSelf->mVertexArrayObject);
+
+    // Ask to Draw buffers pointed by the Vertex Array Object
     glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(_vertexData)/(4*sizeof(float))/2);
 
-    glDisableVertexAttribArray(_mpSelf->mAttribPosition);
-    glDisableVertexAttribArray(_mpSelf->mAttribColor);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // Unbind the Vertex Array Object
+    glBindVertexArray(0);
     glUseProgram(0);
 
     glutSwapBuffers();
-    glutPostRedisplay();    // Ask for refresh ; only needed if animation are present (not yet the case)
+    glutPostRedisplay();    // Ask for refresh ; only needed if animation are present
 }
 
 /**
@@ -403,7 +422,7 @@ void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
 
     // Set uniform values with the new "Model to World" matrix
     glUseProgram(_mpSelf->mProgram);
-    glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+    glUniformMatrix4fv(_mpSelf->mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
     glUseProgram(0);
 }
 
@@ -437,7 +456,7 @@ void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
 
     // Set uniform values with the new "Model to World" matrix
     glUseProgram(_mpSelf->mProgram);
-    glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+    glUniformMatrix4fv(_mpSelf->mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
     glUseProgram(0);
 }
 
@@ -476,7 +495,7 @@ void App::mouseMotionCallback(int aX, int aY) {
 
         // Set uniform values with the new "Model to World" matrix
         glUseProgram(_mpSelf->mProgram);
-        glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+        glUniformMatrix4fv(_mpSelf->mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
         glUseProgram(0);
     }
 }
@@ -515,7 +534,7 @@ void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
 
     // Set uniform values with the new "Model to World" matrix
     glUseProgram(_mpSelf->mProgram);
-    glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+    glUniformMatrix4fv(_mpSelf->mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
     glUseProgram(0);
 }
 

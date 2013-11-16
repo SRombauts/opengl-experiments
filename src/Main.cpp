@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(640, 480);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowPosition(700, 0);
 
     log.notice() << "creating window...";
     int window = glutCreateWindow("OpenGL Experiments");
@@ -78,15 +78,16 @@ int main(int argc, char** argv) {
         log.error() << "You must have at least OpenGL 3.3";
         glutDestroyWindow(window);
     } else {
+        // Create and initialize the application
         App app;
 
-        // Initialize the application
-        app.init();
-
-        // Main Loop
+        // Main Loop (specifically 
         log.notice() << "main loop starting...";
+        glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
         glutMainLoop();
         log.notice() << "bye...";
+
+        // Destructor of App will release memory
     }
 
     return 0;

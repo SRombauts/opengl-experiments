@@ -26,8 +26,6 @@ public:
     App();
     ~App();
 
-    void init();
-
     // glut static callback
     static void reshapeCallback(int aW, int aH);
     static void displayCallback();
@@ -40,11 +38,13 @@ public:
     static void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ);
 
 private:
-    void CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
+    void init();
+    void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
     void initProgram();
-    void initVertexBufferObject();
     void initVertexArrayObject();
     void registerCallbacks();
+    
+    void uninitVertexArrayObject();
 
     void up();
     void down();
@@ -60,11 +60,11 @@ private:
     Log::Logger mLog;       ///< Logger object to output runtime information
 
     GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
-    GLuint mAttribPosition;             ///< Location of the "position" vertex shader attribute (input stream)
-    GLuint mAttribColor;                ///< Location of the "color" vertex shader attribute (input stream)
-    GLuint mUniformModelToWorldMatrix;  ///< Location of the "modelToWorldMatrix"  vertex shader uniform input variable
-    GLuint mUniformWorldToCameraMatrix; ///< Location of the "worldToCameraMatrix" vertex shader uniform input variable
-    GLuint mUniformCameraToClipMatrix;  ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
+    GLuint mPositionAttrib;             ///< Location of the "position" vertex shader attribute (input stream)
+    GLuint mColorAttrib;                ///< Location of the "color" vertex shader attribute (input stream)
+    GLuint mModelToWorldMatrixUnif;     ///< Location of the "modelToWorldMatrix"  vertex shader uniform input variable
+    GLuint mWorldToCameraMatrixUnif;    ///< Location of the "worldToCameraMatrix" vertex shader uniform input variable
+    GLuint mCameraToClipMatrixUnif;     ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
 
     GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh (triangle)
     GLuint mVertexArrayObject;          ///< Vertex array object
