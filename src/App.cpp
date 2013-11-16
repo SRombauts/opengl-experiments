@@ -14,7 +14,7 @@
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 
 #include <fstream>      // NOLINT(readability/streams) for shader files
 #include <sstream>
@@ -22,16 +22,17 @@
 #include <vector>
 #include <cassert>
 
+#include <cmath>    // cos, sin, tan
 
 static const float X_LEFT   = -0.5f;
 static const float X_RIGHT  = 0.5f;
 static const float Y_TOP    = 0.5f;
 static const float Y_BOTTOM = -0.5f;
-static const float Z_FRONT  = 0.5f;
-static const float Z_BACK   = -0.5f;
+static const float Z_FRONT  = -1.5f;
+static const float Z_BACK   = -2.5f;
 
 /// Vertex data of a strip of triangles, drawn clockwise, followed by their color data
-static const float vertexData[] = {
+static const float _vertexData[] = {
     // the vertices (x,y,z,w) of the triangles
     X_LEFT,  Y_TOP,     Z_FRONT, 1.0f,
     X_RIGHT, Y_TOP,     Z_FRONT, 1.0f,
@@ -53,7 +54,26 @@ static const float vertexData[] = {
 };
 
 
-App* App::mpSelf = NULL;
+// Definition of static pointer to the unique App instance
+App* App::_mpSelf = NULL;
+
+
+/**
+ * @brief Calculation of the frutum scale factor for a target Field of View
+ *
+ * @param[in] aFovDeg   Field of View in degree
+ *
+ * @return Frustum scale
+*/
+float CalcFrustumScale(float aFovDeg)
+{
+    const float degToRad = 3.14159f * 2.0f / 360.0f;
+    float fovRad = aFovDeg * degToRad;
+    return 1.0f / tan(fovRad / 2.0f);
+}
+static const float _frustumScale    = CalcFrustumScale(45.0f);
+static const float _zNear           = 1.0f;
+static const float _zFar            = 100.0f;
 
 
 /**
@@ -70,14 +90,15 @@ App::App() :
     mVertexBufferObject(0),
     mModelRotation(0.0f),
     mModelTranslation(0.0f),
-    mModelToWorldMatrix(1.0f) {
-    mpSelf = this;
+    mModelToWorldMatrix(1.0f),
+    mCameraToClipMatrix(1.0f) {
+    _mpSelf = this;
 }
 /**
  * @brief Destructor
  */
 App::~App() {
-    mpSelf = NULL;
+    _mpSelf = NULL;
 }
 
 
@@ -105,7 +126,7 @@ void App::CompileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderTy
         }
     }
     catch(glutil::CompileLinkException& e) {
-        mpSelf->mLog.info() << "CompileShader: \"" << apShaderFilename << "\":\n" << e.what();
+        _mpSelf->mLog.info() << "CompileShader: \"" << apShaderFilename << "\":\n" << e.what();
         throw;  // rethrow to abort program
     }
 }
@@ -160,14 +181,18 @@ void App::initProgram() {
     mUniformWorldToCameraMatrix    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
     mUniformCameraToClipMatrix     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
 
-    // Define a unit matrix for all transformations
-    glm::mat4 unityMatrix(1.0f);
+    // Define the "Camera to Clip" matrix for the perspective transformation
+    mCameraToClipMatrix[0].x = _frustumScale;
+    mCameraToClipMatrix[1].y = _frustumScale;
+    mCameraToClipMatrix[2].z = (_zFar + _zNear) / (_zNear - _zFar);
+    mCameraToClipMatrix[2].w = -1.0f;
+    mCameraToClipMatrix[3].z = (2 * _zFar * _zNear) / (_zNear - _zFar);
 
-    // Set uniform values that are constants (matrix transformation)
-    // NOTE: modelToWorldMatrix is non-constant
+    // Set uniform values for matrix transformations
     glUseProgram(mProgram);
-    glUniformMatrix4fv(mUniformWorldToCameraMatrix, 1, GL_FALSE, glm::value_ptr(unityMatrix));
-    glUniformMatrix4fv(mUniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(unityMatrix));
+    glUniformMatrix4fv(mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
+    glUniformMatrix4fv(mUniformWorldToCameraMatrix, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); // unity matrix
+  //glUniformMatrix4fv(mUniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
     glUseProgram(0);
 }
 
@@ -180,7 +205,7 @@ void App::initVertexBufferObject() {
     glGenBuffers(1, &mVertexBufferObject);
 
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertexData), _vertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -248,6 +273,25 @@ void App::right() {
 }
 
 /**
+ * @brief Move the model to the front
+ */
+void App::front() {
+    mModelTranslation.z += 0.01f;
+    mModelToWorldMatrix[3].z = mModelTranslation.z;
+
+    mLog.info() << "front: z=" << mModelTranslation.z;
+}
+/**
+ * @brief Move the model to the back
+ */
+void App::back() {
+    mModelTranslation.z -= 0.01f;
+    mModelToWorldMatrix[3].z = mModelTranslation.z;
+
+    mLog.info() << "back: z=" << mModelTranslation.z;
+}
+
+/**
  * @brief Rotate the model
  */
 void App::rotate(int aDeltaX, int aDeltaY) {
@@ -272,12 +316,23 @@ void App::rotate(int aDeltaX, int aDeltaY) {
 /**
  * @brief GLUT reshape callback function
  *
+ *  Called once at the start of the rendering, and then for each window resising.
+ *
  * @param[in] aW    Largeur utile de la fenêtre
  * @param[in] aH    Hauteur utile de la fenêtre
  */
 void App::reshapeCallback(int aW, int aH) {
-    assert(NULL != mpSelf);
-    mpSelf->mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
+
+    // Calculate ratio with new window ratio
+    _mpSelf->mCameraToClipMatrix[0].x = _frustumScale * static_cast<float>(aH)/static_cast<float>(aW);
+    _mpSelf->mCameraToClipMatrix[1].y = _frustumScale;
+
+    // Set uniform values with the new matrix transformation
+    glUseProgram(_mpSelf->mProgram);
+    glUniformMatrix4fv(_mpSelf->mUniformCameraToClipMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mCameraToClipMatrix));
+    glUseProgram(0);
 
     glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
 }
@@ -286,29 +341,26 @@ void App::reshapeCallback(int aW, int aH) {
  * @brief GLUT display callback function
  */
 void App::displayCallback() {
-    assert(NULL != mpSelf);
-    // mpSelf->mLog.debug() << "displayCallback()";
+    assert(NULL != _mpSelf);
+    // _mpSelf->mLog.debug() << "displayCallback()";
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Use the linked program of compiled shaders
-    glUseProgram(mpSelf->mProgram);
-
-    // Set uniform values that are variable (matrix transformation)
-    glUniformMatrix4fv(mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(mpSelf->mModelToWorldMatrix));
+    glUseProgram(_mpSelf->mProgram);
 
     // Bind the vertex buffer, and init vertex position and colors
-    glBindBuffer(GL_ARRAY_BUFFER, mpSelf->mVertexBufferObject);
-    glEnableVertexAttribArray(mpSelf->mAttribPosition);   // layout(location = 0) in vec4 position;
+    glBindBuffer(GL_ARRAY_BUFFER, _mpSelf->mVertexBufferObject);
+    glEnableVertexAttribArray(_mpSelf->mAttribPosition);   // layout(location = 0) in vec4 position;
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(mpSelf->mAttribColor);      // layout(location = 1) in vec4 color;
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(vertexData)/2));
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexData)/(4*sizeof(float))/2);
+    glEnableVertexAttribArray(_mpSelf->mAttribColor);      // layout(location = 1) in vec4 color;
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(_vertexData)/2));
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(_vertexData)/(4*sizeof(float))/2);
 
-    glDisableVertexAttribArray(mpSelf->mAttribPosition);
-    glDisableVertexAttribArray(mpSelf->mAttribColor);
+    glDisableVertexAttribArray(_mpSelf->mAttribPosition);
+    glDisableVertexAttribArray(_mpSelf->mAttribColor);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glUseProgram(0);
 
@@ -324,8 +376,8 @@ void App::displayCallback() {
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */
 void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
-    assert(NULL != mpSelf);
-    mpSelf->mLog.debug() << "keyboardCallback(" << static_cast<int>(aKey) << "='" << aKey
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.debug() << "keyboardCallback(" << static_cast<int>(aKey) << "='" << aKey
                         << "'," << aX << "," << aY << ")";
     switch (aKey) {
         case 27:   // ESC : EXIT
@@ -333,21 +385,26 @@ void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
             break;
         case 'w': case 'W':  // QWERTY keyboard disposition
         case 'z': case 'Z':  // AZERTY keyboard disposition
-            mpSelf->up();
+            _mpSelf->up();
             break;
         case 'a': case 'A':  // QWERTY
         case 'q': case 'Q':  // AZERTY
-            mpSelf->left();
+            _mpSelf->left();
             break;
         case 's': case 'S':  // QWERTY & AZERTY
-            mpSelf->down();
+            _mpSelf->down();
             break;
         case 'd': case 'D':  // QWERTY & AZERTY
-            mpSelf->right();
+            _mpSelf->right();
             break;
         default:
             break;
     }
+
+    // Set uniform values with the new "Model to World" matrix
+    glUseProgram(_mpSelf->mProgram);
+    glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+    glUseProgram(0);
 }
 
 /**
@@ -358,25 +415,30 @@ void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */
 void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
-    assert(NULL != mpSelf);
-    mpSelf->mLog.info() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.info() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
 
     switch (aKey) {
         case GLUT_KEY_UP:
-            mpSelf->up();
+            _mpSelf->up();
             break;
         case GLUT_KEY_LEFT:
-            mpSelf->left();
+            _mpSelf->left();
             break;
         case GLUT_KEY_DOWN:
-            mpSelf->down();
+            _mpSelf->down();
             break;
         case GLUT_KEY_RIGHT:
-            mpSelf->right();
+            _mpSelf->right();
             break;
         default:
             break;
     }
+
+    // Set uniform values with the new "Model to World" matrix
+    glUseProgram(_mpSelf->mProgram);
+    glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+    glUseProgram(0);
 }
 
 /**
@@ -388,10 +450,13 @@ void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
  * @param[in] aY        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */
 void App::mouseCallback(int aButton, int aState, int aX, int aY) {
-    assert(NULL != mpSelf);
-    mpSelf->mLog.info() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.info() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
               << "," << aX << "," << aY << ")";
 }
+
+static int _lastMouseX = 0;
+static int _lastMouseY = 0;
 
 /**
  * @brief GLUT mouse motion (while button pressed) callback function
@@ -400,16 +465,19 @@ void App::mouseCallback(int aButton, int aState, int aX, int aY) {
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */    
 void App::mouseMotionCallback(int aX, int aY) {
-    static int lastX = aX;
-    static int lastY = aY;
-    assert(NULL != mpSelf);
-    mpSelf->mLog.info() << "mouseMotionCallback(" << aX << "," << aY << ")";
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.info() << "mouseMotionCallback(" << aX << "," << aY << ")";
 
-    if (   (aX != lastX)
-        || (aY != lastY) ) {
-        mpSelf->rotate((aX - lastX), (aY - lastY));
-        lastX = aX;
-        lastY = aY;
+    if (   (aX != _lastMouseX)
+        || (aY != _lastMouseY) ) {
+        _mpSelf->rotate((aX - _lastMouseX), (aY - _lastMouseY));
+        _lastMouseX = aX;
+        _lastMouseY = aY;
+
+        // Set uniform values with the new "Model to World" matrix
+        glUseProgram(_mpSelf->mProgram);
+        glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+        glUseProgram(0);
     }
 }
 
@@ -420,8 +488,11 @@ void App::mouseMotionCallback(int aX, int aY) {
  * @param[in] aY    Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */    
 void App::mousePassiveMotionCallback(int aX, int aY) {
-    assert(NULL != mpSelf);
-    mpSelf->mLog.info() << "mousePassiveMotionCallback(" << aX << "," << aY << ")";
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.info() << "mousePassiveMotionCallback(" << aX << "," << aY << ")";
+
+    _lastMouseX = aX;
+    _lastMouseY = aY;
 }
 
 /**
@@ -433,8 +504,19 @@ void App::mousePassiveMotionCallback(int aX, int aY) {
  * @param[in] aY        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */
 void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
-    assert(NULL != mpSelf);
-    mpSelf->mLog.info() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
+    assert(NULL != _mpSelf);
+    _mpSelf->mLog.info() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
+
+    if (0 < aDirection) {
+        _mpSelf->front ();
+    } else {
+        _mpSelf->back ();
+    }
+
+    // Set uniform values with the new "Model to World" matrix
+    glUseProgram(_mpSelf->mProgram);
+    glUniformMatrix4fv(_mpSelf->mUniformModelToWorldMatrix,  1, GL_FALSE, glm::value_ptr(_mpSelf->mModelToWorldMatrix));
+    glUseProgram(0);
 }
 
 /**
@@ -446,14 +528,14 @@ void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
  * @param[in] aZ        Y coordinate of the mouse cursor (0 is the top of the render surface of the window : can be negative !)
  */
 void App::joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ) {
-    assert(NULL != mpSelf);
+    assert(NULL != _mpSelf);
 
     static unsigned int lastButtonMask = 0;
     static int lastX = 0;
     static int lastY = 0;
     static int lastZ = 0;
     if ( (lastButtonMask != aButtonMask) || (lastX != aX) || (lastY != aY) || (lastZ != aZ) ) {
-        mpSelf->mLog.info() << "joystickCallback(" << aButtonMask << "," << aX << "," << aY << "," << aZ << ")";
+        _mpSelf->mLog.info() << "joystickCallback(" << aButtonMask << "," << aX << "," << aY << "," << aZ << ")";
         lastButtonMask = aButtonMask;
         lastX = aX;
         lastY = aY;

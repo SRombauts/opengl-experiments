@@ -13,9 +13,9 @@
 
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <glload/gl_3_2_comp.h>
-#include <glm/glm.hpp>
+#include <glm/glm.hpp>          // glm::mat4, glm::vec3...
 
-#include <vector>
+#include <vector>               // std::vector
 
 
 /**
@@ -50,11 +50,14 @@ private:
     void down();
     void left();
     void right();
+    void front();
+    void back();
     void rotate(int aDeltaX, int aDeltaY);
 
 private:
-    static App* mpSelf; ///< Static pointer to the unique App instance, for glut static callback
-    Log::Logger mLog;   ///< Logger object to output runtime information
+    static App* _mpSelf;    ///< Static pointer to the unique App instance, for glut static callback
+    
+    Log::Logger mLog;       ///< Logger object to output runtime information
 
     GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
     GLuint mAttribPosition;             ///< Location of the "position" vertex shader attribute (input stream)
@@ -68,5 +71,7 @@ private:
 
     glm::vec3   mModelRotation;         ///< Angle of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
-    glm::mat4   mModelToWorldMatrix;    ///< Basic model to World matrix
+    glm::mat4   mModelToWorldMatrix;    ///< "Model to World" matrix,  positionning our unique model into world space
+//  glm::mat4   mWorldToCameraMatrix;   ///< "World to Camera" matrix, defining the orientation of the viewer
+    glm::mat4   mCameraToClipMatrix;    ///< "Camera to Clip" matrix,  defining the perspective transformation
 };
