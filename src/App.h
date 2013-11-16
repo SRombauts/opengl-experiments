@@ -26,16 +26,26 @@ public:
     App();
     ~App();
 
-    // glut static callback
-    static void reshapeCallback(int aW, int aH);
-    static void displayCallback();
-    static void keyboardCallback(unsigned char aKey, int aX, int aY);
-    static void keyboardSpecialCallback(int aKey, int aX, int aY);
-    static void mouseCallback(int aButton, int aState, int aX, int aY);
-    static void mouseMotionCallback(int aX, int aY);
-    static void mousePassiveMotionCallback(int aX, int aY);
-    static void mouseWheelCallback(int aNum, int aDirection, int aX, int aY);
-    static void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ);
+    // static inline freeglut callback
+    static inline void reshapeCallbackStatic(int aW, int aH);
+    static inline void displayCallbackStatic();
+    static inline void keyboardCallbackStatic(unsigned char aKey, int aX, int aY);
+    static inline void keyboardSpecialCallbackStatic(int aKey, int aX, int aY);
+    static inline void mouseCallbackStatic(int aButton, int aState, int aX, int aY);
+    static inline void mouseMotionCallbackStatic(int aX, int aY);
+    static inline void mousePassiveMotionCallbackStatic(int aX, int aY);
+    static inline void mouseWheelCallbackStatic(int aNum, int aDirection, int aX, int aY);
+    static inline void joystickCallbackStatic(unsigned int aButtonMask, int aX, int aY, int aZ);
+    // freeglut callback
+    void reshapeCallback(int aW, int aH);
+    void displayCallback();
+    void keyboardCallback(unsigned char aKey, int aX, int aY);
+    void keyboardSpecialCallback(int aKey, int aX, int aY);
+    void mouseCallback(int aButton, int aState, int aX, int aY);
+    void mouseMotionCallback(int aX, int aY);
+    void mousePassiveMotionCallback(int aX, int aY);
+    void mouseWheelCallback(int aNum, int aDirection, int aX, int aY);
+    void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ);
 
 private:
     void init();
@@ -75,3 +85,42 @@ private:
 //  glm::mat4   mWorldToCameraMatrix;   ///< "World to Camera" matrix, defining the orientation of the viewer
     glm::mat4   mCameraToClipMatrix;    ///< "Camera to Clip" matrix,  defining the perspective transformation
 };
+
+
+/// @{ Static inline freeglut callbacks, calling 
+inline void App::reshapeCallbackStatic(int aW, int aH) {
+    assert(NULL != _mpSelf);
+    _mpSelf->reshapeCallback(aW, aH);
+}
+inline void App::displayCallbackStatic() {
+    assert(NULL != _mpSelf);
+    _mpSelf->displayCallback();
+}
+inline void App::keyboardCallbackStatic(unsigned char aKey, int aX, int aY) {
+    assert(NULL != _mpSelf);
+    _mpSelf->keyboardCallback(aKey, aX, aY);
+}
+inline void App::keyboardSpecialCallbackStatic(int aKey, int aX, int aY) {
+    assert(NULL != _mpSelf);
+    _mpSelf->keyboardSpecialCallback(aKey, aX, aY);
+}
+inline void App::mouseCallbackStatic(int aButton, int aState, int aX, int aY) {
+    assert(NULL != _mpSelf);
+    _mpSelf->mouseCallback(aButton, aState, aX, aY);
+}
+inline void App::mouseMotionCallbackStatic(int aX, int aY) {
+    assert(NULL != _mpSelf);
+    _mpSelf->mouseMotionCallback(aX, aY);
+}
+inline void App::mousePassiveMotionCallbackStatic(int aX, int aY) {
+    assert(NULL != _mpSelf);
+    _mpSelf->mousePassiveMotionCallback(aX, aY);
+}
+inline void App::mouseWheelCallbackStatic(int aNum, int aDirection, int aX, int aY) {
+    assert(NULL != _mpSelf);
+    _mpSelf->mouseWheelCallback(aNum, aDirection, aX, aY);
+}
+inline void App::joystickCallbackStatic(unsigned int aButtonMask, int aX, int aY, int aZ) {
+    assert(NULL != _mpSelf);
+    _mpSelf->joystickCallback(aButtonMask, aX, aY, aZ);
+}
