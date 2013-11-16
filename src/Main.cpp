@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
         // Create and initialize the application
         App app;
 
-        // Main Loop (specifically 
+        // Main Loop (specifically asking to continue here on exiting main loop)
         log.notice() << "main loop starting...";
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
         glutMainLoop();

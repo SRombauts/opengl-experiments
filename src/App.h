@@ -53,7 +53,7 @@ private:
     void initProgram();
     void initVertexArrayObject();
     void registerCallbacks();
-    
+
     void uninitVertexArrayObject();
 
     void up();
@@ -66,7 +66,7 @@ private:
 
 private:
     static App* _mpSelf;    ///< Static pointer to the unique App instance, for glut static callback
-    
+
     Log::Logger mLog;       ///< Logger object to output runtime information
 
     GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
@@ -87,7 +87,7 @@ private:
 };
 
 
-/// @{ Static inline freeglut callbacks, calling 
+/// @{ Static inline freeglut callbacks, calling
 inline void App::reshapeCallbackStatic(int aW, int aH) {
     assert(NULL != _mpSelf);
     _mpSelf->reshapeCallback(aW, aH);

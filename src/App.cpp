@@ -65,8 +65,7 @@ App* App::_mpSelf = NULL;
  *
  * @return Frustum scale
 */
-float CalcFrustumScale(float aFovDeg)
-{
+float CalcFrustumScale(float aFovDeg) {
     const float degToRad = 3.14159f * 2.0f / 360.0f;
     float fovRad = aFovDeg * degToRad;
     return 1.0f / tan(fovRad / 2.0f);
@@ -191,7 +190,7 @@ void App::initProgram() {
     glUseProgram(mProgram);
     glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
     glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); // unity matrix
-  //glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
+//  glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
     glUseProgram(0);
 }
 
@@ -215,7 +214,7 @@ void App::initVertexArrayObject(void) {
     // Generate a VAO: Ask for a place on GPU to associate states with our data
     mLog.debug() << "initializing vertex array objet...";
     glGenVertexArrays(1, &mVertexArrayObject);
-    
+
     // Bind the vertex array, so that it can memorise the following states
     glBindVertexArray(mVertexArrayObject);
 
@@ -227,7 +226,7 @@ void App::initVertexArrayObject(void) {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(_vertexData)/2));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
+
     glBindVertexArray(0);
 }
 
@@ -519,9 +518,9 @@ void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
     mLog.info() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
 
     if (0 < aDirection) {
-        front ();
+        front();
     } else {
-        back ();
+        back();
     }
 
     // Set uniform values with the new "Model to World" matrix
