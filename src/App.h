@@ -76,7 +76,8 @@ private:
     GLuint mWorldToCameraMatrixUnif;    ///< Location of the "worldToCameraMatrix" vertex shader uniform input variable
     GLuint mCameraToClipMatrixUnif;     ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
 
-    GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh (triangle)
+    GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh
+    GLuint mIndexBufferObject;          ///< Index buffer object containing the indices of vertices of our mesh
     GLuint mVertexArrayObject;          ///< Vertex array object
 
     glm::vec3   mModelRotation;         ///< Angle of rotation of the model

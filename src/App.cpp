@@ -31,30 +31,50 @@ static const float Y_BOTTOM = -0.5f;
 static const float Z_FRONT  = -1.5f;
 static const float Z_BACK   = -2.5f;
 
-/// Vertex data of a strip of triangles, drawn clockwise, followed by their color data
-static const float _vertexData[] = {
-    // the vertices (x,y,z,w) of the triangles
-    X_LEFT,  Y_TOP,     Z_FRONT, 1.0f,
-    X_RIGHT, Y_TOP,     Z_FRONT, 1.0f,
-    X_LEFT,  Y_BOTTOM,  Z_FRONT, 1.0f,
-    X_RIGHT, Y_BOTTOM,  Z_FRONT, 1.0f,
-    X_LEFT,  Y_BOTTOM,  Z_BACK,  1.0f,
-    X_RIGHT, Y_BOTTOM,  Z_BACK,  1.0f,
-    X_LEFT,  Y_TOP,     Z_FRONT, 1.0f,
-    X_RIGHT, Y_TOP,     Z_FRONT, 1.0f,
-    // the colors (r,g,b,a) of each vertex
-    0.8f, 0.0f, 0.0f, 1.0f,
-    0.0f, 0.8f, 0.0f, 1.0f,
-    0.0f, 0.0f, 0.8f, 1.0f,
-    0.8f, 0.0f, 0.0f, 1.0f,
-    0.0f, 0.8f, 0.0f, 1.0f,
-    0.0f, 0.0f, 0.8f, 1.0f,
-    0.8f, 0.0f, 0.0f, 1.0f,
-    0.0f, 0.8f, 0.0f, 1.0f
+/// Indices of vertex (data bellow)
+static const GLshort _indexData[] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 0, 1
 };
+static const int _nbIndices = sizeof(_indexData)/sizeof(_indexData[0]); ///< Number of indices 
+
+/// Vertex data (indexed above), followed by their color data
+///   6 - 7
+///  /   /|
+/// 0 - 1 5
+/// |   |/
+/// 2 - 3
+///
+/// 0, 1, 2, 3,
+/// 4, 5, 6, 7,
+/// 0, 1
+static const float _vertexData[] = {
+    // the 8 vertices (x,y,z,w) but w default to 1.0f
+    X_LEFT,  Y_TOP,     Z_FRONT,
+    X_RIGHT, Y_TOP,     Z_FRONT,
+    X_LEFT,  Y_BOTTOM,  Z_FRONT,
+    X_RIGHT, Y_BOTTOM,  Z_FRONT,
+    X_LEFT,  Y_BOTTOM,  Z_BACK,
+    X_RIGHT, Y_BOTTOM,  Z_BACK,
+    X_LEFT,  Y_TOP,     Z_BACK,
+    X_RIGHT, Y_TOP,     Z_BACK,
+    // the colors (r,g,b,a) of each of 8 vertices
+    0.8f, 0.0f, 0.0f, 1.0f,
+    0.0f, 0.8f, 0.0f, 1.0f,
+    0.0f, 0.0f, 0.8f, 1.0f,
+    0.5f, 0.5f, 0.0f, 1.0f,
+    0.0f, 0.5f, 0.5f, 1.0f,
+    0.5f, 0.0f, 0.5f, 1.0f,
+    0.5f, 0.5f, 0.5f, 1.0f,
+    0.1f, 0.1f, 0.1f, 1.0f
+};
+static const int _nbVertices        = 8;    ///< Number of vertices
+static const int _vertexDim         = 3;    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
+static const int _sizeOfVertex      = _vertexDim * sizeof(float);   ///< size of one vertex
+static const int _offsetOfColors    = _nbVertices * _sizeOfVertex;  ///< size of all vertices == start of colors
+static const int _colorDim          = 4;    ///< Each color is in 4D (r,g,b,a)
 
 
-// Definition of static pointer to the unique App instance
+// Definition of the static pointer to the unique App instance
 App* App::_mpSelf = NULL;
 
 
@@ -81,11 +101,14 @@ static const float _zFar            = 100.0f;
 App::App() :
     mLog("App"),
     mProgram(0),
-    mPositionAttrib(0),
-    mColorAttrib(0),
-    mModelToWorldMatrixUnif(0),
-    mWorldToCameraMatrixUnif(0),
-    mCameraToClipMatrixUnif(0),
+    mPositionAttrib(-1),
+    mColorAttrib(-1),
+    mModelToWorldMatrixUnif(-1),
+    mWorldToCameraMatrixUnif(-1),
+    mCameraToClipMatrixUnif(-1),
+    mVertexBufferObject(0),
+    mIndexBufferObject(0),
+    mVertexArrayObject(0),
     mModelRotation(0.0f),
     mModelTranslation(0.0f),
     mModelToWorldMatrix(1.0f),
@@ -172,12 +195,18 @@ void App::initProgram() {
     std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 
     // Get location of (vertex) attributes (input streams of (vertex) shader
+    // TODO(SRombauts) test != -1
     mPositionAttrib = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
     mColorAttrib    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
     // Get location of uniforms - input variables of (vertex) shader
+    // TODO(SRombauts) test != -1
     mModelToWorldMatrixUnif     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
     mWorldToCameraMatrixUnif    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
     mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
+
+    mLog.debug() << "attrib/unif:" << mPositionAttrib << "," << mColorAttrib << ","
+                 << mModelToWorldMatrixUnif << "," << mWorldToCameraMatrixUnif << "," << mCameraToClipMatrixUnif;
+
 
     // Define the "Camera to Clip" matrix for the perspective transformation
     mCameraToClipMatrix[0].x = _frustumScale;
@@ -203,6 +232,7 @@ void App::initProgram() {
 void App::initVertexArrayObject(void) {
     // Generate a VBO: Ask for a buffer of GPU memory
     mLog.debug() << "initializing vertex buffer objet...";
+    // TODO(SRombauts) test != 0
     glGenBuffers(1, &mVertexBufferObject);
 
     // Allocate GPU memory and copy our data onto this new buffer
@@ -210,6 +240,16 @@ void App::initVertexArrayObject(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(_vertexData), _vertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // here _vertexData is of no more use (dynamic memory could be deallocated)
+
+    // Generate a IBO: Ask for a buffer of GPU memory
+    mLog.debug() << "initializing index buffer objet...";
+    glGenBuffers(1, &mIndexBufferObject);
+
+    // Allocate GPU memory and copy our data onto this new buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indexData), _indexData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // here _indexData is of no more use (dynamic memory could be deallocated)
 
     // Generate a VAO: Ask for a place on GPU to associate states with our data
     mLog.debug() << "initializing vertex array objet...";
@@ -223,9 +263,10 @@ void App::initVertexArrayObject(void) {
     glEnableVertexAttribArray(mPositionAttrib);    // layout(location = 0) in vec4 position;
     glEnableVertexAttribArray(mColorAttrib);       // layout(location = 1) in vec4 color;
     // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(sizeof(_vertexData)/2));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribPointer(mPositionAttrib, _vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(mColorAttrib, _colorDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetOfColors));
+	// this tells OpenGL that vertex are pointed by their index
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
 
     glBindVertexArray(0);
 }
@@ -236,6 +277,7 @@ void App::initVertexArrayObject(void) {
 void App::uninitVertexArrayObject(void) {
     mLog.debug() << "uninitializing vertex buffer and array objet...";
     glDeleteBuffers(1, &mVertexBufferObject);
+    glDeleteBuffers(1, &mIndexBufferObject);
     glDeleteVertexArrays(1, &mVertexArrayObject);
 }
 
@@ -374,7 +416,7 @@ void App::displayCallback() {
     glBindVertexArray(mVertexArrayObject);
 
     // Ask to Draw buffers pointed by the Vertex Array Object
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(_vertexData)/(4*sizeof(float))/2);
+    glDrawElements(GL_TRIANGLE_STRIP, _nbIndices, GL_UNSIGNED_SHORT, 0);
 
     // Unbind the Vertex Array Object
     glBindVertexArray(0);
