@@ -38,7 +38,7 @@ static const GLshort _indexData[] = {
     1, 7, 3, 5,
 };
 // static const int _nbIndices = sizeof(_indexData)/sizeof(_indexData[0]); ///< Number of indices
-static const int _lenMainStrip          = 8;   ///< Number of indices for the main strip
+static const int _lenMainStrip          = 10;  ///< Number of indices for the main strip
 static const int _offsetOfLeftStrip     = _lenMainStrip * sizeof(_indexData[0]);    ///< Offset of left strip
 static const int _lenLeftStrip          = 4;   ///< Number of indices for the lateral left strip
 static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]); ///< Offset of right strip
