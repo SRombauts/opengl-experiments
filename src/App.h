@@ -82,7 +82,7 @@ private:
 
     glm::vec3   mModelRotation;         ///< Angle of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
-    glm::mat4   mModelToWorldMatrix;    ///< "Model to World" matrix,  positionning our unique model into world space
+    glm::mat4   mModelToWorldMatrix;    ///< "Model to World" matrix,  positioning our unique model into world space
 //  glm::mat4   mWorldToCameraMatrix;   ///< "World to Camera" matrix, defining the orientation of the viewer
     glm::mat4   mCameraToClipMatrix;    ///< "Camera to Clip" matrix,  defining the perspective transformation
 };
