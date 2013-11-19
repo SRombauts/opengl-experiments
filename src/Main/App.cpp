@@ -363,13 +363,13 @@ void App::rotate(int aDeltaX, int aDeltaY) {
     mModelRotation.x += (aDeltaX * 0.01f);
     mModelRotation.y += (aDeltaY * 0.01f);
 
-    // Rotation arround the Y axis (from left to right)
+    // Rotation around the Y axis (from left to right)
     mModelToWorldMatrix[0].x = cos(mModelRotation.x);
     mModelToWorldMatrix[0].z = -sin(mModelRotation.x);
     mModelToWorldMatrix[2].x = sin(mModelRotation.x);
     mModelToWorldMatrix[2].z = cos(mModelRotation.x);
 
-    // Rotation arround the X axis (from top to bottom)
+    // Rotation around the X axis (from top to bottom)
     mModelToWorldMatrix[1].y = cos(mModelRotation.y);
     mModelToWorldMatrix[1].z = sin(mModelRotation.y);
     mModelToWorldMatrix[2].y = -sin(mModelRotation.y);

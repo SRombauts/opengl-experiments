@@ -36,8 +36,10 @@ project "OpenGL"
     language "c++"
 
     files {"README.md", "LICENSE.txt", "premake4.lua"}
-    files {"src/*.cpp", "src/*.h"}
+    files {"src/Main/*.cpp", "src/Main/*.h"}
+    files {"src/Utils/*.cpp", "src/Utils/*.h"}
     files {"data/*.vert", "data/*.frag"}
+    includedirs "src/"
     
     includedirs "LoggerCpp/include/"
     links {"LoggerCpp"}
