@@ -11,6 +11,8 @@
 
 #include "LoggerCpp/LoggerCpp.h"
 
+#include "Utils/Utils.h"
+
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <glload/gl_3_2_comp.h>
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
@@ -90,38 +92,38 @@ private:
 
 /// @{ Static inline freeglut callbacks, calling
 inline void App::reshapeCallbackStatic(int aW, int aH) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->reshapeCallback(aW, aH);
 }
 inline void App::displayCallbackStatic() {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->displayCallback();
 }
 inline void App::keyboardCallbackStatic(unsigned char aKey, int aX, int aY) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->keyboardCallback(aKey, aX, aY);
 }
 inline void App::keyboardSpecialCallbackStatic(int aKey, int aX, int aY) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->keyboardSpecialCallback(aKey, aX, aY);
 }
 inline void App::mouseCallbackStatic(int aButton, int aState, int aX, int aY) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->mouseCallback(aButton, aState, aX, aY);
 }
 inline void App::mouseMotionCallbackStatic(int aX, int aY) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->mouseMotionCallback(aX, aY);
 }
 inline void App::mousePassiveMotionCallbackStatic(int aX, int aY) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->mousePassiveMotionCallback(aX, aY);
 }
 inline void App::mouseWheelCallbackStatic(int aNum, int aDirection, int aX, int aY) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->mouseWheelCallback(aNum, aDirection, aX, aY);
 }
 inline void App::joystickCallbackStatic(unsigned int aButtonMask, int aX, int aY, int aZ) {
-    assert(NULL != _mpSelf);
+    assert(nullptr != _mpSelf);
     _mpSelf->joystickCallback(aButtonMask, aX, aY, aZ);
 }

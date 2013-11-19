@@ -82,7 +82,7 @@ static const int _colorDim          = 4;    ///< Each color is in 4D (r,g,b,a)
 
 
 // Definition of the static pointer to the unique App instance
-App* App::_mpSelf = NULL;
+App* App::_mpSelf = nullptr;
 
 
 /**
@@ -128,7 +128,7 @@ App::App() :
  */
 App::~App() {
     uninitVertexArrayObject();
-    _mpSelf = NULL;
+    _mpSelf = nullptr;
 }
 
 
