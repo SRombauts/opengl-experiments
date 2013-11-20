@@ -39,9 +39,11 @@ static const GLshort _indexData[] = {
 };
 // static const int _nbIndices = sizeof(_indexData)/sizeof(_indexData[0]); ///< Number of indices
 static const int _lenMainStrip          = 10;  ///< Number of indices for the main strip
-static const int _offsetOfLeftStrip     = _lenMainStrip * sizeof(_indexData[0]);    ///< Offset of left strip
+/// Offset of the lateral strip at the left of the cube
+static const int _offsetOfLeftStrip     = _lenMainStrip * sizeof(_indexData[0]);
 static const int _lenLeftStrip          = 4;   ///< Number of indices for the lateral left strip
-static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]); ///< Offset of right strip
+/// Offset of the lateral strip at the right of the cube :
+static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]);
 static const int _lenRightStrip         = 4;  ///< Number of indices for the lateral right strip
 
 /// Vertex data (indexed above), followed by their color data
@@ -76,8 +78,8 @@ static const float _vertexData[] = {
 };
 static const int _nbVertices        = 8;    ///< Number of vertices
 static const int _vertexDim         = 3;    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
-static const int _sizeOfVertex      = _vertexDim * sizeof(float);   ///< size of one vertex
-static const int _offsetOfColors    = _nbVertices * _sizeOfVertex;  ///< size of all vertices == start of colors
+static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///< size of one vertex
+static const int _offsetOfColors    = _nbVertices * _sizeOfVertex;          ///< size of all vertices == start of colors
 static const int _colorDim          = 4;    ///< Each color is in 4D (r,g,b,a)
 
 
@@ -141,7 +143,9 @@ App::~App() {
  *
  * @throw a std::exception in case of error (glutil::CompileLinkException or std::runtime_error)
  */
-void App::compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const {
+void App::compileShader(std::vector<GLuint>& aShaderList,
+                        const GLenum aShaderType,
+                        const char* apShaderFilename) const {
     try {
         std::ifstream ifShader(apShaderFilename);
         if (ifShader.is_open()) {
@@ -506,8 +510,8 @@ void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
  *
  * @param[in] aButton   Mouse button
  * @param[in] aState    State of the button
- * @param[in] aX        X coord of the mouse cursor (0 is the left of the render surface of the window: can be negative!)
- * @param[in] aY        Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
+ * @param[in] aX    X coord of the mouse cursor (0 is the left of the render surface of the window: can be negative!)
+ * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */
 void App::mouseCallback(int aButton, int aState, int aX, int aY) {
     mLog.info() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
@@ -515,7 +519,8 @@ void App::mouseCallback(int aButton, int aState, int aX, int aY) {
 }
 
 
-static glm::detail::tvec2<int> _lastMousePos;   ///< Last known position of the mouse for mouse (passive) motion functions
+/// Last known position of the mouse for mouse (passive) motion functions
+static glm::detail::tvec2<int> _lastMousePos;
 
 /**
  * @brief GLUT mouse motion (while button pressed) callback function

@@ -2905,7 +2905,7 @@ def CheckStyle(filename, clean_lines, linenum, file_extension, nesting_state,
       error(filename, linenum, 'whitespace/line_length', 4,
             'Lines should very rarely be longer than 140 characters')
     elif line_width > 120:
-      error(filename, linenum, 'whitespace/line_length', 2,
+      error(filename, linenum, 'whitespace/line_length', 3,
             'Lines should be <= 120 characters long')
 
   if (cleansed_line.count(';') > 1 and
