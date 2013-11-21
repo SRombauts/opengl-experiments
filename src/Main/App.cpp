@@ -9,10 +9,11 @@
  * or copy at http://opensource.org/licenses/MIT)
  */
 
-#include "App.h"        // NOLINT(build/include) no subdirectory (yet)
+#include "Main/App.h"
 
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
+#include <glutil/MatrixStack.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 
@@ -87,19 +88,6 @@ static const int _colorDim          = 4;    ///< Each color is in 4D (r,g,b,a)
 App* App::_mpSelf = nullptr;
 
 
-/**
- * @brief Calculation of the frustum scale factor for a target Field of View
- *
- * @param[in] aFovDeg   Field of View in degree
- *
- * @return Frustum scale
-*/
-float CalcFrustumScale(float aFovDeg) {
-    const float degToRad = 3.14159f * 2.0f / 360.0f;
-    float fovRad = aFovDeg * degToRad;
-    return 1.0f / tan(fovRad / 2.0f);
-}
-static const float _frustumScale    = CalcFrustumScale(45.0f);  ///< frustum scale factor for a target Field of View
 static const float _zNear           = 1.0f;     ///< Z coordinate or the near/front frustum plane from which to render
 static const float _zFar            = 100.0f;   ///< Z coordinate or the far/back frustum plane to which to render
 
@@ -120,8 +108,7 @@ App::App() :
     mVertexArrayObject(0),
     mModelRotation(0.0f),
     mModelTranslation(0.0f),
-    mModelToWorldMatrix(1.0f),
-    mCameraToClipMatrix(1.0f) {
+    mModelToWorldMatrix(1.0f) {
     _mpSelf = this;
     init();
 }
@@ -213,13 +200,6 @@ void App::initProgram() {
     mModelToWorldMatrixUnif     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
     mWorldToCameraMatrixUnif    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
     mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
-
-    // Define the "Camera to Clip" matrix for the perspective transformation
-    mCameraToClipMatrix[0].x = _frustumScale;
-    mCameraToClipMatrix[1].y = _frustumScale;
-    mCameraToClipMatrix[2].z = (_zFar + _zNear) / (_zNear - _zFar);
-    mCameraToClipMatrix[2].w = -1.0f;
-    mCameraToClipMatrix[3].z = (2 * _zFar * _zNear) / (_zNear - _zFar);
 
     // Set uniform values for matrix transformations
     glUseProgram(mProgram);
@@ -393,13 +373,13 @@ void App::rotate(int aDeltaX, int aDeltaY) {
 void App::reshapeCallback(int aW, int aH) {
     mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
 
-    // Calculate ratio with new window ratio
-    mCameraToClipMatrix[0].x = _frustumScale * static_cast<float>(aH)/static_cast<float>(aW);
-    mCameraToClipMatrix[1].y = _frustumScale;
+    // Define the "Camera to Clip" matrix for the perspective transformation
+    glutil::MatrixStack cameraToClipMatrix;
+	cameraToClipMatrix.Perspective(45.0f, (aW / (float)aH), _zNear, _zFar);
 
     // Set uniform values with the new matrix transformation
     glUseProgram(mProgram);
-    glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix));
+	glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix.Top()));
     glUseProgram(0);
 
     glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
