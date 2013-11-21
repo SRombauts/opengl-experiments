@@ -97,6 +97,8 @@ static const float _zFar            = 100.0f;   ///< Z coordinate or the far/bac
  */
 App::App() :
     mLog("App"),
+    mKeyPressed(256, false),
+    mSpecialKeyPressed(128, false),
     mProgram(0),
     mPositionAttrib(-1),
     mColorAttrib(-1),
@@ -107,8 +109,7 @@ App::App() :
     mIndexBufferObject(0),
     mVertexArrayObject(0),
     mModelRotation(0.0f),
-    mModelTranslation(0.0f),
-    mModelToWorldMatrix(1.0f) {
+    mModelTranslation(0.0f) {
     _mpSelf = this;
     init();
 }
@@ -197,14 +198,17 @@ void App::initProgram() {
     mPositionAttrib = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
     mColorAttrib    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
     // Get location of uniforms - input variables of (vertex) shader
+    // "Model to World" matrix,  positioning our unique model into world space
+    // "World to Camera" matrix, defining the orientation of the viewer
+    // "Camera to Clip" matrix,  defining the perspective transformation
     mModelToWorldMatrixUnif     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
     mWorldToCameraMatrixUnif    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
     mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
 
     // Set uniform values for matrix transformations
     glUseProgram(mProgram);
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
-    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); // unity matrix
+//  glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(modelToWorldMatrix));  // transform()
+    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));     // unity matrix
 //  glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
     glUseProgram(0);
 }
@@ -272,10 +276,13 @@ void App::uninitVertexArrayObject(void) {
  */
 void App::registerCallbacks() {
     mLog.debug() << "registerCallbacks...";
+
     glutReshapeFunc(reshapeCallbackStatic);
     glutDisplayFunc(displayCallbackStatic);
     glutKeyboardFunc(keyboardCallbackStatic);
+    glutKeyboardUpFunc(keyboardUpCallbackStatic);
     glutSpecialFunc(keyboardSpecialCallbackStatic);
+    glutSpecialUpFunc(keyboardSpecialUpCallbackStatic);
     glutMouseFunc(mouseCallbackStatic);
     glutMotionFunc(mouseMotionCallbackStatic);
     glutPassiveMotionFunc(mousePassiveMotionCallbackStatic);
@@ -284,12 +291,43 @@ void App::registerCallbacks() {
 }
 
 /**
+* @brief Check current pressed keyboard keys
+*/
+void App::checkKeys() {
+    if (isKeyPressed(27)) {
+        // Exit on Escape
+        glutLeaveMainLoop();
+    }
+    if (   isSpecialKeyPressed(GLUT_KEY_UP)             // Special directional key
+        || isKeyPressed('w') || isKeyPressed('Z')       // QWERTY keyboard disposition
+        || isKeyPressed('z') || isKeyPressed('Z') ) {   // AZERTY keyboard disposition
+        // Move up the model
+        up();
+    }
+    if (   isSpecialKeyPressed(GLUT_KEY_LEFT)           // Special directional key
+        || isKeyPressed('a') || isKeyPressed('A')       // QWERTY keyboard disposition
+        || isKeyPressed('q') || isKeyPressed('Q') ) {   // AZERTY keyboard disposition
+        // Move the model to the left
+        left();
+    }
+    if (   isSpecialKeyPressed(GLUT_KEY_DOWN)           // Special directional key
+        || isKeyPressed('s') || isKeyPressed('S') ) {   // QWERTY & AZERTY keyboard disposition
+        // Move down the model
+        down();
+    }
+
+    if (   isSpecialKeyPressed(GLUT_KEY_RIGHT)          // Special directional key
+        || isKeyPressed('d') || isKeyPressed('D') ) {   // QWERTY & AZERTY keyboard disposition
+        // Move right the model
+        right();
+    }
+}
+
+/**
  * @brief Move up the model
  */
 void App::up() {
     mModelTranslation.y += 0.01f;
-    transform();
-
     mLog.info() << "up y=" << mModelTranslation.y;
 }
 /**
@@ -297,8 +335,6 @@ void App::up() {
  */
 void App::down() {
     mModelTranslation.y -= 0.01f;
-    transform();
-
     mLog.info() << "down y=" << mModelTranslation.y;
 }
 
@@ -307,8 +343,6 @@ void App::down() {
  */
 void App::left() {
     mModelTranslation.x -= 0.01f;
-    transform();
-
     mLog.info() << "left: x=" << mModelTranslation.x;
 }
 /**
@@ -316,8 +350,6 @@ void App::left() {
  */
 void App::right() {
     mModelTranslation.x += 0.01f;
-    transform();
-
     mLog.info() << "right: x=" << mModelTranslation.x;
 }
 
@@ -326,8 +358,6 @@ void App::right() {
  */
 void App::front() {
     mModelTranslation.z += 0.01f;
-    transform();
-
     mLog.info() << "front: z=" << mModelTranslation.z;
 }
 /**
@@ -335,8 +365,6 @@ void App::front() {
  */
 void App::back() {
     mModelTranslation.z -= 0.01f;
-    transform();
-
     mLog.info() << "back: z=" << mModelTranslation.z;
 }
 
@@ -346,8 +374,6 @@ void App::back() {
 void App::rotate(int aDeltaX, int aDeltaY) {
     mModelRotation.x += (aDeltaX * 0.01f);
     mModelRotation.y += (aDeltaY * 0.01f);
-    transform();
-
     mLog.info() << "rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
 }
 
@@ -375,8 +401,13 @@ void App::transform() {
     rotationX[2].y = -sin(mModelRotation.y);
     rotationX[2].z = cos(mModelRotation.y);
 
-    // Calculate the new transformation matrix
-    mModelToWorldMatrix = rotationY * rotationX * translations;
+    // Calculate the new transformation matrix (from right to left)
+    glm::mat4 modelToWorldMatrix = rotationX * rotationY * translations;
+
+    // Set uniform values with the new "Model to World" matrix
+    glUseProgram(mProgram);
+    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(modelToWorldMatrix));
+    glUseProgram(0);
 }
 
 /**
@@ -412,6 +443,11 @@ void App::displayCallback() {
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Check current key pressed
+    checkKeys();
+    // and calculate the current transformations matrix
+    transform();
+
     // Use the linked program of compiled shaders
     glUseProgram(mProgram);
 
@@ -432,7 +468,7 @@ void App::displayCallback() {
 }
 
 /**
- * @brief GLUT keyboard callback function
+ * @brief GLUT keyboard key pressed callback function
  *
  * @param[in] aKey  ASCII code of the key pressed
  * @param[in] aX    X coord of the mouse cursor (0 is the left of the render surface of the window: can be negative!)
@@ -441,36 +477,26 @@ void App::displayCallback() {
 void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
     mLog.debug() << "keyboardCallback(" << static_cast<int>(aKey) << "='" << aKey
                         << "'," << aX << "," << aY << ")";
-    switch (aKey) {
-        case 27:   // ESC : EXIT
-            glutLeaveMainLoop();
-            break;
-        case 'w': case 'W':  // QWERTY keyboard disposition
-        case 'z': case 'Z':  // AZERTY keyboard disposition
-            up();
-            break;
-        case 'a': case 'A':  // QWERTY
-        case 'q': case 'Q':  // AZERTY
-            left();
-            break;
-        case 's': case 'S':  // QWERTY & AZERTY
-            down();
-            break;
-        case 'd': case 'D':  // QWERTY & AZERTY
-            right();
-            break;
-        default:
-            break;
-    }
 
-    // Set uniform values with the new "Model to World" matrix
-    glUseProgram(mProgram);
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
-    glUseProgram(0);
+    mKeyPressed[aKey] = true;
 }
 
 /**
- * @brief GLUT special keys keyboard callback function
+ * @brief GLUT keyboard key released callback function
+ *
+ * @param[in] aKey  ASCII code of the key released
+ * @param[in] aX    X coord of the mouse cursor (0 is the left of the render surface of the window: can be negative!)
+ * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
+ */
+void App::keyboardUpCallback(unsigned char aKey, int aX, int aY) {
+    mLog.debug() << "keyboardUpCallback(" << static_cast<int>(aKey) << "='" << aKey
+                        << "'," << aX << "," << aY << ")";
+
+    mKeyPressed[aKey] = false;
+}
+
+/**
+ * @brief GLUT keyboard special key pressed callback function
  *
  * @param[in] aKey  ASCII code of the key pressed
  * @param[in] aX    X coord of the mouse cursor (0 is the left of the render surface of the window: can be negative!)
@@ -479,27 +505,20 @@ void App::keyboardCallback(unsigned char aKey, int aX, int aY) {
 void App::keyboardSpecialCallback(int aKey, int aX, int aY) {
     mLog.info() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
 
-    switch (aKey) {
-        case GLUT_KEY_UP:
-            up();
-            break;
-        case GLUT_KEY_LEFT:
-            left();
-            break;
-        case GLUT_KEY_DOWN:
-            down();
-            break;
-        case GLUT_KEY_RIGHT:
-            right();
-            break;
-        default:
-            break;
-    }
+    mSpecialKeyPressed[aKey] = true;
+}
 
-    // Set uniform values with the new "Model to World" matrix
-    glUseProgram(mProgram);
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
-    glUseProgram(0);
+/**
+ * @brief GLUT keyboard special key release callback function
+ *
+ * @param[in] aKey  ASCII code of the key release
+ * @param[in] aX    X coord of the mouse cursor (0 is the left of the render surface of the window: can be negative!)
+ * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
+ */
+void App::keyboardSpecialUpCallback(int aKey, int aX, int aY) {
+    mLog.info() << "keyboardSpecialUpCallback(" << aKey << "," << aX << "," << aY << ")";
+
+    mSpecialKeyPressed[aKey] = false;
 }
 
 /**
@@ -533,11 +552,6 @@ void App::mouseMotionCallback(int aX, int aY) {
         rotate((aX - _lastMousePos.x), (aY - _lastMousePos.y));
         _lastMousePos.x = aX;
         _lastMousePos.y = aY;
-
-        // Set uniform values with the new "Model to World" matrix
-        glUseProgram(mProgram);
-        glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
-        glUseProgram(0);
     }
 }
 
@@ -570,11 +584,6 @@ void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
     } else {
         back();
     }
-
-    // Set uniform values with the new "Model to World" matrix
-    glUseProgram(mProgram);
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(mModelToWorldMatrix));
-    glUseProgram(0);
 }
 
 /**

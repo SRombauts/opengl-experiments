@@ -32,7 +32,9 @@ public:
     static inline void reshapeCallbackStatic(int aW, int aH);
     static inline void displayCallbackStatic();
     static inline void keyboardCallbackStatic(unsigned char aKey, int aX, int aY);
+    static inline void keyboardUpCallbackStatic(unsigned char aKey, int aX, int aY);
     static inline void keyboardSpecialCallbackStatic(int aKey, int aX, int aY);
+    static inline void keyboardSpecialUpCallbackStatic(int aKey, int aX, int aY);
     static inline void mouseCallbackStatic(int aButton, int aState, int aX, int aY);
     static inline void mouseMotionCallbackStatic(int aX, int aY);
     static inline void mousePassiveMotionCallbackStatic(int aX, int aY);
@@ -42,12 +44,17 @@ public:
     void reshapeCallback(int aW, int aH);
     void displayCallback();
     void keyboardCallback(unsigned char aKey, int aX, int aY);
+    void keyboardUpCallback(unsigned char aKey, int aX, int aY);
     void keyboardSpecialCallback(int aKey, int aX, int aY);
+    void keyboardSpecialUpCallback(int aKey, int aX, int aY);
     void mouseCallback(int aButton, int aState, int aX, int aY);
     void mouseMotionCallback(int aX, int aY);
     void mousePassiveMotionCallback(int aX, int aY);
     void mouseWheelCallback(int aNum, int aDirection, int aX, int aY);
     void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ);
+
+    inline bool isKeyPressed(unsigned char aKey) const;
+    inline bool isSpecialKeyPressed(int aKey) const;
 
 private:
     void init();
@@ -58,6 +65,7 @@ private:
 
     void uninitVertexArrayObject();
 
+    void checkKeys();
     void up();
     void down();
     void left();
@@ -69,6 +77,9 @@ private:
 
 private:
     static App* _mpSelf;    ///< Static pointer to the unique App instance, for glut static callback
+
+    std::vector<bool>   mKeyPressed;        ///< Current state of regular keyboard keys
+    std::vector<bool>   mSpecialKeyPressed; ///< Current state of special keyboard keys
 
     Log::Logger mLog;       ///< Logger object to output runtime information
 
@@ -85,10 +96,30 @@ private:
 
     glm::vec3   mModelRotation;         ///< Angles of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
-    glm::mat4   mModelToWorldMatrix;    ///< "Model to World" matrix,  positioning our unique model into world space
-//  glm::mat4   mWorldToCameraMatrix;   ///< "World to Camera" matrix, defining the orientation of the viewer
-//  glm::mat4   mCameraToClipMatrix;    ///< "Camera to Clip" matrix,  defining the perspective transformation
 };
+
+
+/**
+ * @brief Get the current state of the given regular keyboard key
+ *
+ * @param[in] aKey  Index of the key
+ *
+ * @return state of the Key (true if pressed)
+ */
+inline bool App::isKeyPressed(unsigned char aKey) const {
+    return mKeyPressed.at(aKey);
+}
+
+/**
+ * @brief Get the current state of the given special keyboard key
+ *
+ * @param[in] aKey  Index of the key
+ *
+ * @return state of the Key (true if pressed)
+ */
+inline bool App::isSpecialKeyPressed(int aKey) const {
+    return mSpecialKeyPressed.at(aKey);
+}
 
 
 /// @{ Static inline freeglut callbacks, calling
@@ -104,9 +135,17 @@ inline void App::keyboardCallbackStatic(unsigned char aKey, int aX, int aY) {
     assert(nullptr != _mpSelf);
     _mpSelf->keyboardCallback(aKey, aX, aY);
 }
+inline void App::keyboardUpCallbackStatic(unsigned char aKey, int aX, int aY) {
+    assert(nullptr != _mpSelf);
+    _mpSelf->keyboardUpCallback(aKey, aX, aY);
+}
 inline void App::keyboardSpecialCallbackStatic(int aKey, int aX, int aY) {
     assert(nullptr != _mpSelf);
     _mpSelf->keyboardSpecialCallback(aKey, aX, aY);
+}
+inline void App::keyboardSpecialUpCallbackStatic(int aKey, int aX, int aY) {
+    assert(nullptr != _mpSelf);
+    _mpSelf->keyboardSpecialUpCallback(aKey, aX, aY);
 }
 inline void App::mouseCallbackStatic(int aButton, int aState, int aX, int aY) {
     assert(nullptr != _mpSelf);
