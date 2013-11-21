@@ -65,6 +65,7 @@ private:
     void front();
     void back();
     void rotate(int aDeltaX, int aDeltaY);
+    void transform();
 
 private:
     static App* _mpSelf;    ///< Static pointer to the unique App instance, for glut static callback
@@ -82,7 +83,7 @@ private:
     GLuint mIndexBufferObject;          ///< Index buffer object containing the indices of vertices of our mesh
     GLuint mVertexArrayObject;          ///< Vertex array object
 
-    glm::vec3   mModelRotation;         ///< Angle of rotation of the model
+    glm::vec3   mModelRotation;         ///< Angles of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
     glm::mat4   mModelToWorldMatrix;    ///< "Model to World" matrix,  positioning our unique model into world space
 //  glm::mat4   mWorldToCameraMatrix;   ///< "World to Camera" matrix, defining the orientation of the viewer

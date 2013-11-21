@@ -288,7 +288,7 @@ void App::registerCallbacks() {
  */
 void App::up() {
     mModelTranslation.y += 0.01f;
-    mModelToWorldMatrix[3].y = mModelTranslation.y;
+    transform();
 
     mLog.info() << "up y=" << mModelTranslation.y;
 }
@@ -297,7 +297,7 @@ void App::up() {
  */
 void App::down() {
     mModelTranslation.y -= 0.01f;
-    mModelToWorldMatrix[3].y = mModelTranslation.y;
+    transform();
 
     mLog.info() << "down y=" << mModelTranslation.y;
 }
@@ -307,7 +307,7 @@ void App::down() {
  */
 void App::left() {
     mModelTranslation.x -= 0.01f;
-    mModelToWorldMatrix[3].x = mModelTranslation.x;
+    transform();
 
     mLog.info() << "left: x=" << mModelTranslation.x;
 }
@@ -316,7 +316,7 @@ void App::left() {
  */
 void App::right() {
     mModelTranslation.x += 0.01f;
-    mModelToWorldMatrix[3].x = mModelTranslation.x;
+    transform();
 
     mLog.info() << "right: x=" << mModelTranslation.x;
 }
@@ -326,7 +326,7 @@ void App::right() {
  */
 void App::front() {
     mModelTranslation.z += 0.01f;
-    mModelToWorldMatrix[3].z = mModelTranslation.z;
+    transform();
 
     mLog.info() << "front: z=" << mModelTranslation.z;
 }
@@ -335,7 +335,7 @@ void App::front() {
  */
 void App::back() {
     mModelTranslation.z -= 0.01f;
-    mModelToWorldMatrix[3].z = mModelTranslation.z;
+    transform();
 
     mLog.info() << "back: z=" << mModelTranslation.z;
 }
@@ -346,20 +346,37 @@ void App::back() {
 void App::rotate(int aDeltaX, int aDeltaY) {
     mModelRotation.x += (aDeltaX * 0.01f);
     mModelRotation.y += (aDeltaY * 0.01f);
-
-    // Rotation around the Y axis (from left to right)
-    mModelToWorldMatrix[0].x = cos(mModelRotation.x);
-    mModelToWorldMatrix[0].z = -sin(mModelRotation.x);
-    mModelToWorldMatrix[2].x = sin(mModelRotation.x);
-    mModelToWorldMatrix[2].z = cos(mModelRotation.x);
-
-    // Rotation around the X axis (from top to bottom)
-    mModelToWorldMatrix[1].y = cos(mModelRotation.y);
-    mModelToWorldMatrix[1].z = sin(mModelRotation.y);
-    mModelToWorldMatrix[2].y = -sin(mModelRotation.y);
-    mModelToWorldMatrix[2].z = cos(mModelRotation.y);
+    transform();
 
     mLog.info() << "rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
+}
+
+/**
+ * @brief Calculate the new transformation matrix from Rotations and Translations
+ */
+void App::transform() {
+    // Translation first
+    glm::mat4 translations(1.0f);
+    translations[3].x = mModelTranslation.x;
+    translations[3].y = mModelTranslation.y;
+    translations[3].z = mModelTranslation.z;
+
+    // Rotation around the Y axis (from left to right)
+    glm::mat4 rotationY(1.0f);
+    rotationY[0].x = cos(mModelRotation.x);
+    rotationY[0].z = -sin(mModelRotation.x);
+    rotationY[2].x = sin(mModelRotation.x);
+    rotationY[2].z = cos(mModelRotation.x);
+
+    // Rotation around the X axis (from top to bottom)
+    glm::mat4 rotationX(1.0f);
+    rotationX[1].y = cos(mModelRotation.y);
+    rotationX[1].z = sin(mModelRotation.y);
+    rotationX[2].y = -sin(mModelRotation.y);
+    rotationX[2].z = cos(mModelRotation.y);
+
+    // Calculate the new transformation matrix
+    mModelToWorldMatrix = rotationY * rotationX * translations;
 }
 
 /**
@@ -375,11 +392,11 @@ void App::reshapeCallback(int aW, int aH) {
 
     // Define the "Camera to Clip" matrix for the perspective transformation
     glutil::MatrixStack cameraToClipMatrix;
-	cameraToClipMatrix.Perspective(45.0f, (aW / (float)aH), _zNear, _zFar);
+    cameraToClipMatrix.Perspective(45.0f, (static_cast<float>(aW) / static_cast<float>(aH)), _zNear, _zFar);
 
     // Set uniform values with the new matrix transformation
     glUseProgram(mProgram);
-	glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix.Top()));
+    glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix.Top()));
     glUseProgram(0);
 
     glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
