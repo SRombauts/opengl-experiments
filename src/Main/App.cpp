@@ -29,8 +29,8 @@ static const float X_LEFT   = -0.5f;    ///< Left coordinate
 static const float X_RIGHT  = 0.5f;     ///< Right coordinate
 static const float Y_TOP    = 0.5f;     ///< Top coordinate
 static const float Y_BOTTOM = -0.5f;    ///< Bottom coordinate
-static const float Z_FRONT  = -1.5f;    ///< Front coordinate
-static const float Z_BACK   = -2.5f;    ///< Back coordinate
+static const float Z_FRONT  = -3.5f;    ///< Front coordinate
+static const float Z_BACK   = -4.5f;    ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
 ///   6 - 7
@@ -442,7 +442,7 @@ void App::displayCallback() {
 
     // Check current key pressed
     checkKeys();
-    // and calculate the current transformations matrix
+    // and re-calculate the model to world transformations matrix
     transform();
 
     // Use the linked program of compiled shaders
@@ -529,6 +529,17 @@ void App::keyboardSpecialUpCallback(int aKey, int aX, int aY) {
 void App::mouseCallback(int aButton, int aState, int aX, int aY) {
     mLog.info() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
               << "," << aX << "," << aY << ")";
+
+    // Detect Mouse Wheel under X (Linux Ubuntu 12.10)
+    if (3 == aButton) {
+       if (GLUT_DOWN == aState) {
+          mouseWheelCallback(0, -1, aX, aY);
+       }
+    } else if (4 == aButton) {
+       if (GLUT_DOWN == aState) {
+          mouseWheelCallback(0, 1, aX, aY);
+       }
+    }
 }
 
 
@@ -576,11 +587,13 @@ void App::mousePassiveMotionCallback(int aX, int aY) {
 void App::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
     mLog.info() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
 
+    // Update Z translation value
     if (0 < aDirection) {
         front();
     } else {
         back();
     }
+    // transform() will re-calculate the model to world transformations matrix in next displayCallback()
 }
 
 /**
