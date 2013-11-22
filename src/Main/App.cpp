@@ -32,31 +32,12 @@ static const float Y_BOTTOM = -0.5f;    ///< Bottom coordinate
 static const float Z_FRONT  = -1.5f;    ///< Front coordinate
 static const float Z_BACK   = -2.5f;    ///< Back coordinate
 
-/// Indices of vertex (data bellow)
-static const GLshort _indexData[] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 0, 1,
-    6, 0, 4, 2,
-    1, 7, 3, 5,
-};
-// static const int _nbIndices = sizeof(_indexData)/sizeof(_indexData[0]); ///< Number of indices
-static const int _lenMainStrip          = 10;  ///< Number of indices for the main strip
-/// Offset of the lateral strip at the left of the cube
-static const int _offsetOfLeftStrip     = _lenMainStrip * sizeof(_indexData[0]);
-static const int _lenLeftStrip          = 4;   ///< Number of indices for the lateral left strip
-/// Offset of the lateral strip at the right of the cube :
-static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]);
-static const int _lenRightStrip         = 4;  ///< Number of indices for the lateral right strip
-
-/// Vertex data (indexed above), followed by their color data
+/// Vertex data (indexed bellow), followed by their color data
 ///   6 - 7
 ///  /   /|
 /// 0 - 1 5
 /// |   |/
 /// 2 - 3
-///
-/// 0, 1, 2, 3,
-/// 4, 5, 6, 7,
-/// 0, 1
 static const float _vertexData[] = {
     // the 8 vertices (x,y,z,w) but w default to 1.0f
     X_LEFT,  Y_TOP,     Z_FRONT,
@@ -77,11 +58,27 @@ static const float _vertexData[] = {
     0.5f, 0.5f, 0.5f, 1.0f,
     0.1f, 0.1f, 0.1f, 1.0f
 };
-static const int _nbVertices        = 8;    ///< Number of vertices
-static const int _vertexDim         = 3;    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
+static const int _sizeOfVertexData  = sizeof(_vertexData);  ///< size of the _vertexData array
+static const int _nbVertices        = 8;                    ///< Number of vertices
+static const int _vertexDim         = 3;                    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
 static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///< size of one vertex
 static const int _offsetOfColors    = _nbVertices * _sizeOfVertex;          ///< size of all vertices == start of colors
-static const int _colorDim          = 4;    ///< Each color is in 4D (r,g,b,a)
+static const int _colorDim          = 4;                    ///< Each color is in 4D (r,g,b,a)
+
+/// Indices of vertex (from vertex buffer above)
+static const GLshort _indexData[] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 0, 1,
+    6, 0, 4, 2,
+    1, 7, 3, 5,
+};
+static const int _sizeOfIndexData       = sizeof(_indexData);   ///< size of the _indexData);  ///< size array
+static const int _lenMainStrip          = 10;                   ///< Number of indices for the main strip
+/// Offset of the lateral strip at the left of the cube
+static const int _offsetOfLeftStrip     = _lenMainStrip * sizeof(_indexData[0]);
+static const int _lenLeftStrip          = 4;                    ///< Number of indices for the lateral left strip
+/// Offset of the lateral strip at the right of the cube :
+static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]);
+static const int _lenRightStrip         = 4;                    ///< Number of indices for the lateral right strip
 
 
 // Definition of the static pointer to the unique App instance
@@ -227,7 +224,7 @@ void App::initVertexArrayObject(void) {
 
     // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertexData), _vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _sizeOfVertexData, _vertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // here _vertexData is of no more use (dynamic memory could be deallocated)
 
@@ -237,7 +234,7 @@ void App::initVertexArrayObject(void) {
 
     // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indexData), _indexData, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _sizeOfIndexData, _indexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     // here _indexData is of no more use (dynamic memory could be deallocated)
 
