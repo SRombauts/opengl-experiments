@@ -37,7 +37,7 @@ project "OpenGL"
 
     files {"README.md", "LICENSE.txt", "premake4.lua"}
     files {"src/Main/*.cpp", "src/Main/*.h"}
-    files {"src/Utils/*.cpp", "src/Utils/*.h"}
+    files {"src/Utils/*.cpp", "src/Utils/*.h", "src/Utils/*.hpp"}
     files {"data/*.vert", "data/*.frag"}
     includedirs "src/"
     

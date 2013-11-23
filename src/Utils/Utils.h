@@ -48,6 +48,7 @@ namespace Utils {
 #endif  // _MSC_VER < 1600
 #else   // _MSC_VER
 #if (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__) // before C++11 on GCC4.7 and Visual Studio 2010
+/// Flag to prevent multiple redefinition of nullptr 
 #ifndef HAVE_NULLPTR
 #define HAVE_NULLPTR
 /**
