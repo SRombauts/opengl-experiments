@@ -11,9 +11,6 @@
 
 #include "Main/App.h"
 
-#include "Utils/Measure.h"
-#include "Utils/Time.h"
-
 #include <GL/freeglut.h>
 
 

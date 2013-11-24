@@ -16,8 +16,6 @@
 #include <windows.h>
 #endif
 
-#include <iostream>
-
 namespace Utils {
 
 // Get tick in milliseconds
@@ -58,7 +56,6 @@ time_t Time::getTickUs() {
     }
 #elif defined(_WIN32)
     LARGE_INTEGER freq;
-    // TODO(SRombauts) could be done only once ?
     if (FALSE != QueryPerformanceFrequency(&freq)) {
         LARGE_INTEGER t1;
         QueryPerformanceCounter(&t1);

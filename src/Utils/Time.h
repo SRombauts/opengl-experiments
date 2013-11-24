@@ -28,11 +28,18 @@ public:
      * @brief Get tick in milliseconds.
      *
      * @return Current time in milliseconds.
+     *
+     * @see getTickMs() for better precision.
      */
     static time_t getTickMs();
 
     /**
      * @brief Get tick in microseconds.
+     *
+     *  Use CLOCK_MONOTONIC under Linux (with librt), with a precision under the microsecond.
+     *  Use QueryPerformanceCounter under Windows, with a precision under the microsecond.
+     *
+     *  The cost for a call to getTickUs() is approximately of/under one microsecond on any modern computer.
      *
      * @return Current time in microseconds.
      */

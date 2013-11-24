@@ -432,7 +432,7 @@ void App::calculateFPS() {
         time_t avgUs = totalUs/_nbFrames;
         mLog.notice() << _nbFrames << "fps (avg " << avgUs/1000 << "." << avgUs%1000
                       << "ms, worst " << _worstFrameUs/1000 << "." << _worstFrameUs%1000 << "ms)";
-        _firstTickUs = curTickUs;
+        _firstTickUs =  Utils::Time::getTickUs(); // do not count logging time
         _nbFrames = 0;
         _worstFrameUs = 0;
     }
