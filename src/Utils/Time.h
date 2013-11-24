@@ -25,14 +25,14 @@ namespace Utils {
 class Time {
 public:
     /**
-     * @brief Get tick in microseconds.
+     * @brief Get tick in milliseconds.
      *
      * @return Current time in milliseconds.
      */
     static time_t getTickMs();
 
     /**
-     * @brief Get tick in milliseconds.
+     * @brief Get tick in microseconds.
      *
      * @return Current time in microseconds.
      */

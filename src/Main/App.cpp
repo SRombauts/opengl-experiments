@@ -11,6 +11,8 @@
 
 #include "Main/App.h"
 
+#include "Utils/Time.h"
+
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
 #include <glutil/MatrixStack.h>
@@ -22,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <ctime>
 
 #include <cmath>    // cos, sin, tan
 
@@ -408,6 +411,34 @@ void App::transform() {
 }
 
 /**
+ * @brief Calculate and print FPS, and average and word frame duration
+ */
+void App::calculateFPS() {
+    static int      _nbFrames       = 0;
+    static time_t   _worstFrameUs   = 0;
+    static time_t   _firstTickUs    = Utils::Time::getTickUs();
+    static time_t   _lastTickUs     = Utils::Time::getTickUs();
+    time_t          curTickUs       = Utils::Time::getTickUs();
+    time_t          totalUs         = (curTickUs - _firstTickUs);
+    time_t          frameUs         = (curTickUs - _lastTickUs);
+
+    _lastTickUs = curTickUs;
+    ++_nbFrames;
+
+    if (frameUs > _worstFrameUs) {
+        _worstFrameUs = frameUs;
+    }
+    if (totalUs >= 1000000) {
+        time_t avgUs = totalUs/_nbFrames;
+        mLog.notice() << _nbFrames << "fps (avg " << avgUs/1000 << "." << avgUs%1000
+                      << "ms, worst " << _worstFrameUs/1000 << "." << _worstFrameUs%1000 << "ms)";
+        _firstTickUs = curTickUs;
+        _nbFrames = 0;
+        _worstFrameUs = 0;
+    }
+}
+
+/**
  * @brief GLUT reshape callback function
  *
  *  Called once at the start of the rendering, and then for each window resising.
@@ -435,6 +466,9 @@ void App::reshapeCallback(int aW, int aH) {
  */
 void App::displayCallback() {
     // mLog.debug() << "displayCallback()";
+
+    // FPS and frame duration calculations
+    calculateFPS();
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
@@ -532,13 +566,13 @@ void App::mouseCallback(int aButton, int aState, int aX, int aY) {
 
     // Detect Mouse Wheel under X (Linux Ubuntu 12.10)
     if (3 == aButton) {
-       if (GLUT_DOWN == aState) {
-          mouseWheelCallback(0, -1, aX, aY);
-       }
+        if (GLUT_DOWN == aState) {
+            mouseWheelCallback(0, -1, aX, aY);
+        }
     } else if (4 == aButton) {
-       if (GLUT_DOWN == aState) {
-          mouseWheelCallback(0, 1, aX, aY);
-       }
+        if (GLUT_DOWN == aState) {
+            mouseWheelCallback(0, 1, aX, aY);
+        }
     }
 }
 

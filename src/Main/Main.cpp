@@ -9,21 +9,12 @@
  * or copy at http://opensource.org/licenses/MIT)
  */
 
-#include <glload/gl_load.hpp>   // Need to be included before other gl library
-#include <glload/gl_3_2_comp.h>
+#include "Main/App.h"
+
+#include "Utils/Measure.h"
+#include "Utils/Time.h"
+
 #include <GL/freeglut.h>
-#include <glutil/Shader.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <fstream>      // NOLINT(readability/streams) for files
-#include <sstream>
-#include <string>
-#include <vector>
-#include <cassert>
-
-
-#include "App.h"    // NOLINT(build/include)
 
 
 /**
@@ -45,16 +36,16 @@ int main(int argc, char** argv) {
 #endif
 
     // Configure the Output objects
+    // TODO(SRombauts) Use a configuration file!
     Log::Config::Vector configList;
-#ifdef NDEBUG
+#if 0
     Log::Config::addOutput(configList, "OutputFile");
     Log::Config::setOption(configList, "filename",          "log.txt");
     Log::Config::setOption(configList, "filename_old",      "log.old.txt");
     Log::Config::setOption(configList, "max_startup_size",  "0");
     Log::Config::setOption(configList, "max_size",          "10000");
-#else
-    Log::Config::addOutput(configList, "OutputConsole");
 #endif
+    Log::Config::addOutput(configList, "OutputConsole");
 #if defined(WIN32) && !defined(NDEBUG)
     Log::Config::addOutput(configList, "OutputDebug");
 #endif

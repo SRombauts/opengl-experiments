@@ -16,6 +16,8 @@
 #include <windows.h>
 #endif
 
+#include <iostream>
+
 namespace Utils {
 
 // Get tick in milliseconds
@@ -60,7 +62,7 @@ time_t Time::getTickUs() {
     if (FALSE != QueryPerformanceFrequency(&freq)) {
         LARGE_INTEGER t1;
         QueryPerformanceCounter(&t1);
-        TickUs = (time_t) ((t1.QuadPart) / (freq.QuadPart / 1000000));
+        TickUs = (time_t) ((t1.QuadPart * 1000) / (freq.QuadPart / 1000));
     }
 #endif  // __GNUC__
 

@@ -28,6 +28,28 @@ public:
     App();
     ~App();
 
+    inline bool isKeyPressed(unsigned char aKey) const;
+    inline bool isSpecialKeyPressed(int aKey) const;
+
+private:
+    void init();
+    void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
+    void initProgram();
+    void initVertexArrayObject();
+    void registerCallbacks();
+    void uninitVertexArrayObject();
+
+    void checkKeys();
+    void up();
+    void down();
+    void left();
+    void right();
+    void front();
+    void back();
+    void rotate(int aDeltaX, int aDeltaY);
+    void transform();
+    void calculateFPS();
+
     // static inline freeglut callback
     static inline void reshapeCallbackStatic(int aW, int aH);
     static inline void displayCallbackStatic();
@@ -52,28 +74,6 @@ public:
     void mousePassiveMotionCallback(int aX, int aY);
     void mouseWheelCallback(int aNum, int aDirection, int aX, int aY);
     void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ);
-
-    inline bool isKeyPressed(unsigned char aKey) const;
-    inline bool isSpecialKeyPressed(int aKey) const;
-
-private:
-    void init();
-    void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
-    void initProgram();
-    void initVertexArrayObject();
-    void registerCallbacks();
-
-    void uninitVertexArrayObject();
-
-    void checkKeys();
-    void up();
-    void down();
-    void left();
-    void right();
-    void front();
-    void back();
-    void rotate(int aDeltaX, int aDeltaY);
-    void transform();
 
 private:
     static App* _mpSelf;    ///< Static pointer to the unique App instance, for glut static callback
