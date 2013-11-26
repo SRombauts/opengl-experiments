@@ -28,21 +28,33 @@
 
 #include <cmath>    // cos, sin, tan
 
+// Cube coordinates
 static const float X_LEFT   = -0.5f;    ///< Left coordinate
 static const float X_RIGHT  = 0.5f;     ///< Right coordinate
 static const float Y_TOP    = 0.5f;     ///< Top coordinate
 static const float Y_BOTTOM = -0.5f;    ///< Bottom coordinate
 static const float Z_FRONT  = -3.5f;    ///< Front coordinate
 static const float Z_BACK   = -4.5f;    ///< Back coordinate
+// Plane coordinates
+static const float X_PLANE_LEFT     = -5.0f;    ///< Left coordinate
+static const float X_PLANE_RIGHT    = 5.0f;     ///< Right coordinate
+static const float Y_PLANE          = -0.5f;    ///< Y coordinate
+static const float Z_PLANE_FRONT    = 1.0f;     ///< Front coordinate
+static const float Z_PLANE_BACK     = -9.0f;    ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
+/// cube:
 ///   6 - 7
 ///  /   /|
 /// 0 - 1 5
 /// |   |/
 /// 2 - 3
+/// plane:
+///   0 - 1
+///  /   /
+/// 2 - 3
 static const float _vertexData[] = {
-    // the 8 vertices (x,y,z,w) but w default to 1.0f
+    // cube: the 8 vertices (x,y,z,w) but w default to 1.0f
     X_LEFT,  Y_TOP,     Z_FRONT,
     X_RIGHT, Y_TOP,     Z_FRONT,
     X_LEFT,  Y_BOTTOM,  Z_FRONT,
@@ -51,7 +63,12 @@ static const float _vertexData[] = {
     X_RIGHT, Y_BOTTOM,  Z_BACK,
     X_LEFT,  Y_TOP,     Z_BACK,
     X_RIGHT, Y_TOP,     Z_BACK,
-    // the colors (r,g,b,a) of each of 8 vertices
+    // plane: the 4 vertices (x,y,z,w) but w default to 1.0f
+    X_PLANE_LEFT,  Y_PLANE, Z_PLANE_BACK,
+    X_PLANE_RIGHT, Y_PLANE, Z_PLANE_BACK,
+    X_PLANE_LEFT,  Y_PLANE, Z_PLANE_FRONT,
+    X_PLANE_RIGHT, Y_PLANE, Z_PLANE_FRONT,
+    // cube: the colors (r,g,b,a) of each of 8 vertices
     0.8f, 0.0f, 0.0f, 1.0f,
     0.0f, 0.8f, 0.0f, 1.0f,
     0.0f, 0.0f, 0.8f, 1.0f,
@@ -59,10 +76,15 @@ static const float _vertexData[] = {
     0.0f, 0.5f, 0.5f, 1.0f,
     0.5f, 0.0f, 0.5f, 1.0f,
     0.5f, 0.5f, 0.5f, 1.0f,
-    0.1f, 0.1f, 0.1f, 1.0f
+    0.1f, 0.1f, 0.1f, 1.0f,
+    // plane: the colors (r,g,b,a) of each of 4 vertices
+    0.1f, 0.8f, 0.3f, 1.0f,
+    0.1f, 0.8f, 0.3f, 1.0f,
+    0.1f, 0.8f, 0.3f, 1.0f,
+    0.1f, 0.8f, 0.3f, 1.0f,
 };
 static const int _sizeOfVertexData  = sizeof(_vertexData);  ///< size of the _vertexData array
-static const int _nbVertices        = 8;                    ///< Number of vertices
+static const int _nbVertices        = 12;                   ///< Total number of vertices (cube + plane)
 static const int _vertexDim         = 3;                    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
 static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///< size of one vertex
 static const int _offsetOfColors    = _nbVertices * _sizeOfVertex;          ///< size of all vertices == start of colors
@@ -70,9 +92,12 @@ static const int _colorDim          = 4;                    ///< Each color is i
 
 /// Indices of vertex (from vertex buffer above)
 static const GLshort _indexData[] = {
+    // cube:
     0, 1, 2, 3, 4, 5, 6, 7, 0, 1,
     6, 0, 4, 2,
     1, 7, 3, 5,
+    // plane
+    8, 9, 10, 11,
 };
 static const int _sizeOfIndexData       = sizeof(_indexData);   ///< size of the _indexData);  ///< size array
 static const int _lenMainStrip          = 10;                   ///< Number of indices for the main strip
@@ -82,6 +107,9 @@ static const int _lenLeftStrip          = 4;                    ///< Number of i
 /// Offset of the lateral strip at the right of the cube :
 static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]);
 static const int _lenRightStrip         = 4;                    ///< Number of indices for the lateral right strip
+/// Offset of the plane strip :
+static const int _offsetOfPlaneStrip    = (_lenMainStrip + _lenLeftStrip + _lenRightStrip) * sizeof(_indexData[0]);
+static const int _lenPlaneStrip         = 4;                    ///< Number of indices for the plane strip
 
 
 // Definition of the static pointer to the unique App instance
@@ -486,9 +514,12 @@ void App::displayCallback() {
     glBindVertexArray(mVertexArrayObject);
 
     // Ask to Draw triangles from buffers pointed by the Vertex Array Object
+    // cube:
     glDrawElements(GL_TRIANGLE_STRIP, _lenMainStrip,  GL_UNSIGNED_SHORT, 0);
     glDrawElements(GL_TRIANGLE_STRIP, _lenLeftStrip,  GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfLeftStrip));
     glDrawElements(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfRightStrip));
+    // plane:
+    glDrawElements(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfPlaneStrip));
 
     // Unbind the Vertex Array Object
     glBindVertexArray(0);
