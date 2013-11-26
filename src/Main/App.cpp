@@ -236,7 +236,7 @@ void App::initProgram() {
     // Set uniform values for matrix transformations
     glUseProgram(mProgram);
 //  glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(modelToWorldMatrix));  // transform()
-    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));     // unity matrix
+    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));     // identity matrix
 //  glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
     glUseProgram(0);
 }
@@ -408,7 +408,7 @@ void App::rotate(int aDeltaX, int aDeltaY) {
 /**
  * @brief Calculate the new transformation matrix from Rotations and Translations
  */
-void App::transform() {
+glm::mat4 App::transform() {
     // Translation first
     glm::mat4 translations(1.0f);
     translations[3].x = mModelTranslation.x;
@@ -429,13 +429,8 @@ void App::transform() {
     rotationX[2].y = -sin(mModelRotation.y);
     rotationX[2].z = cos(mModelRotation.y);
 
-    // Calculate the new transformation matrix (from right to left)
-    glm::mat4 modelToWorldMatrix = rotationX * rotationY * translations;
-
-    // Set uniform values with the new "Model to World" matrix
-    glUseProgram(mProgram);
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(modelToWorldMatrix));
-    glUseProgram(0);
+    // Calculate the new "modelToWorldMatrix" (from right to left)
+    return (rotationX * rotationY * translations);
 }
 
 /**
@@ -504,8 +499,6 @@ void App::displayCallback() {
 
     // Check current key pressed
     checkKeys();
-    // and re-calculate the model to world transformations matrix
-    transform();
 
     // Use the linked program of compiled shaders
     glUseProgram(mProgram);
@@ -513,13 +506,9 @@ void App::displayCallback() {
     // Bind the Vertex Array Object, bound to buffers with vertex position and colors
     glBindVertexArray(mVertexArrayObject);
 
-    // Ask to Draw triangles from buffers pointed by the Vertex Array Object
-    // cube:
-    glDrawElements(GL_TRIANGLE_STRIP, _lenMainStrip,  GL_UNSIGNED_SHORT, 0);
-    glDrawElements(GL_TRIANGLE_STRIP, _lenLeftStrip,  GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfLeftStrip));
-    glDrawElements(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfRightStrip));
-    // plane:
-    glDrawElements(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfPlaneStrip));
+    // Use a matrix stack to manage the tree-hierarchy of the scene (initialized with the identity matrix)
+    glutil::MatrixStack modelToWorldMatrixStack;
+    drawPlane(modelToWorldMatrixStack);
 
     // Unbind the Vertex Array Object
     glBindVertexArray(0);
@@ -527,6 +516,46 @@ void App::displayCallback() {
 
     glutSwapBuffers();
     glutPostRedisplay();    // Ask for refresh ; only needed if animation are present
+}
+
+/**
+ * @brief Draw the plane at the root of the world
+ *
+ * @param[in] aModelToWorldMatrixStack  Matrix Stack of the tree of the scene
+ */
+void App::drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack) {
+    // Root of the stack : the plane is centered at the origin, unscaled (no transformation, need to push the stack)
+
+    // Set uniform values with the new "Model to World" matrix
+    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
+    // Ask to Draw triangles from buffers pointed by the Vertex Array Object
+    // plane:
+    glDrawElements(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfPlaneStrip));
+
+    // Now draw the sub elements
+    drawCube(aModelToWorldMatrixStack);
+}
+
+/**
+ * @brief Draw the cube above the plane
+ *
+ * First level of the stack : the cube is translated and rotated above the plane
+ *
+ * @param[in] aModelToWorldMatrixStack  Matrix Stack of the tree of the scene
+ */
+void App::drawCube(glutil::MatrixStack& aModelToWorldMatrixStack) {
+    glutil::PushStack push(aModelToWorldMatrixStack); // RAII PushStack
+
+    // re-calculate the model to world transformations matrix, and pass it to the program
+    glm::mat4 cubeToWorldMatrix = transform();
+    aModelToWorldMatrixStack.ApplyMatrix(cubeToWorldMatrix);
+
+    // Set uniform values with the new "Model to World" matrix
+    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
+    // cube:
+    glDrawElements(GL_TRIANGLE_STRIP, _lenMainStrip,  GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLE_STRIP, _lenLeftStrip,  GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfLeftStrip));
+    glDrawElements(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfRightStrip));
 }
 
 /**

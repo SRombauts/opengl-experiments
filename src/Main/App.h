@@ -16,6 +16,7 @@
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <glload/gl_3_2_comp.h>
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
+#include <glutil/MatrixStack.h>
 
 #include <vector>               // std::vector
 
@@ -47,7 +48,11 @@ private:
     void front();
     void back();
     void rotate(int aDeltaX, int aDeltaY);
-    void transform();
+    glm::mat4 transform();
+
+    void drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack);
+    void drawCube(glutil::MatrixStack& aModelToWorldMatrixStack);
+
     void calculateFPS();
 
     // static inline freeglut callback
