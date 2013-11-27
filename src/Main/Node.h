@@ -11,8 +11,6 @@
 
 #include "Utils/shared_ptr.hpp"
 
-#include <glload/gl_load.hpp>   // Need to be included before other gl library
-#include <glload/gl_3_2_comp.h>
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
 
 #include <vector>               // std::vector

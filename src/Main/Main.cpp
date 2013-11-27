@@ -11,6 +11,7 @@
 
 #include "Main/App.h"
 
+#include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <GL/freeglut.h>
 
 
