@@ -3833,9 +3833,10 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
               'Use static_cast<%s>(...) instead' %
               matched_type)
 
+  # SRombauts: adding many builtin type
   CheckCStyleCast(filename, linenum, line, clean_lines.raw_lines[linenum],
                   'static_cast',
-                  r'\((int|float|double|bool|char|u?int(16|32|64))\)', error)
+                  r'\((int|float|double|bool|long|short|char|unsigned long|unsigned int|unsigned short|unsigned char|size_t|time_t|u?int(16|32|64))\)', error)
 
   # This doesn't catch all cases. Consider (const char * const)"hello".
   #
