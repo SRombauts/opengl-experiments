@@ -13,7 +13,8 @@
 
 #include "Utils/Utils.h"
 
-#include <vector>               // std::vector
+#include <vector>
+#include <cassert>
 
 
 // Manage OpenGL rendering
