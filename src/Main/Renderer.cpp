@@ -30,14 +30,14 @@ static const float X_LEFT   = -0.5f;    ///< Left coordinate
 static const float X_RIGHT  = 0.5f;     ///< Right coordinate
 static const float Y_TOP    = 0.5f;     ///< Top coordinate
 static const float Y_BOTTOM = -0.5f;    ///< Bottom coordinate
-static const float Z_FRONT  = -3.5f;    ///< Front coordinate
-static const float Z_BACK   = -4.5f;    ///< Back coordinate
+static const float Z_FRONT  = 0.5f;    ///< Front coordinate
+static const float Z_BACK   = -0.5f;    ///< Back coordinate
 // Plane coordinates
 static const float X_PLANE_LEFT     = -5.0f;    ///< Left coordinate
 static const float X_PLANE_RIGHT    = 5.0f;     ///< Right coordinate
 static const float Y_PLANE          = -0.5f;    ///< Y coordinate
-static const float Z_PLANE_FRONT    = 1.0f;     ///< Front coordinate
-static const float Z_PLANE_BACK     = -9.0f;    ///< Back coordinate
+static const float Z_PLANE_FRONT    = 5.0f;     ///< Front coordinate
+static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
 /// cube:
@@ -127,6 +127,8 @@ Renderer::Renderer() :
     mVertexBufferObject(0),
     mIndexBufferObject(0),
     mVertexArrayObject(0),
+    mCameraRotation(0.0f),
+    mCameraTranslation(0.0f, 0.0f, -5.0f),
     mModelRotation(0.0f),
     mModelTranslation(0.0f) {
     init();
@@ -218,13 +220,6 @@ void Renderer::initProgram() {
     mModelToWorldMatrixUnif     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
     mWorldToCameraMatrixUnif    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
     mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
-
-    // Set uniform values for matrix transformations
-    glUseProgram(mProgram);
-//  glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(modelToWorldMatrix));  // transform()
-    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));     // identity matrix
-//  glUniformMatrix4fv(mCameraToClipMatrixUnif,  1, GL_FALSE, glm::value_ptr(mCameraToClipMatrix)); // reshape()
-    glUseProgram(0);
 }
 
 /**
@@ -286,69 +281,146 @@ void Renderer::uninitVertexArrayObject(void) {
 }
 
 /**
- * @brief Move up the model
+ * @brief Move up the camera
  */
 void Renderer::up() {
+    mCameraTranslation.y += 0.01f;
+    mLog.info() << "up y=" << mCameraTranslation.y;
+}
+/**
+ * @brief Move down the camera
+ */
+void Renderer::down() {
+    mCameraTranslation.y -= 0.01f;
+    mLog.info() << "down y=" << mCameraTranslation.y;
+}
+
+/**
+ * @brief Move the camera to the left
+ */
+void Renderer::left() {
+    mCameraTranslation.x -= 0.01f;
+    mLog.info() << "left: x=" << mCameraTranslation.x;
+}
+/**
+ * @brief Move the camera to the right
+ */
+void Renderer::right() {
+    mCameraTranslation.x += 0.01f;
+    mLog.info() << "right: x=" << mCameraTranslation.x;
+}
+
+/**
+ * @brief Move the camera to the front
+ */
+void Renderer::front() {
+    mCameraTranslation.z += 0.01f;
+    mLog.info() << "front: z=" << mCameraTranslation.z;
+}
+/**
+ * @brief Move the camera to the back
+ */
+void Renderer::back() {
+    mCameraTranslation.z -= 0.01f;
+    mLog.info() << "back: z=" << mCameraTranslation.z;
+}
+
+/**
+ * @brief Rotate the camera
+ */
+void Renderer::rotate(int aDeltaX, int aDeltaY) {
+    mCameraRotation.x += (aDeltaX * 0.01f);
+    mCameraRotation.y += (aDeltaY * 0.01f);
+    mLog.info() << "rotate: angle(" << mCameraRotation.x << ", " << mCameraRotation.y << ")";
+}
+
+/**
+ * @brief Calculate the new camera transformation matrix from Rotations and Translations
+ */
+glm::mat4 Renderer::transform() {
+    // Translation first
+    glm::mat4 translations(1.0f);
+    translations[3].x = mCameraTranslation.x;
+    translations[3].y = mCameraTranslation.y;
+    translations[3].z = mCameraTranslation.z;
+
+    // Rotation around the Y axis (from left to right)
+    glm::mat4 rotationY(1.0f);
+    rotationY[0].x = cos(mCameraRotation.x);
+    rotationY[0].z = -sin(mCameraRotation.x);
+    rotationY[2].x = sin(mCameraRotation.x);
+    rotationY[2].z = cos(mCameraRotation.x);
+
+    // Rotation around the X axis (from top to bottom)
+    glm::mat4 rotationX(1.0f);
+    rotationX[1].y = cos(mCameraRotation.y);
+    rotationX[1].z = sin(mCameraRotation.y);
+    rotationX[2].y = -sin(mCameraRotation.y);
+    rotationX[2].z = cos(mCameraRotation.y);
+
+    // Calculate the new "worldToCameradMatrix" (from right to left)
+    return (rotationX * rotationY * translations);
+}
+
+
+/**
+ * @brief Move up the model
+ */
+void Renderer::modelUp() {
     mModelTranslation.y += 0.01f;
-    mLog.info() << "up y=" << mModelTranslation.y;
+    mLog.info() << "model up y=" << mModelTranslation.y;
 }
 /**
  * @brief Move down the model
  */
-void Renderer::down() {
+void Renderer::modelDown() {
     mModelTranslation.y -= 0.01f;
-    mLog.info() << "down y=" << mModelTranslation.y;
+    mLog.info() << "model down y=" << mModelTranslation.y;
 }
 
 /**
  * @brief Move the model to the left
  */
-void Renderer::left() {
+void Renderer::modelLeft() {
     mModelTranslation.x -= 0.01f;
-    mLog.info() << "left: x=" << mModelTranslation.x;
+    mLog.info() << "model left: x=" << mModelTranslation.x;
 }
 /**
  * @brief Move the model to the right
  */
-void Renderer::right() {
+void Renderer::modelRight() {
     mModelTranslation.x += 0.01f;
-    mLog.info() << "right: x=" << mModelTranslation.x;
+    mLog.info() << "model right: x=" << mModelTranslation.x;
 }
 
 /**
  * @brief Move the model to the front
  */
-void Renderer::front() {
+void Renderer::modelFront() {
     mModelTranslation.z += 0.01f;
-    mLog.info() << "front: z=" << mModelTranslation.z;
+    mLog.info() << "model front: z=" << mModelTranslation.z;
 }
 /**
  * @brief Move the model to the back
  */
-void Renderer::back() {
+void Renderer::modelBack() {
     mModelTranslation.z -= 0.01f;
-    mLog.info() << "back: z=" << mModelTranslation.z;
+    mLog.info() << "model back: z=" << mModelTranslation.z;
 }
 
 /**
  * @brief Rotate the model
  */
-void Renderer::rotate(int aDeltaX, int aDeltaY) {
+void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
     mModelRotation.x += (aDeltaX * 0.01f);
     mModelRotation.y += (aDeltaY * 0.01f);
-    mLog.info() << "rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
+    //mLog.info() << "model rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
 }
 
 /**
- * @brief Calculate the new transformation matrix from Rotations and Translations
+ * @brief Calculate the new model transformation matrix from Rotations and Translations
  */
-glm::mat4 Renderer::transform() {
-    // Translation first
-    glm::mat4 translations(1.0f);
-    translations[3].x = mModelTranslation.x;
-    translations[3].y = mModelTranslation.y;
-    translations[3].z = mModelTranslation.z;
-
+glm::mat4 Renderer::modelTransform() {
     // Rotation around the Y axis (from left to right)
     glm::mat4 rotationY(1.0f);
     rotationY[0].x = cos(mModelRotation.x);
@@ -363,8 +435,14 @@ glm::mat4 Renderer::transform() {
     rotationX[2].y = -sin(mModelRotation.y);
     rotationX[2].z = cos(mModelRotation.y);
 
+    // Translations at last
+    glm::mat4 translations(1.0f);
+    translations[3].x = mModelTranslation.x;
+    translations[3].y = mModelTranslation.y;
+    translations[3].z = mModelTranslation.z;
+
     // Calculate the new "modelToWorldMatrix" (from right to left)
-    return (rotationX * rotationY * translations);
+    return (translations * rotationX * rotationY);
 }
 
 /**
@@ -410,7 +488,7 @@ void Renderer::reshape(int aW, int aH) {
     glutil::MatrixStack cameraToClipMatrix;
     cameraToClipMatrix.Perspective(45.0f, (static_cast<float>(aW) / static_cast<float>(aH)), _zNear, _zFar);
 
-    // Set uniform values with the new matrix transformation
+    // Set uniform values with the new "Camera to Clip" matrix
     glUseProgram(mProgram);
     glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix.Top()));
     glUseProgram(0);
@@ -433,6 +511,11 @@ void Renderer::display() {
 
     // Use the linked program of compiled shaders
     glUseProgram(mProgram);
+
+    // re-calculate the "World to Camera" matrix, and pass it to the program
+    glm::mat4 worldToCamerMatrix = transform();
+    // Set uniform values with the new "World to Camera" matrix
+    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(worldToCamerMatrix));
 
     // Bind the Vertex Array Object, bound to buffers with vertex position and colors
     glBindVertexArray(mVertexArrayObject);
@@ -478,7 +561,7 @@ void Renderer::drawCube(glutil::MatrixStack& aModelToWorldMatrixStack) {
     glutil::PushStack push(aModelToWorldMatrixStack); // RAII PushStack
 
     // re-calculate the model to world transformations matrix, and pass it to the program
-    glm::mat4 cubeToWorldMatrix = transform();
+    glm::mat4 cubeToWorldMatrix = modelTransform();
     aModelToWorldMatrixStack.ApplyMatrix(cubeToWorldMatrix);
 
     // Set uniform values with the new "Model to World" matrix

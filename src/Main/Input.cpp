@@ -12,6 +12,8 @@
 #include "Main/Input.h"
 #include "Main/Renderer.h"
 
+#include "Utils/Time.h"
+
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
 
@@ -77,27 +79,51 @@ void Input::checkKeys() {
         glutLeaveMainLoop();
     }
     if (   isSpecialKeyPressed(GLUT_KEY_UP)             // Special directional key
-        || isKeyPressed('w') || isKeyPressed('Z')       // QWERTY keyboard disposition
+        || isKeyPressed('w') || isKeyPressed('W')       // QWERTY keyboard disposition
         || isKeyPressed('z') || isKeyPressed('Z') ) {   // AZERTY keyboard disposition
-        // Move up the model
+        // Move up the camera
         mRenderer.up();
     }
     if (   isSpecialKeyPressed(GLUT_KEY_LEFT)           // Special directional key
         || isKeyPressed('a') || isKeyPressed('A')       // QWERTY keyboard disposition
         || isKeyPressed('q') || isKeyPressed('Q') ) {   // AZERTY keyboard disposition
-        // Move the model to the left
+        // Move the camera to the left
         mRenderer.left();
     }
     if (   isSpecialKeyPressed(GLUT_KEY_DOWN)           // Special directional key
         || isKeyPressed('s') || isKeyPressed('S') ) {   // QWERTY & AZERTY keyboard disposition
-        // Move down the model
+        // Move down the camera
         mRenderer.down();
     }
-
     if (   isSpecialKeyPressed(GLUT_KEY_RIGHT)          // Special directional key
         || isKeyPressed('d') || isKeyPressed('D') ) {   // QWERTY & AZERTY keyboard disposition
-        // Move right the model
+        // Move right the camera
         mRenderer.right();
+    }
+
+    if (isKeyPressed('r') || isKeyPressed('R')) {
+        // Move front the model
+        mRenderer.modelFront();
+    }
+    if (isKeyPressed('t') || isKeyPressed('T')) {
+        // Move up the model
+        mRenderer.modelUp();
+    }
+    if (isKeyPressed('y') || isKeyPressed('Y')) {
+        // Move back the model
+        mRenderer.modelBack();
+    }
+    if (isKeyPressed('f') || isKeyPressed('F')) {
+        // Move the model to the left
+        mRenderer.modelLeft();
+    }
+    if (isKeyPressed('g') || isKeyPressed('G')) {
+        // Move down the model
+        mRenderer.modelDown();
+    }
+    if (isKeyPressed('h') || isKeyPressed('H')) {
+        // Move right the model
+        mRenderer.modelRight();
     }
 }
 
@@ -124,6 +150,16 @@ void Input::displayCallback() {
 
     // Check current key pressed
     checkKeys();
+
+    // TODO(SRombauts) Timers & Animations :
+    static time_t   _lastTickUs     = Utils::Time::getTickUs();
+    time_t          curTickUs       = Utils::Time::getTickUs();
+    time_t          deltaUs         = (curTickUs - _lastTickUs);
+
+    if (deltaUs >= 16667) { // 16,667ms = 60Hz
+        mRenderer.modelRotate(1, 0);
+        _lastTickUs = curTickUs;
+    }
 
     // Delegate management of OpenGL rendering
     mRenderer.display();
