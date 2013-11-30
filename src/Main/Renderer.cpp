@@ -15,7 +15,8 @@
 
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
-#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
+#include <glm/gtc/type_ptr.hpp>         // glm::value_ptr
+#include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
 
 #include <fstream>      // NOLINT(readability/streams) for shader files
 #include <sstream>
@@ -130,7 +131,7 @@ Renderer::Renderer() :
     mCameraRotation(0.0f),
     mCameraTranslation(0.0f, 0.0f, -5.0f),
     mModelRotation(0.0f),
-    mModelTranslation(0.0f) {
+    mModelTranslation(1.0f, 0.0f, 0.0f) {
     init();
 }
 /**
@@ -314,14 +315,14 @@ void Renderer::right() {
  * @brief Move the camera to the front
  */
 void Renderer::front() {
-    mCameraTranslation.z += 0.01f;
+    mCameraTranslation.z += 0.1f;
     mLog.info() << "front: z=" << mCameraTranslation.z;
 }
 /**
  * @brief Move the camera to the back
  */
 void Renderer::back() {
-    mCameraTranslation.z -= 0.01f;
+    mCameraTranslation.z -= 0.1f;
     mLog.info() << "back: z=" << mCameraTranslation.z;
 }
 
@@ -338,28 +339,25 @@ void Renderer::rotate(int aDeltaX, int aDeltaY) {
  * @brief Calculate the new camera transformation matrix from Rotations and Translations
  */
 glm::mat4 Renderer::transform() {
-    // Translation first
-    glm::mat4 translations(1.0f);
-    translations[3].x = mCameraTranslation.x;
-    translations[3].y = mCameraTranslation.y;
-    translations[3].z = mCameraTranslation.z;
-
     // Rotation around the Y axis (from left to right)
-    glm::mat4 rotationY(1.0f);
+    glm::mat4 rotationY;
     rotationY[0].x = cos(mCameraRotation.x);
     rotationY[0].z = -sin(mCameraRotation.x);
     rotationY[2].x = sin(mCameraRotation.x);
     rotationY[2].z = cos(mCameraRotation.x);
 
     // Rotation around the X axis (from top to bottom)
-    glm::mat4 rotationX(1.0f);
+    glm::mat4 rotationX;
     rotationX[1].y = cos(mCameraRotation.y);
     rotationX[1].z = sin(mCameraRotation.y);
     rotationX[2].y = -sin(mCameraRotation.y);
     rotationX[2].z = cos(mCameraRotation.y);
 
+    // Translation at last
+    glm::mat4 translations = glm::translate(glm::mat4(1.0f), mCameraTranslation);
+
     // Calculate the new "worldToCameradMatrix" (from right to left)
-    return (rotationX * rotationY * translations);
+    return (translations * rotationX * rotationY);
 }
 
 
@@ -422,24 +420,21 @@ void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
  */
 glm::mat4 Renderer::modelTransform() {
     // Rotation around the Y axis (from left to right)
-    glm::mat4 rotationY(1.0f);
+    glm::mat4 rotationY;
     rotationY[0].x = cos(mModelRotation.x);
     rotationY[0].z = -sin(mModelRotation.x);
     rotationY[2].x = sin(mModelRotation.x);
     rotationY[2].z = cos(mModelRotation.x);
 
     // Rotation around the X axis (from top to bottom)
-    glm::mat4 rotationX(1.0f);
+    glm::mat4 rotationX;
     rotationX[1].y = cos(mModelRotation.y);
     rotationX[1].z = sin(mModelRotation.y);
     rotationX[2].y = -sin(mModelRotation.y);
     rotationX[2].z = cos(mModelRotation.y);
 
     // Translations at last
-    glm::mat4 translations(1.0f);
-    translations[3].x = mModelTranslation.x;
-    translations[3].y = mModelTranslation.y;
-    translations[3].z = mModelTranslation.z;
+    glm::mat4 translations = glm::translate(glm::mat4(1.0f), mModelTranslation);
 
     // Calculate the new "modelToWorldMatrix" (from right to left)
     return (translations * rotationX * rotationY);
@@ -485,12 +480,11 @@ void Renderer::reshape(int aW, int aH) {
     mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
 
     // Define the "Camera to Clip" matrix for the perspective transformation
-    glutil::MatrixStack cameraToClipMatrix;
-    cameraToClipMatrix.Perspective(45.0f, (static_cast<float>(aW) / static_cast<float>(aH)), _zNear, _zFar);
+    glm::mat4 cameraToClipMatrix = glm::perspective<float>(45.0f, (static_cast<float>(aW) / static_cast<float>(aH)), _zNear, _zFar);
 
     // Set uniform values with the new "Camera to Clip" matrix
     glUseProgram(mProgram);
-    glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix.Top()));
+    glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix));
     glUseProgram(0);
 
     glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
