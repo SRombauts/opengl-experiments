@@ -15,8 +15,10 @@
 /**
  * @brief Constructor
  */
-Node::Node() {
+Node::Node() :
+    mbMatrixDirty(false) {
 }
+
 /**
  * @brief Destructor
  */

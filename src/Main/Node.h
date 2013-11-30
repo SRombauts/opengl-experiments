@@ -9,11 +9,13 @@
  * or copy at http://opensource.org/licenses/MIT)
  */
 
-#include "Utils/shared_ptr.hpp"
+#include "Utils/shared_ptr.hpp"         // std::shared_ptr replacement
 
-#include <glm/glm.hpp>          // glm::mat4, glm::vec3...
+#include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
+#include <glm/gtc/matrix_transform.hpp> // glm::rotate, glm::translate
+#include <glm/gtc/quaternion.hpp>       // glm::fquat
 
-#include <vector>               // std::vector
+#include <vector>                       // std::vector
 
 
 /**
@@ -22,19 +24,26 @@
 class Node {
 public:
     typedef Utils::shared_ptr<Node> Ptr;    ///< Shared Pointer to a Node
-    typedef std::vector<Ptr>        Vector; ///< Vector of pointers to a Node
+    typedef std::vector<Ptr>        List;   ///< List (std::vector) of pointers to a Node
 
 public:
     Node();
     ~Node();
 
-    inline const Vector& getChildren() const;
-    inline       Vector& getChildren();
+    inline const List&      getChildren() const;
+    inline       List&      getChildren();
+
+    inline const glm::mat4& getMatrix() const;
 
 private:
-    Node::Vector    mChildren;          ///< Children Node of the current Node
+    Node::List          mChildrenList;          ///< Children Nodes of the current Node
 
-    glm::vec3       mModelTranslation;  ///< Vector of translation of the model
+    glm::fquat          mOrientationQuaternion; ///< Quaternion of orientation of the Node
+    glm::vec3           mTranslationVector;     ///< Vector of translation of the Node
+
+    // Mutable to enable updating in const getter
+    mutable glm::mat4   mMatrix;                ///< Composited resulting Matrix of orientation and translation
+    mutable bool        mbMatrixDirty;          ///< Tell if the composited Matrix is up to date or need recalculation
 };
 
 /**
@@ -42,8 +51,8 @@ private:
  *
  * @return  Const Vector of children of the current Node
  */
-inline const Node::Vector& Node::getChildren() const {
-    return mChildren;
+inline const Node::List& Node::getChildren() const {
+    return mChildrenList;
 }
 
 /**
@@ -51,6 +60,23 @@ inline const Node::Vector& Node::getChildren() const {
  *
  * @return  Vector of children of the current Node
  */
-inline Node::Vector& Node::getChildren() {
-    return mChildren;
+inline Node::List& Node::getChildren() {
+    return mChildrenList;
+}
+
+/**
+ * @brief   Get the up-to-date composited Matrix of orientation and translation
+ *
+ *  Recalculate the matrix from quaternion of orientation and vector of translation only when required.
+ * Resulting matrix is cached until a change in orientation or translation flag it as "dirty".
+ *
+ * @return  Vector of children of the current Node
+ */
+inline const glm::mat4& Node::getMatrix() const {
+    if (mbMatrixDirty) {
+        glm::mat4 rotation  = glm::mat4_cast(mOrientationQuaternion);
+        mMatrix             = glm::translate(rotation, mTranslationVector);
+    }
+
+    return mMatrix;
 }
