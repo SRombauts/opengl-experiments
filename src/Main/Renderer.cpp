@@ -129,7 +129,7 @@ Renderer::Renderer() :
     mIndexBufferObject(0),
     mVertexArrayObject(0),
     mCameraRotation(0.0f),
-    mCameraTranslation(0.0f, 0.0f, -5.0f),
+    mCameraTranslation(0.0f, 0.0f, 5.0f),
     mModelRotation(0.0f),
     mModelTranslation(1.0f, 0.0f, 0.0f) {
     init();
@@ -354,7 +354,7 @@ glm::mat4 Renderer::transform() {
     rotationX[2].z = cos(mCameraRotation.y);
 
     // Translation at last
-    glm::mat4 translations = glm::translate(glm::mat4(1.0f), mCameraTranslation);
+    glm::mat4 translations = glm::translate(glm::mat4(1.0f), -mCameraTranslation);
 
     // Calculate the new "worldToCameradMatrix" (from right to left)
     return (translations * rotationX * rotationY);

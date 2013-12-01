@@ -80,10 +80,13 @@ private:
     GLuint mIndexBufferObject;          ///< Index buffer object containing the indices of vertices of our mesh
     GLuint mVertexArrayObject;          ///< Vertex array object
 
-    // TODO(SRombauts) use a quaternion
+// TODO(SRombauts) use a quaternion
+//  glm::fquat  mModelRotation;         ///< Axis and angle of rotation of the camera
     glm::vec3   mCameraRotation;        ///< Angles of rotation of the camera
     glm::vec3   mCameraTranslation;     ///< Vector of translation of the camera
 
+// TODO(SRombauts) use a quaternion
+//  glm::fquat  mModelRotation;         ///< Axis and angle of rotation of the model
     glm::vec3   mModelRotation;         ///< Angles of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
 
