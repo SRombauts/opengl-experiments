@@ -1,24 +1,15 @@
 #!/bin/sh
 
-echo "Getting dependencies..."
-git submodule init
-git submodule update
-cd unofficial-opengl-sdk
-git submodule init
-git submodule update
-
-echo "Building freeglut..."
-cd freeglut/freeglut
-cmake . -DCMAKE_BUILD_TYPE=Debug
-cmake --build . --target freeglut_static
-mv lib/libglut.a lib/libfreeglut_staticd.a
-cmake . -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target freeglut_static
-mv lib/libglut.a lib/libfreeglut_static.a
-cd ../..
-../premake/premake4 gmake
-make -j4
-cd ..
+echo "Generating project..."
 premake/premake4 gmake
 make -j4
+
+echo "==== Running cpplint ===="
+python cpplint.py --verbose=3 --output=eclipse --linelength=120 src/*/*
+
+echo "==== Running cppcheck ===="
+cppcheck --quiet --enable=style --template=gcc src/
+
+echo "==== Running doxygen ===="
+doxygen > /dev/null
 

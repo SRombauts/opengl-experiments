@@ -1,20 +1,13 @@
-@echo "Getting dependencies..."
-git submodule init
-git submodule update
-cd unofficial-opengl-sdk
-git submodule init
-git submodule update
-
-@echo "Building freeglut..."
-cd freeglut\freeglut
-cmake . -G "Visual Studio 10"
-cmake --build . --target freeglut_static --config Debug
-move lib\Debug\* lib
-cmake --build . --target freeglut_static --config Release
-move lib\Release\* lib
-cd ..\..
-..\premake\premake4 vs2010
-@echo "[open and build solution]"
-cd ..
+@echo "Generating project..."
 premake\premake4 vs2010
 @echo "[open and build solution]"
+
+@echo "==== Running cpplint ===="
+python cpplint.py --verbose=3 --output=eclipse --linelength=120 src/Main/Main.cpp src/Main/App.h src/Main/App.cpp src/Main/Input.h src/Main/Input.cpp src/Main/Renderer.h src/Main/Renderer.cpp  src/Main/Node.h src/Main/Node.cpp
+
+@echo "==== Running cppcheck ===="
+cppcheck --quiet --enable=style --template=gcc src/
+
+@echo "==== Running doxygen ===="
+doxygen > NUL
+
