@@ -201,7 +201,7 @@ void Input::keyboardUpCallback(unsigned char aKey, int aX, int aY) {
  * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */
 void Input::keyboardSpecialCallback(int aKey, int aX, int aY) {
-    mLog.info() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
+    mLog.debug() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
 
     mSpecialKeyPressed[aKey] = true;
 }
@@ -214,7 +214,7 @@ void Input::keyboardSpecialCallback(int aKey, int aX, int aY) {
  * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */
 void Input::keyboardSpecialUpCallback(int aKey, int aX, int aY) {
-    mLog.info() << "keyboardSpecialUpCallback(" << aKey << "," << aX << "," << aY << ")";
+    mLog.debug() << "keyboardSpecialUpCallback(" << aKey << "," << aX << "," << aY << ")";
 
     mSpecialKeyPressed[aKey] = false;
 }
@@ -228,7 +228,7 @@ void Input::keyboardSpecialUpCallback(int aKey, int aX, int aY) {
  * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */
 void Input::mouseCallback(int aButton, int aState, int aX, int aY) {
-    mLog.info() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
+    mLog.debug() << "mouseCallback(" << aButton << "," << ((aState == GLUT_DOWN)?"down":"up")
               << "," << aX << "," << aY << ")";
 
     // Detect Mouse Wheel under X (Linux Ubuntu 12.10)
@@ -254,7 +254,7 @@ static glm::detail::tvec2<int> _lastMousePos;
  * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */    
 void Input::mouseMotionCallback(int aX, int aY) {
-    mLog.info() << "mouseMotionCallback(" << aX << "," << aY << ")";
+    mLog.debug() << "mouseMotionCallback(" << aX << "," << aY << ")";
 
     if (   (aX != _lastMousePos.x)
         || (aY != _lastMousePos.y) ) {
@@ -271,7 +271,7 @@ void Input::mouseMotionCallback(int aX, int aY) {
  * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */    
 void Input::mousePassiveMotionCallback(int aX, int aY) {
-    mLog.info() << "mousePassiveMotionCallback(" << aX << "," << aY << ")";
+    mLog.debug() << "mousePassiveMotionCallback(" << aX << "," << aY << ")";
 
     _lastMousePos.x = aX;
     _lastMousePos.y = aY;
@@ -286,7 +286,7 @@ void Input::mousePassiveMotionCallback(int aX, int aY) {
  * @param[in] aY    Y coord of the mouse cursor (0 is the top of the render surface of the window: can be negative!)
  */
 void Input::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
-    mLog.info() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
+    mLog.debug() << "mouseWheelCallback(" << aNum << "," << aDirection << "," << aX << "," << aY << ")";
 
     // Update Z translation value
     if (0 < aDirection) {
@@ -310,7 +310,7 @@ void Input::joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ) {
     static glm::detail::tvec3<int>  _lastJoystickPos;
     if (   (_lastButtonMask != aButtonMask)
         || (_lastJoystickPos.x != aX) || (_lastJoystickPos.y != aY) || (_lastJoystickPos.z != aZ) ) {
-        mLog.info() << "joystickCallback(" << aButtonMask << "," << aX << "," << aY << "," << aZ << ")";
+        mLog.debug() << "joystickCallback(" << aButtonMask << "," << aX << "," << aY << "," << aZ << ")";
         _lastButtonMask = aButtonMask;
         _lastJoystickPos.x = aX;
         _lastJoystickPos.y = aY;
