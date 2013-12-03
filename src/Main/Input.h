@@ -12,6 +12,7 @@
 #include "LoggerCpp/LoggerCpp.h"
 
 #include "Utils/Utils.h"
+#include "Utils/FPS.h"
 
 #include <vector>
 #include <cassert>
@@ -66,14 +67,16 @@ private:
     void joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ);
 
 private:
-    static Input*       _mpSelf;            ///< Static pointer to the unique Input instance, for glut static callback
+    static Input*       _mpSelf;                ///< Static pointer to the Input instance, for glut static callback
 
-    Log::Logger         mLog;               ///< Logger object to output runtime information
+    Log::Logger         mLog;                   ///< Logger object to output runtime information
 
-    Renderer&           mRenderer;          ///< Reference to the renderer managing OpenGL drawing
+    Renderer&           mRenderer;              ///< Reference to the renderer managing OpenGL drawing
 
-    std::vector<bool>   mKeyPressed;        ///< Current state of regular keyboard keys
-    std::vector<bool>   mSpecialKeyPressed; ///< Current state of special keyboard keys
+    std::vector<bool>   mKeyPressed;            ///< Current state of regular keyboard keys
+    std::vector<bool>   mSpecialKeyPressed;     ///< Current state of special keyboard keys
+
+    Utils::FPS          mFPS;                   ///< FPS and inter-frame times calculation
 
 private:
     /// disallow copy constructor and assignment operator

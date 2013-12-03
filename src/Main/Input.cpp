@@ -148,17 +148,20 @@ void Input::reshapeCallback(int aW, int aH) {
 void Input::displayCallback() {
     // mLog.debug() << "displayCallback()";
 
+    // FPS and frame duration calculations
+    mFPS.calculate();
+
     // Check current key pressed
     checkKeys();
 
-    // TODO(SRombauts) Timers & Animations :
-    static time_t   _lastTickUs     = Utils::Time::getTickUs();
+    // TODO(SRombauts) Timers for Animations, similar to the Utils::FPS class
+    static time_t   _prevTickUs     = Utils::Time::getTickUs();
     time_t          curTickUs       = Utils::Time::getTickUs();
-    time_t          deltaUs         = (curTickUs - _lastTickUs);
+    time_t          deltaUs         = (curTickUs - _prevTickUs);
 
     if (deltaUs >= 16667) { // 16,667ms = 60Hz
         mRenderer.modelRotate(1, 0);
-        _lastTickUs = curTickUs;
+        _prevTickUs = curTickUs;
     }
 
     // Delegate management of OpenGL rendering

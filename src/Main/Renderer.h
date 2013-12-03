@@ -64,8 +64,6 @@ private:
     void drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack);
     void drawCube(glutil::MatrixStack& aModelToWorldMatrixStack);
 
-    void calculateFPS();
-
 private:
     Log::Logger mLog;                   ///< Logger object to output runtime information
 
