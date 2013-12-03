@@ -412,7 +412,7 @@ void Renderer::modelBack() {
 void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
     mModelRotation.x += (aDeltaX * 0.01f);
     mModelRotation.y += (aDeltaY * 0.01f);
-    //mLog.info() << "model rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
+//  mLog.info() << "model rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
 }
 
 /**
@@ -480,7 +480,7 @@ void Renderer::reshape(int aW, int aH) {
     mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
 
     // Define the "Camera to Clip" matrix for the perspective transformation
-    glm::mat4 cameraToClipMatrix = glm::perspective<float>(45.0f, (static_cast<float>(aW) / static_cast<float>(aH)), _zNear, _zFar);
+    glm::mat4 cameraToClipMatrix = glm::perspective<float>(45.0f, (aW / static_cast<float>(aH)), _zNear, _zFar);
 
     // Set uniform values with the new "Camera to Clip" matrix
     glUseProgram(mProgram);
