@@ -10,7 +10,7 @@
  */
 #pragma once
 
-#include <ctime>    // time_t
+#include "Utils/Time.h"
 
 namespace Utils {
 
@@ -25,15 +25,36 @@ public:
     /**
      * @brief Constructor measure and save the first time tick.
      */
-    Measure();
+    inline Measure();
+
+    /**
+     * @brief Re-measure and save the first time tick.
+     */
+    inline void restart();
 
     /**
      * @brief Measure a second time tick and return the difference since the first one.
      */
-    time_t diff();
+    inline time_t diff();
 
 private:
     time_t mStartTimeUs;    ///< First time measurement, from the constructor.
 };
+
+
+// Constructor measure and save the first time tick.
+inline Measure::Measure() {
+    mStartTimeUs = Time::getTickUs();
+}
+
+// Re-measure and save the first time tick.
+inline void Measure::restart() {
+    mStartTimeUs = Time::getTickUs();
+}
+
+// Measure a second time tick and return the difference since the first one.
+inline time_t Measure::diff() {
+    return Time::diff(mStartTimeUs, Time::getTickUs());
+}
 
 } // namespace Utils
