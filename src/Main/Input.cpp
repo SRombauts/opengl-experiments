@@ -31,7 +31,8 @@ Input::Input(Renderer& aRenderer) :
     mLog("Input"),
     mRenderer(aRenderer),
     mKeyPressed(256, false),
-    mSpecialKeyPressed(128, false) {
+    mSpecialKeyPressed(128, false),
+    mFPS(1000000) {
     _mpSelf = this;
     init();
 }
@@ -149,7 +150,11 @@ void Input::displayCallback() {
     // mLog.debug() << "displayCallback()";
 
     // FPS and frame duration calculations
-    mFPS.calculate();
+    bool bNewCalculatedFPS = mFPS.calculate();
+    if (bNewCalculatedFPS) {
+        mLog.notice() << mFPS.getCalculatedFPS() << "fps (avg " << mFPS.getAverageInterFrameUs()/1000.0
+                      << "ms, worst " << mFPS.getWorstInterFrameUs()/1000.0 << "ms)";
+    }
 
     // Check current key pressed
     checkKeys();

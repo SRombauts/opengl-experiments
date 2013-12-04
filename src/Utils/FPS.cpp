@@ -17,9 +17,16 @@ namespace Utils {
 
 /**
  * @brief Constructor
+ *
+ * @param[in] aCalculationIntervalUs    Number of microseconds to take into account for FPS calculation
  */
-FPS::FPS() :
-    mLog("FPS") {
+FPS::FPS(time_t aCalculationIntervalUs) :
+    mCalculationIntervalUs(aCalculationIntervalUs),
+    mCurrentFrameTickUs(0),
+    mElapsedTimeUs(0),
+    mCalculatedFPS(0.0f),
+    mAverageInterFrameUs(0),
+    mWorstInterFrameUs(0) {
 }
 
 /**
@@ -30,8 +37,11 @@ FPS::~FPS() {
 
 /**
  * @brief Calculate and print FPS, and average and word frame duration
+ *
+ * @return true
  */
-void FPS::calculate() {
+bool FPS::calculate() {
+    bool            bNewCalculatedFPS = false;
     static int      _nbFrames       = 0;
     static time_t   _worstFrameUs   = 0;
     static time_t   _firstTickUs    = Utils::Time::getTickUs();
@@ -46,14 +56,22 @@ void FPS::calculate() {
     if (frameUs > _worstFrameUs) {
         _worstFrameUs = frameUs;
     }
-    if (totalUs >= 1000000) {
-        time_t avgUs = totalUs/_nbFrames;
-        mLog.notice() << _nbFrames << "fps (avg " << avgUs/1000 << "." << avgUs%1000
-                      << "ms, worst " << _worstFrameUs/1000 << "." << _worstFrameUs%1000 << "ms)";
-        _firstTickUs =  Utils::Time::getTickUs(); // do not count logging time
+
+    // Save some useful values
+    mCurrentFrameTickUs = curTickUs;
+    mElapsedTimeUs      = frameUs;
+    mWorstInterFrameUs  = _worstFrameUs;
+
+    if (totalUs >= mCalculationIntervalUs) {
+        mCalculatedFPS      = static_cast<float>(_nbFrames)*1000000/totalUs;
+        bNewCalculatedFPS   = true;
+        mAverageInterFrameUs = totalUs/_nbFrames;
+        _firstTickUs = curTickUs;
         _nbFrames = 0;
         _worstFrameUs = 0;
     }
+
+    return bNewCalculatedFPS;
 }
 
 } // namespace Utils
