@@ -190,6 +190,16 @@ void Renderer::init() {
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
+    // Enable blending transparency (and antialiasing)
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Enable antialiasing
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    // and multisampling : TODO(SRombauts) is this redundant? Test on different hardware
+    glEnable(GL_MULTISAMPLE);
     // Gamma correction to produce image in the sRGB colorspace
     glEnable(GL_FRAMEBUFFER_SRGB);
 }

@@ -52,11 +52,12 @@ int main(int argc, char** argv) {
 
     log.info() << "freeglut starting...";
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE     // double buffered window
-                      | GLUT_ALPHA      // alpha component to the color buffer
-                      | GLUT_DEPTH      // depth buffer
-                      | GLUT_STENCIL    // stencil buffer (select which pixels to render)
-                      | GLUT_SRGB);     // ask for gamma corrected rendering for sRGB colorspace
+    glutInitDisplayMode(GLUT_DOUBLE         // double buffered window
+                      | GLUT_ALPHA          // alpha component to the color buffer
+                      | GLUT_DEPTH          // depth buffer
+                      | GLUT_STENCIL        // stencil buffer (select which pixels to render)
+                      | GLUT_MULTISAMPLE    // ask for multisample anti-aliasing buffer
+                      | GLUT_SRGB);         // ask for gamma corrected rendering for sRGB colorspace
     glutInitWindowSize(640, 480);
     glutInitWindowPosition(700, 0);
 
