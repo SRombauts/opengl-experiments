@@ -38,7 +38,7 @@ FPS::~FPS() {
 /**
  * @brief Calculate and print FPS, and average and word frame duration
  *
- * @return true
+ * @return true if a new FPS value is available
  */
 bool FPS::calculate() {
     bool            bNewCalculatedFPS = false;

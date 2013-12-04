@@ -16,7 +16,7 @@
 namespace Utils {
 
 /**
- * @brief Management of the GLUT input callbacks
+ * @brief Frame-Per-Seconds and inter-frame timing calculation
  */
 class FPS {
 public:

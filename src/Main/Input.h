@@ -13,6 +13,7 @@
 
 #include "Utils/Utils.h"
 #include "Utils/FPS.h"
+#include "Utils/Timer.h"
 
 #include <vector>
 #include <cassert>
@@ -77,6 +78,7 @@ private:
     std::vector<bool>   mSpecialKeyPressed;     ///< Current state of special keyboard keys
 
     Utils::FPS          mFPS;                   ///< FPS and inter-frame times calculation
+    Utils::Timer        mCubeRotationTimer;     ///< Timer to animate the cube
 
 private:
     /// disallow copy constructor and assignment operator

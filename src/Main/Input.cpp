@@ -32,7 +32,8 @@ Input::Input(Renderer& aRenderer) :
     mRenderer(aRenderer),
     mKeyPressed(256, false),
     mSpecialKeyPressed(128, false),
-    mFPS(1000000) {
+    mFPS(1000000),
+    mCubeRotationTimer(16667) { // 16,667ms = 60Hz
     _mpSelf = this;
     init();
 }
@@ -159,14 +160,10 @@ void Input::displayCallback() {
     // Check current key pressed
     checkKeys();
 
-    // TODO(SRombauts) Timers for Animations, similar to the Utils::FPS class
-    static time_t   _prevTickUs     = Utils::Time::getTickUs();
-    time_t          curTickUs       = Utils::Time::getTickUs();
-    time_t          deltaUs         = (curTickUs - _prevTickUs);
-
-    if (deltaUs >= 16667) { // 16,667ms = 60Hz
+    // Timer for basic cube animation (rotation around the X axis at 60Hz)
+    bool bCubeRotate = mCubeRotationTimer.isTimeElapsed(mFPS.getCurrentFrameTickUs());
+    if (bCubeRotate) {
         mRenderer.modelRotate(1, 0);
-        _prevTickUs = curTickUs;
     }
 
     // Delegate management of OpenGL rendering
