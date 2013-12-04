@@ -190,6 +190,8 @@ void Renderer::init() {
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
+    // Gamma correction to produce image in the sRGB colorspace
+    glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 /**
