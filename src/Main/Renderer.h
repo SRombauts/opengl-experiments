@@ -58,6 +58,10 @@ private:
     void initVertexArrayObject();
     void uninitVertexArrayObject();
 
+    // Offset a given quaternion by an axis and an angle
+    static void offsetOrientation(const glm::vec3 &aAxis, float aAngRad, glm::fquat& aCameraOrientation);
+
+    // TODO(SRombauts) Generalize? (Presently Camera is the inversed of Model)
     glm::mat4 transform();
     glm::mat4 modelTransform();
 
@@ -78,14 +82,10 @@ private:
     GLuint mIndexBufferObject;          ///< Index buffer object containing the indices of vertices of our mesh
     GLuint mVertexArrayObject;          ///< Vertex array object
 
-// TODO(SRombauts) use a quaternion
-//  glm::fquat  mModelRotation;         ///< Axis and angle of rotation of the camera
-    glm::vec3   mCameraRotation;        ///< Angles of rotation of the camera
+    glm::fquat  mCameraOrientation;     ///< Axis and angle of rotation of the camera
     glm::vec3   mCameraTranslation;     ///< Vector of translation of the camera
 
-// TODO(SRombauts) use a quaternion
-//  glm::fquat  mModelRotation;         ///< Axis and angle of rotation of the model
-    glm::vec3   mModelRotation;         ///< Angles of rotation of the model
+    glm::fquat  mModelOrientation;      ///< Axis and angle of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
 
 private:

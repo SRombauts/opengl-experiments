@@ -126,9 +126,9 @@ Renderer::Renderer() :
     mVertexBufferObject(0),
     mIndexBufferObject(0),
     mVertexArrayObject(0),
-    mCameraRotation(0.0f),
+    mCameraOrientation(1.0f, 0.0f, 0.0f, 0.0f),
     mCameraTranslation(0.0f, 0.0f, 5.0f),
-    mModelRotation(0.0f),
+    mModelOrientation(1.0f, 0.0f, 0.0f, 0.0f),
     mModelTranslation(1.0f, 0.0f, 0.0f) {
     init();
 }
@@ -354,37 +354,52 @@ void Renderer::back() {
 }
 
 /**
- * @brief Rotate the camera
- */
-void Renderer::rotate(int aDeltaX, int aDeltaY) {
-    mCameraRotation.x += (aDeltaX * 0.01f);
-    mCameraRotation.y += (aDeltaY * 0.01f);
-    mLog.info() << "rotate: angle(" << mCameraRotation.x << ", " << mCameraRotation.y << ")";
+ * @brief Offset the given quaternion by the given axis and angle
+ * 
+ * @param[in]       aAxis               Vector axis of the rotation
+ * @param[in]       aAngRad             Angle of the rotation in radian
+ * @param[in,out]   aCameraOrientation  Quaternion to offset
+*/ 
+void Renderer::offsetOrientation(const glm::vec3 &aAxis, float aAngRad, glm::fquat& aCameraOrientation)
+{
+    // Compose a quaternion for modifying orientation
+    // TODO(SRombauts) glm should have a quaternion constructor doing this work!?
+	glm::vec3   axis    = glm::normalize(aAxis) * sinf(aAngRad / 2.0f);
+	float       scalar  = cosf(aAngRad / 2.0f);
+	glm::fquat  offset(scalar, axis.x, axis.y, axis.z);
+
+    // Modify and renormalize camera orientation
+	aCameraOrientation = glm::normalize(aCameraOrientation * offset);
 }
 
 /**
- * @brief Calculate the new camera transformation matrix from Rotations and Translations
+ * @brief Rotate the camera
+ */
+void Renderer::rotate(int aDeltaX, int aDeltaY) {
+    mLog.info() << "rotate: (" << aDeltaX << ", " << aDeltaY << ")";
+
+    offsetOrientation(glm::vec3(0.0f, 1.0f, 0.0f), (0.01f * aDeltaX), mCameraOrientation);
+    offsetOrientation(glm::vec3(1.0f, 0.0f, 0.0f), (0.01f * aDeltaY), mCameraOrientation);
+
+    mLog.info() << "rotate: mCameraOrientation(" << mCameraOrientation.x
+                                         << ", " << mCameraOrientation.y
+                                         << ", " << mCameraOrientation.z
+                                         << ", " << mCameraOrientation.w << ")";
+}
+
+/**
+ * @brief Calculate the new camera transformation matrix from Translations and Rotations
  */
 glm::mat4 Renderer::transform() {
-    // Rotation around the Y axis (from left to right)
-    glm::mat4 rotationY;
-    rotationY[0].x = cos(mCameraRotation.x);
-    rotationY[0].z = -sin(mCameraRotation.x);
-    rotationY[2].x = sin(mCameraRotation.x);
-    rotationY[2].z = cos(mCameraRotation.x);
-
-    // Rotation around the X axis (from top to bottom)
-    glm::mat4 rotationX;
-    rotationX[1].y = cos(mCameraRotation.y);
-    rotationX[1].z = sin(mCameraRotation.y);
-    rotationX[2].y = -sin(mCameraRotation.y);
-    rotationX[2].z = cos(mCameraRotation.y);
-
-    // Translation at last
+    // Translations
     glm::mat4 translations = glm::translate(glm::mat4(1.0f), -mCameraTranslation);
 
-    // Calculate the new "worldToCameradMatrix" (from right to left)
-    return (translations * rotationX * rotationY);
+    // Rotations
+    // TODO(SRombauts) : use glm::rotate to avoid creation of a temporary matrix
+    glm::mat4 rotations = glm::mat4_cast(mCameraOrientation);
+
+    // Calculate the new "worldToCameradMatrix" (transform from right to left : translations then rotations)
+    return (rotations * translations);
 }
 
 
@@ -437,34 +452,23 @@ void Renderer::modelBack() {
  * @brief Rotate the model
  */
 void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
-    mModelRotation.x += (aDeltaX * 0.01f);
-    mModelRotation.y += (aDeltaY * 0.01f);
-//  mLog.info() << "model rotate: angle(" << mModelRotation.x << ", " << mModelRotation.y << ")";
+    offsetOrientation(glm::vec3(0.0f, 1.0f, 0.0f), (0.01f * aDeltaX), mModelOrientation);
+    offsetOrientation(glm::vec3(1.0f, 0.0f, 0.0f), (0.01f * aDeltaY), mModelOrientation);
+//  mLog.info() << "model rotate: angle(" << aDeltaX.x << ", " << aDeltaY.y << ")";
 }
 
 /**
  * @brief Calculate the new model transformation matrix from Rotations and Translations
  */
 glm::mat4 Renderer::modelTransform() {
-    // Rotation around the Y axis (from left to right)
-    glm::mat4 rotationY;
-    rotationY[0].x = cos(mModelRotation.x);
-    rotationY[0].z = -sin(mModelRotation.x);
-    rotationY[2].x = sin(mModelRotation.x);
-    rotationY[2].z = cos(mModelRotation.x);
+    // Rotations
+    glm::mat4 rotations = glm::mat4_cast(mModelOrientation);
 
-    // Rotation around the X axis (from top to bottom)
-    glm::mat4 rotationX;
-    rotationX[1].y = cos(mModelRotation.y);
-    rotationX[1].z = sin(mModelRotation.y);
-    rotationX[2].y = -sin(mModelRotation.y);
-    rotationX[2].z = cos(mModelRotation.y);
-
-    // Translations at last
+    // Translations
     glm::mat4 translations = glm::translate(glm::mat4(1.0f), mModelTranslation);
 
-    // Calculate the new "modelToWorldMatrix" (from right to left)
-    return (translations * rotationX * rotationY);
+    // Calculate the new "modelToWorldMatrix" (from right to left: rotations, then translations)
+    return (translations * rotations);
 }
 
 /**
