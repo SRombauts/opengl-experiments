@@ -190,16 +190,32 @@ void Renderer::init() {
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
-    // Enable blending transparency (and antialiasing)
+    // Enable blending transparency (and also the unused following OpenGL "SMOOTH" anti-aliasing)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // Enable antialiasing
+/*
+    // Enable OpenGL "SMOOTH" polygon anti-aliasing
+    // NO, does not work nicely; this would require to do depth sorted rendering
+    // => prefer following modern multisampling MSAA or FSAA
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_POLYGON_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
-    // and multisampling : TODO(SRombauts) is this redundant? Test on different hardware
-    glEnable(GL_MULTISAMPLE);
+*/
+    // Query OpenGL for Multisampling support
+    GLint multiSampling = 0;
+    GLint numSamples  = 0;
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &multiSampling);
+    if (0 != multiSampling) {
+        glGetIntegerv(GL_SAMPLES, &numSamples);
+        // Enable multisampling : MSAA/FSAA needs to be defined in NVIDIA/AMD/Intel driver panel
+        glEnable(GL_MULTISAMPLE);
+        glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST); // or GL_FASTEST
+        mLog.notice() << "MultiSampling " << numSamples << "x";
+    } else {
+        glDisable(GL_MULTISAMPLE);
+    }
+
     // Gamma correction to produce image in the sRGB colorspace
     glEnable(GL_FRAMEBUFFER_SRGB);
 }
