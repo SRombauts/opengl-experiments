@@ -213,6 +213,7 @@ void Renderer::init() {
         glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST); // or GL_FASTEST
         mLog.notice() << "MultiSampling " << numSamples << "x";
     } else {
+        mLog.warning() << "MultiSampling not working";
         glDisable(GL_MULTISAMPLE);
     }
 

@@ -56,8 +56,10 @@ int main(int argc, char** argv) {
                       | GLUT_ALPHA          // alpha component to the color buffer
                       | GLUT_DEPTH          // depth buffer
                       | GLUT_STENCIL        // stencil buffer (select which pixels to render)
-                      | GLUT_MULTISAMPLE    // ask for multisample anti-aliasing buffer
+                      | GLUT_MULTISAMPLE    // ask for multisample anti-aliasing buffer (MSAA/FSAA...)
                       | GLUT_SRGB);         // ask for gamma corrected rendering for sRGB colorspace
+    // Configure number of samples of multisampling : 4x is the default value, 8x/16x are not guaranted in all hardware
+    glutSetOption(GLUT_MULTISAMPLE, 4);
     glutInitWindowSize(640, 480);
     glutInitWindowPosition(700, 0);
 
