@@ -42,8 +42,8 @@ private:
     glm::vec3           mTranslationVector;     ///< Vector of translation of the Node
 
     // Mutable to enable updating in const getter
-    mutable glm::mat4   mMatrix;                ///< Composited resulting Matrix of orientation and translation
-    mutable bool        mbMatrixDirty;          ///< Tell if the composited Matrix is up to date or need recalculation
+    mutable glm::mat4   mMatrix;                ///< Composed resulting Matrix of orientation and translation
+    mutable bool        mbMatrixDirty;          ///< Tell if the composed Matrix is up to date or need recalculation
 };
 
 /**
@@ -65,7 +65,7 @@ inline Node::List& Node::getChildren() {
 }
 
 /**
- * @brief   Get the up-to-date composited Matrix of orientation and translation
+ * @brief   Get the up-to-date composed Matrix of orientation and translation
  *
  *  Recalculate the matrix from quaternion of orientation and vector of translation only when required.
  * Resulting matrix is cached until a change in orientation or translation flag it as "dirty".

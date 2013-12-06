@@ -354,32 +354,15 @@ void Renderer::back() {
 }
 
 /**
- * @brief Offset the given quaternion by the given axis and angle
- * 
- * @param[in]       aAxis               Vector axis of the rotation
- * @param[in]       aAngRad             Angle of the rotation in radian
- * @param[in,out]   aCameraOrientation  Quaternion to offset
-*/ 
-void Renderer::offsetOrientation(const glm::vec3 &aAxis, float aAngRad, glm::fquat& aCameraOrientation)
-{
-    // Compose a quaternion for modifying orientation
-    // TODO(SRombauts) glm should have a quaternion constructor doing this work!?
-	glm::vec3   axis    = glm::normalize(aAxis) * sinf(aAngRad / 2.0f);
-	float       scalar  = cosf(aAngRad / 2.0f);
-	glm::fquat  offset(scalar, axis.x, axis.y, axis.z);
-
-    // Modify and renormalize camera orientation
-	aCameraOrientation = glm::normalize(aCameraOrientation * offset);
-}
-
-/**
  * @brief Rotate the camera
  */
 void Renderer::rotate(int aDeltaX, int aDeltaY) {
     mLog.info() << "rotate: (" << aDeltaX << ", " << aDeltaY << ")";
 
-    offsetOrientation(glm::vec3(0.0f, 1.0f, 0.0f), (0.01f * aDeltaX), mCameraOrientation);
-    offsetOrientation(glm::vec3(1.0f, 0.0f, 0.0f), (0.01f * aDeltaY), mCameraOrientation);
+    // Offset the given quaternion by the given angle (in degree) and normalized axis
+    // TODO(SRombauts) how to rotate only once but around a composed x/y arbitrary axis? Euler Angles like glm::euler()?
+    mCameraOrientation = glm::rotate(mCameraOrientation, (1.0f * aDeltaX), glm::vec3(0.0f, 1.0f, 0.0f));
+    mCameraOrientation = glm::rotate(mCameraOrientation, (1.0f * aDeltaY), glm::vec3(1.0f, 0.0f, 0.0f));
 
     mLog.info() << "rotate: mCameraOrientation(" << mCameraOrientation.x
                                          << ", " << mCameraOrientation.y
@@ -452,8 +435,10 @@ void Renderer::modelBack() {
  * @brief Rotate the model
  */
 void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
-    offsetOrientation(glm::vec3(0.0f, 1.0f, 0.0f), (0.01f * aDeltaX), mModelOrientation);
-    offsetOrientation(glm::vec3(1.0f, 0.0f, 0.0f), (0.01f * aDeltaY), mModelOrientation);
+    // Offset the given quaternion by the given angle (in degree) and normalized axis
+    // TODO(SRombauts) how to rotate only once but around a composed x/y arbitrary axis? Euler Angles like glm::euler()?
+    mModelOrientation = glm::rotate(mModelOrientation, (1.0f * aDeltaX), glm::vec3(0.0f, 1.0f, 0.0f));
+    mModelOrientation = glm::rotate(mModelOrientation, (1.0f * aDeltaY), glm::vec3(1.0f, 0.0f, 0.0f));
 //  mLog.info() << "model rotate: angle(" << aDeltaX.x << ", " << aDeltaY.y << ")";
 }
 

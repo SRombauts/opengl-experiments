@@ -58,10 +58,7 @@ private:
     void initVertexArrayObject();
     void uninitVertexArrayObject();
 
-    // Offset a given quaternion by an axis and an angle
-    static void offsetOrientation(const glm::vec3 &aAxis, float aAngRad, glm::fquat& aCameraOrientation);
-
-    // TODO(SRombauts) Generalize? (Presently Camera is the inversed of Model)
+    // TODO(SRombauts) Generalize? (Presently Camera is the inverse of Model)
     glm::mat4 transform();
     glm::mat4 modelTransform();
 
