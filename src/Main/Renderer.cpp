@@ -24,16 +24,22 @@
 
 #include <cmath>    // cos, sin, tan
 
+// We use a standard "Right Hand Coordinate System"
+// unitX, unitY and unitZ are the unit vectors of the world coordinate system
+static const glm::vec3 unitX(1.0f, 0.0f, 0.0f); ///< Unit vector to the "right of the world"
+static const glm::vec3 unitY(0.0f, 1.0f, 0.0f); ///< Unit vector to the "up of the world"
+static const glm::vec3 unitZ(0.0f, 0.0f, 1.0f); ///< Unit vector to the "back of the world"
+
 // Cube coordinates
-static const float X_LEFT   = -0.5f;    ///< Left coordinate
 static const float X_RIGHT  = 0.5f;     ///< Right coordinate
+static const float X_LEFT   = -0.5f;    ///< Left coordinate
 static const float Y_TOP    = 0.5f;     ///< Top coordinate
 static const float Y_BOTTOM = -0.5f;    ///< Bottom coordinate
-static const float Z_FRONT  = 0.5f;    ///< Front coordinate
+static const float Z_FRONT  = 0.5f;     ///< Front coordinate
 static const float Z_BACK   = -0.5f;    ///< Back coordinate
 // Plane coordinates
-static const float X_PLANE_LEFT     = -5.0f;    ///< Left coordinate
 static const float X_PLANE_RIGHT    = 5.0f;     ///< Right coordinate
+static const float X_PLANE_LEFT     = -5.0f;    ///< Left coordinate
 static const float Y_PLANE          = -0.5f;    ///< Y coordinate
 static const float Z_PLANE_FRONT    = 5.0f;     ///< Front coordinate
 static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
@@ -126,9 +132,9 @@ Renderer::Renderer() :
     mVertexBufferObject(0),
     mIndexBufferObject(0),
     mVertexArrayObject(0),
-    mCameraOrientation(1.0f, 0.0f, 0.0f, 0.0f),
-    mCameraTranslation(0.0f, 0.0f, 5.0f),
-    mModelOrientation(1.0f, 0.0f, 0.0f, 0.0f),
+    mCameraOrientation(),
+    mCameraTranslation(0.0f, 0.0f, 4.0f),
+    mModelOrientation(),
     mModelTranslation(1.0f, 0.0f, 0.0f) {
     init();
 }
@@ -359,32 +365,40 @@ void Renderer::back() {
 void Renderer::rotate(int aDeltaX, int aDeltaY) {
     mLog.info() << "rotate: (" << aDeltaX << ", " << aDeltaY << ")";
 
-    // Offset the given quaternion by the given angle (in degree) and normalized axis
-    // TODO(SRombauts) how to rotate only once but around a composed x/y arbitrary axis? Euler Angles like glm::euler()?
-    mCameraOrientation = glm::rotate(mCameraOrientation, (1.0f * aDeltaX), glm::vec3(0.0f, 1.0f, 0.0f));
-    mCameraOrientation = glm::rotate(mCameraOrientation, (1.0f * aDeltaY), glm::vec3(1.0f, 0.0f, 0.0f));
+    // rotate the camera horizontally around its current relative vertical Y axis
+    if (0 != aDeltaX) {
+        // calculate Y unit vector of the current camera orientation
+        const glm::vec3 cameraY = (mCameraOrientation * unitY);
+        // Offset the given quaternion by the given angle (in degree) and normalized axis
+        mCameraOrientation      = glm::rotate(mCameraOrientation, (1.0f * aDeltaX), cameraY);
+    }
+    // rotate the camera vertically around its current relative horizontal X axis
+    if (0 != aDeltaY) {
+        const glm::vec3 cameraX = (mCameraOrientation * unitX);
+        mCameraOrientation      = glm::rotate(mCameraOrientation, (1.0f * aDeltaY), cameraX);
+    }
 
-    mLog.info() << "rotate: mCameraOrientation(" << mCameraOrientation.x
+/*  mLog.info() << "rotate: mCameraOrientation(" << mCameraOrientation.x
                                          << ", " << mCameraOrientation.y
                                          << ", " << mCameraOrientation.z
-                                         << ", " << mCameraOrientation.w << ")";
+                                         << ", " << mCameraOrientation.w << ")"; */
 }
 
 /**
- * @brief Calculate the new camera transformation matrix from Translations and Rotations
+ * @brief Calculate the new "worldToCameradMatrix" transformation matrix from Translations and Rotations
+ *
+ *  We want to apply translations first, than rotations, but matrix have to be multiplied in reverse order :
+ * out = (rotations * translations) * in;
+ *
+ * @return "worldToCameradMatrix"
  */
 glm::mat4 Renderer::transform() {
-    // Translations
-    glm::mat4 translations = glm::translate(glm::mat4(1.0f), -mCameraTranslation);
-
-    // Rotations
-    // TODO(SRombauts) : use glm::rotate to avoid creation of a temporary matrix
+    // We begin to built the rotation matrix from the orientation quaternion:
     glm::mat4 rotations = glm::mat4_cast(mCameraOrientation);
 
-    // Calculate the new "worldToCameradMatrix" (transform from right to left : translations then rotations)
-    return (rotations * translations);
+    // Then we apply translations to the rotation matrix
+    return glm::translate(rotations, -mCameraTranslation);
 }
-
 
 /**
  * @brief Move up the model
@@ -435,22 +449,36 @@ void Renderer::modelBack() {
  * @brief Rotate the model
  */
 void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
-    // Offset the given quaternion by the given angle (in degree) and normalized axis
-    // TODO(SRombauts) how to rotate only once but around a composed x/y arbitrary axis? Euler Angles like glm::euler()?
-    mModelOrientation = glm::rotate(mModelOrientation, (1.0f * aDeltaX), glm::vec3(0.0f, 1.0f, 0.0f));
-    mModelOrientation = glm::rotate(mModelOrientation, (1.0f * aDeltaY), glm::vec3(1.0f, 0.0f, 0.0f));
-//  mLog.info() << "model rotate: angle(" << aDeltaX.x << ", " << aDeltaY.y << ")";
+    // yaw: rotate the model horizontally around its current relative vertical Y axis
+    if (0 != aDeltaX) {
+        // calculate Y unit vector of the current camera orientation
+        const glm::vec3 modelY  = (mModelOrientation * unitY);
+        // Offset the given quaternion by the given angle (in degree) and normalized axis
+        mModelOrientation       = glm::rotate(mModelOrientation, (1.0f * aDeltaX), modelY);
+    }
+    // pitch: rotate the model vertically around its current relative horizontal X axis
+    if (0 != aDeltaY) {
+        const glm::vec3 modelX  = (mModelOrientation * unitX);
+        mModelOrientation       = glm::rotate(mModelOrientation, (1.0f * aDeltaY), modelX);
+    }
+
+//  mLog.info() << "model rotate: angle(" << aDeltaX << ", " << aDeltaY << ")";
 }
 
 /**
- * @brief Calculate the new model transformation matrix from Rotations and Translations
+ * @brief Calculate the new "modelToWorldMatrix" transformation matrix from Rotations and Translations
+ *
+ *  We want to apply rotations first, than translations, but matrix have to be multiplied in reverse order :
+ * out = (translations * rotations) * in;
+ *
+ * @return "modelToWorldMatrix"
  */
 glm::mat4 Renderer::modelTransform() {
-    // Rotations
-    glm::mat4 rotations = glm::mat4_cast(mModelOrientation);
-
     // Translations
     glm::mat4 translations = glm::translate(glm::mat4(1.0f), mModelTranslation);
+
+    // Rotations
+    glm::mat4 rotations = glm::mat4_cast(mModelOrientation);
 
     // Calculate the new "modelToWorldMatrix" (from right to left: rotations, then translations)
     return (translations * rotations);
