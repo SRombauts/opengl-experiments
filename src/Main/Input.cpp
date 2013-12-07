@@ -102,6 +102,14 @@ void Input::checkKeys() {
         // Move right the camera
         mRenderer.right();
     }
+    if (isKeyPressed('x') || isKeyPressed('X')) {
+        // Roll left the camera
+        mRenderer.roll(-1.0f);
+    }
+    if (isKeyPressed('c') || isKeyPressed('C')) {
+        // Roll right the camera
+        mRenderer.roll(1.0f);
+    }
 
     if (isKeyPressed('r') || isKeyPressed('R')) {
         // Move front the model
@@ -261,11 +269,13 @@ static glm::detail::tvec2<int> _lastMousePos;
 void Input::mouseMotionCallback(int aX, int aY) {
     mLog.debug() << "mouseMotionCallback(" << aX << "," << aY << ")";
 
-    if (   (aX != _lastMousePos.x)
-        || (aY != _lastMousePos.y) ) {
-        mRenderer.rotate((aX - _lastMousePos.x), (aY - _lastMousePos.y));
-        _lastMousePos.x = aX;
+    if (aY != _lastMousePos.y) {
+        mRenderer.pitch(static_cast<float>(aY - _lastMousePos.y));
         _lastMousePos.y = aY;
+    }
+    if (aX != _lastMousePos.x) {
+        mRenderer.yaw(static_cast<float>(aX - _lastMousePos.x));
+        _lastMousePos.x = aX;
     }
 }
 

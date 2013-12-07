@@ -40,7 +40,9 @@ public:
     void right();
     void front();
     void back();
-    void rotate(int aDeltaX, int aDeltaY);
+    void yaw(float aAngle);
+    void pitch(float aAngle);
+    void roll(float aAngles);
     // model:
     void modelUp();
     void modelDown();

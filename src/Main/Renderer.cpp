@@ -360,28 +360,45 @@ void Renderer::back() {
 }
 
 /**
- * @brief Rotate the camera
+ * @brief Pitch, rotate the camera vertically around its current relative horizontal X axis
+ *
+ * @param[in] aAngle    Rotation in degrees
  */
-void Renderer::rotate(int aDeltaX, int aDeltaY) {
-    mLog.info() << "rotate: (" << aDeltaX << ", " << aDeltaY << ")";
+void Renderer::pitch(float aAngle) {
+    mLog.info() << "pitch(" << aAngle << ")";
 
-    // rotate the camera horizontally around its current relative vertical Y axis
-    if (0 != aDeltaX) {
-        // calculate Y unit vector of the current camera orientation
-        const glm::vec3 cameraY = (mCameraOrientation * unitY);
-        // Offset the given quaternion by the given angle (in degree) and normalized axis
-        mCameraOrientation      = glm::rotate(mCameraOrientation, (1.0f * aDeltaX), cameraY);
-    }
-    // rotate the camera vertically around its current relative horizontal X axis
-    if (0 != aDeltaY) {
-        const glm::vec3 cameraX = (mCameraOrientation * unitX);
-        mCameraOrientation      = glm::rotate(mCameraOrientation, (1.0f * aDeltaY), cameraX);
-    }
+    // calculate the left X unit vector of the current camera orientation
+    const glm::vec3 cameraX = (mCameraOrientation * unitX);
+    // Offset the given quaternion by the given angle (in degrees) and normalized axis
+    mCameraOrientation      = glm::rotate(mCameraOrientation, aAngle, cameraX);
+}
 
-/*  mLog.info() << "rotate: mCameraOrientation(" << mCameraOrientation.x
-                                         << ", " << mCameraOrientation.y
-                                         << ", " << mCameraOrientation.z
-                                         << ", " << mCameraOrientation.w << ")"; */
+/**
+ * @brief Yaw, rotate the camera horizontally around its current relative vertical Y axis
+ *
+ * @param[in] aAngle    Rotation in degrees
+ */
+void Renderer::yaw(float aAngle) {
+    mLog.info() << "yaw(" << aAngle << ")";
+
+    // calculate the up Y unit vector of the current camera orientation
+    const glm::vec3 cameraY = (mCameraOrientation * unitY);
+    // Offset the given quaternion by the given angle (in degrees) and normalized axis
+    mCameraOrientation      = glm::rotate(mCameraOrientation, aAngle, cameraY);
+}
+
+/**
+ * @brief Roll, rotate the camera around its current relative viewing Z axis
+ *
+ * @param[in] aAngle    Rotation in degrees
+ */
+void Renderer::roll(float aAngle) {
+    mLog.info() << "roll(" << aAngle << ")";
+
+    // calculate the front Z unit vector of the current camera orientation
+    const glm::vec3 cameraZ = (mCameraOrientation * unitZ);
+    // Offset the given quaternion by the given angle (in degrees) and normalized axis
+    mCameraOrientation      = glm::rotate(mCameraOrientation, aAngle, cameraZ);
 }
 
 /**
@@ -453,7 +470,7 @@ void Renderer::modelRotate(int aDeltaX, int aDeltaY) {
     if (0 != aDeltaX) {
         // calculate Y unit vector of the current camera orientation
         const glm::vec3 modelY  = (mModelOrientation * unitY);
-        // Offset the given quaternion by the given angle (in degree) and normalized axis
+        // Offset the given quaternion by the given angle (in degrees) and normalized axis
         mModelOrientation       = glm::rotate(mModelOrientation, (1.0f * aDeltaX), modelY);
     }
     // pitch: rotate the model vertically around its current relative horizontal X axis
