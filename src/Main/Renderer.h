@@ -14,6 +14,7 @@
 #include "Utils/Utils.h"
 
 #include <glload/gl_3_3_comp.h> // GLuint, GLenum
+#define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
 #include <glutil/MatrixStack.h>
 
@@ -40,8 +41,8 @@ public:
     void right();
     void front();
     void back();
-    void yaw(float aAngle);
     void pitch(float aAngle);
+    void yaw(float aAngle);
     void roll(float aAngles);
     // model:
     void modelUp();
@@ -50,7 +51,9 @@ public:
     void modelRight();
     void modelFront();
     void modelBack();
-    void modelRotate(int aDeltaX, int aDeltaY);
+    void modelPitch(float aAngle);
+    void modelYaw(float aAngle);
+    void modelRoll(float aAngle);
 
 private:
     // Initialization
@@ -59,6 +62,10 @@ private:
     void initProgram();
     void initVertexArrayObject();
     void uninitVertexArrayObject();
+
+    // Rotate a given quaternion by an axis and an angle
+    static void rotateRightMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
+    static void rotateLeftMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
 
     // TODO(SRombauts) Generalize? (Presently Camera is the inverse of Model)
     glm::mat4 transform();

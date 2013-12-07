@@ -15,6 +15,7 @@
 #include "Utils/Time.h"
 
 #include <GL/freeglut.h>
+#define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
 
 
@@ -104,11 +105,11 @@ void Input::checkKeys() {
     }
     if (isKeyPressed('x') || isKeyPressed('X')) {
         // Roll left the camera
-        mRenderer.roll(-1.0f);
+        mRenderer.roll(-0.01f);
     }
     if (isKeyPressed('c') || isKeyPressed('C')) {
         // Roll right the camera
-        mRenderer.roll(1.0f);
+        mRenderer.roll(0.01f);
     }
 
     if (isKeyPressed('r') || isKeyPressed('R')) {
@@ -134,6 +135,16 @@ void Input::checkKeys() {
     if (isKeyPressed('h') || isKeyPressed('H')) {
         // Move right the model
         mRenderer.modelRight();
+    }
+
+    if (isKeyPressed('p')) {
+        mRenderer.modelPitch(0.01f);
+    }
+    if (isKeyPressed('m')) {
+        mRenderer.modelYaw(0.01f);
+    }
+    if (isKeyPressed('l')) {
+        mRenderer.modelRoll(0.01f);
     }
 }
 
@@ -171,7 +182,7 @@ void Input::displayCallback() {
     // Timer for basic cube animation (rotation around the X axis at 60Hz)
     bool bCubeRotate = mCubeRotationTimer.isTimeElapsed(mFPS.getCurrentFrameTickUs());
     if (bCubeRotate) {
-        mRenderer.modelRotate(1, 0);
+        mRenderer.modelYaw(0.01f);
     }
 
     // Delegate management of OpenGL rendering
@@ -270,11 +281,11 @@ void Input::mouseMotionCallback(int aX, int aY) {
     mLog.debug() << "mouseMotionCallback(" << aX << "," << aY << ")";
 
     if (aY != _lastMousePos.y) {
-        mRenderer.pitch(static_cast<float>(aY - _lastMousePos.y));
+        mRenderer.pitch(0.01f * (aY - _lastMousePos.y));
         _lastMousePos.y = aY;
     }
     if (aX != _lastMousePos.x) {
-        mRenderer.yaw(static_cast<float>(aX - _lastMousePos.x));
+        mRenderer.yaw(0.01f * (aX - _lastMousePos.x));
         _lastMousePos.x = aX;
     }
 }

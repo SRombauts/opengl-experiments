@@ -11,6 +11,7 @@
 
 #include "Utils/shared_ptr.hpp"         // std::shared_ptr replacement
 
+#define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
 #include <glm/gtc/matrix_transform.hpp> // glm::rotate, glm::translate
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
