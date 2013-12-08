@@ -26,12 +26,6 @@
  */
 class Renderer {
 public:
-    // Base vector of a standard "Right Hand Coordinate System"
-    static const glm::vec3 UNIT_X_RIGHT;    ///< Unit vector to the "right of the world"
-    static const glm::vec3 UNIT_Y_UP;       ///< Unit vector to the "up of the world"
-    static const glm::vec3 UNIT_Z_FRONT;    ///< Unit vector to the "front of the world"
-
-public:
     Renderer();
     ~Renderer();
 
@@ -58,10 +52,6 @@ private:
     void initProgram();
     void initVertexArrayObject();
     void uninitVertexArrayObject();
-
-    // Rotate a given quaternion by an axis and an angle
-    static void rotateRightMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
-    static void rotateLeftMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
 
     // TODO(SRombauts) Generalize with the Node class (Presently Camera is the inverse of Model)
     glm::mat4 transform();

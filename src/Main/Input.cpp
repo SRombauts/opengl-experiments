@@ -11,6 +11,7 @@
 
 #include "Main/Input.h"
 #include "Main/Renderer.h"
+#include "Main/Node.h"
 
 #include "Utils/Time.h"
 
@@ -85,23 +86,23 @@ void Input::checkKeys() {
         || isKeyPressed('w') || isKeyPressed('W')       // QWERTY keyboard disposition
         || isKeyPressed('z') || isKeyPressed('Z') ) {   // AZERTY keyboard disposition
         // Move up the camera
-        mRenderer.move(0.01f * Renderer::UNIT_Y_UP);
+        mRenderer.move(0.01f * Node::UNIT_Y_UP);
     }
     if (   isSpecialKeyPressed(GLUT_KEY_LEFT)           // Special directional key
         || isKeyPressed('a') || isKeyPressed('A')       // QWERTY keyboard disposition
         || isKeyPressed('q') || isKeyPressed('Q') ) {   // AZERTY keyboard disposition
         // Move the camera to the left
-        mRenderer.move(-0.01f * Renderer::UNIT_X_RIGHT);
+        mRenderer.move(-0.01f * Node::UNIT_X_RIGHT);
     }
     if (   isSpecialKeyPressed(GLUT_KEY_DOWN)           // Special directional key
         || isKeyPressed('s') || isKeyPressed('S') ) {   // QWERTY & AZERTY keyboard disposition
         // Move down the camera
-        mRenderer.move(-0.01f * Renderer::UNIT_Y_UP);
+        mRenderer.move(-0.01f * Node::UNIT_Y_UP);
     }
     if (   isSpecialKeyPressed(GLUT_KEY_RIGHT)          // Special directional key
         || isKeyPressed('d') || isKeyPressed('D') ) {   // QWERTY & AZERTY keyboard disposition
         // Move right the camera
-        mRenderer.move(0.01f * Renderer::UNIT_X_RIGHT);
+        mRenderer.move(0.01f * Node::UNIT_X_RIGHT);
     }
     if (isKeyPressed('x') || isKeyPressed('X')) {
         // Roll left the camera
@@ -114,27 +115,27 @@ void Input::checkKeys() {
 
     if (isKeyPressed('r') || isKeyPressed('R')) {
         // Move front the model
-        mRenderer.modelMove(0.01f * Renderer::UNIT_Z_FRONT);
+        mRenderer.modelMove(0.01f * Node::UNIT_Z_FRONT);
     }
     if (isKeyPressed('t') || isKeyPressed('T')) {
         // Move up the model
-        mRenderer.modelMove(0.01f * Renderer::UNIT_Y_UP);
+        mRenderer.modelMove(0.01f * Node::UNIT_Y_UP);
     }
     if (isKeyPressed('y') || isKeyPressed('Y')) {
         // Move back the model
-        mRenderer.modelMove(-0.01f * Renderer::UNIT_Z_FRONT);
+        mRenderer.modelMove(-0.01f * Node::UNIT_Z_FRONT);
     }
     if (isKeyPressed('f') || isKeyPressed('F')) {
         // Move the model to the left
-        mRenderer.modelMove(-0.01f * Renderer::UNIT_X_RIGHT);
+        mRenderer.modelMove(-0.01f * Node::UNIT_X_RIGHT);
     }
     if (isKeyPressed('g') || isKeyPressed('G')) {
         // Move down the model
-        mRenderer.modelMove(-0.01f * Renderer::UNIT_Y_UP);
+        mRenderer.modelMove(-0.01f * Node::UNIT_Y_UP);
     }
     if (isKeyPressed('h') || isKeyPressed('H')) {
         // Move right the model
-        mRenderer.modelMove(0.01f * Renderer::UNIT_X_RIGHT);
+        mRenderer.modelMove(0.01f * Node::UNIT_X_RIGHT);
     }
 
     if (isKeyPressed('p')) {
@@ -316,10 +317,10 @@ void Input::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
 
     if (0 > aDirection) {
         // Update Z translation value to the front
-        mRenderer.move(0.1f * Renderer::UNIT_Z_FRONT);;
+        mRenderer.move(0.1f * Node::UNIT_Z_FRONT);;
     } else {
         // Update Z translation value to the back
-        mRenderer.move(-0.1f * Renderer::UNIT_Z_FRONT);
+        mRenderer.move(-0.1f * Node::UNIT_Z_FRONT);
     }
     // transform() will re-calculate the model to world transformations matrix in next displayCallback()
 }

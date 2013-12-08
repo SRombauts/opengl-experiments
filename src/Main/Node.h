@@ -26,6 +26,12 @@
  */
 class Node {
 public:
+    // Base vector of a standard "Right Hand Coordinate System"
+    static const glm::vec3 UNIT_X_RIGHT;    ///< Unit vector to the "right of the world"
+    static const glm::vec3 UNIT_Y_UP;       ///< Unit vector to the "up of the world"
+    static const glm::vec3 UNIT_Z_FRONT;    ///< Unit vector to the "front of the world"
+
+public:
     typedef Utils::shared_ptr<Node> Ptr;    ///< Shared Pointer to a Node
     typedef std::vector<Ptr>        List;   ///< List (std::vector) of pointers to a Node
 
@@ -33,18 +39,29 @@ public:
     Node();
     ~Node();
 
-    // Draw
-    void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
+    // Basic movements
+    void move(const glm::vec3& aTranslation);
+    void pitch(float aAngle);
+    void yaw(float aAngle);
+    void roll(float aAngle);
 
     // Calculate and return the current Rotations & Translations matrix
     const glm::mat4& getMatrix() const;
 
+    // Draw
+    void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
+
+    // Accessors
     inline const List&  getChildren() const;
+
+    // Rotate a given quaternion by an axis and an angle
+    static void rotateRightMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
+    static void rotateLeftMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
 
 private:
     Node::List          mChildrenList;          ///< Children Nodes of the current Node
 
-    glm::fquat          mOrientationQuaternion; ///< Quaternion of orientation of the Node
+    glm::fquat          mOrientationQuat;       ///< Quaternion of orientation of the Node
     glm::vec3           mTranslationVector;     ///< Vector of translation of the Node
 
     // Mutable to enable updating in const getter
