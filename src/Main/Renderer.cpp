@@ -25,10 +25,10 @@
 #include <cmath>    // cos, sin, tan
 
 // We use a standard "Right Hand Coordinate System"
-// unitX, unitY and unitZ are the unit vectors of the world coordinate system
-static const glm::vec3 unitX(1.0f, 0.0f, 0.0f); ///< Unit vector to the "right of the world"
-static const glm::vec3 unitY(0.0f, 1.0f, 0.0f); ///< Unit vector to the "up of the world"
-static const glm::vec3 unitZ(0.0f, 0.0f, 1.0f); ///< Unit vector to the "back of the world"
+// UNIT_X_RIGHT, UNIT_Y_UP and UNIT_Z_FRONT are the unit vectors of the world coordinate system
+const glm::vec3 Renderer::UNIT_X_RIGHT(1.0f, 0.0f, 0.0f); // "right of the world"
+const glm::vec3 Renderer::UNIT_Y_UP(0.0f, 1.0f, 0.0f); // "up of the world"
+const glm::vec3 Renderer::UNIT_Z_FRONT(0.0f, 0.0f, 1.0f); // "front of the world"
 
 // Cube coordinates
 static const float X_RIGHT  = 0.5f;     ///< Right coordinate
@@ -315,48 +315,20 @@ void Renderer::uninitVertexArrayObject(void) {
 }
 
 /**
- * @brief Move up the camera
+ * @brief Move the camera from the given relative translation vector
+ *
+ * @param[in] aTranslation  3D Translation vector to add to the given camera position
  */
-void Renderer::up() {
-    mCameraTranslation.y += 0.01f;
-    mLog.info() << "up y=" << mCameraTranslation.y;
-}
-/**
- * @brief Move down the camera
- */
-void Renderer::down() {
-    mCameraTranslation.y -= 0.01f;
-    mLog.info() << "down y=" << mCameraTranslation.y;
-}
-
-/**
- * @brief Move the camera to the left
- */
-void Renderer::left() {
-    mCameraTranslation.x -= 0.01f;
-    mLog.info() << "left: x=" << mCameraTranslation.x;
-}
-/**
- * @brief Move the camera to the right
- */
-void Renderer::right() {
-    mCameraTranslation.x += 0.01f;
-    mLog.info() << "right: x=" << mCameraTranslation.x;
-}
-
-/**
- * @brief Move the camera to the front
- */
-void Renderer::front() {
-    mCameraTranslation.z += 0.1f;
-    mLog.info() << "front: z=" << mCameraTranslation.z;
-}
-/**
- * @brief Move the camera to the back
- */
-void Renderer::back() {
-    mCameraTranslation.z -= 0.1f;
-    mLog.info() << "back: z=" << mCameraTranslation.z;
+void Renderer::move(const glm::vec3& aTranslation) {
+    // Get the rotation matrix from the orientation quaternion:
+    glm::mat3 rotations = glm::mat3_cast(mCameraOrientation);
+    // calculate relative translation into the current camera orientation
+    const glm::vec3 relativeTranslation = (aTranslation * rotations);
+    // and apply it to the current camera position
+    mCameraTranslation += relativeTranslation;
+    mLog.info() << "move: pos(" << mCameraTranslation.x << ","
+                                << mCameraTranslation.y << ","
+                                << mCameraTranslation.z << ")";
 }
 
 /**
@@ -396,7 +368,7 @@ void Renderer::pitch(float aAngle) {
     mLog.info() << "pitch(" << aAngle << ")";
 
     // Offset the given quaternion by the given angle (in radians) and normalized axis
-    rotateLeftMultiply(mCameraOrientation, aAngle, unitX); // left-multiply
+    rotateLeftMultiply(mCameraOrientation, aAngle, UNIT_X_RIGHT); // left-multiply
 }
 
 /**
@@ -408,7 +380,7 @@ void Renderer::yaw(float aAngle) {
     mLog.info() << "yaw(" << aAngle << ")";
 
     // Offset the given quaternion by the given angle (in radians) and normalized axis
-    rotateLeftMultiply(mCameraOrientation, aAngle, unitY); // left-multiply
+    rotateLeftMultiply(mCameraOrientation, aAngle, UNIT_Y_UP); // left-multiply
 }
 
 /**
@@ -420,7 +392,7 @@ void Renderer::roll(float aAngle) {
     mLog.info() << "roll(" << aAngle << ")";
 
     // Offset the given quaternion by the given angle (in radians) and normalized axis
-    rotateLeftMultiply(mCameraOrientation, aAngle, unitZ); // left-multiply
+    rotateLeftMultiply(mCameraOrientation, aAngle, UNIT_Z_FRONT); // left-multiply
 }
 
 /**
@@ -440,48 +412,20 @@ glm::mat4 Renderer::transform() {
 }
 
 /**
- * @brief Move up the model
+ * @brief Move the move from the given relative translation vector
+ *
+ * @param[in] aTranslation  3D Translation vector to add to the given camera position
  */
-void Renderer::modelUp() {
-    mModelTranslation.y += 0.01f;
-    mLog.info() << "model up y=" << mModelTranslation.y;
-}
-/**
- * @brief Move down the model
- */
-void Renderer::modelDown() {
-    mModelTranslation.y -= 0.01f;
-    mLog.info() << "model down y=" << mModelTranslation.y;
-}
-
-/**
- * @brief Move the model to the left
- */
-void Renderer::modelLeft() {
-    mModelTranslation.x -= 0.01f;
-    mLog.info() << "model left: x=" << mModelTranslation.x;
-}
-/**
- * @brief Move the model to the right
- */
-void Renderer::modelRight() {
-    mModelTranslation.x += 0.01f;
-    mLog.info() << "model right: x=" << mModelTranslation.x;
-}
-
-/**
- * @brief Move the model to the front
- */
-void Renderer::modelFront() {
-    mModelTranslation.z += 0.01f;
-    mLog.info() << "model front: z=" << mModelTranslation.z;
-}
-/**
- * @brief Move the model to the back
- */
-void Renderer::modelBack() {
-    mModelTranslation.z -= 0.01f;
-    mLog.info() << "model back: z=" << mModelTranslation.z;
+void Renderer::modelMove(const glm::vec3& aTranslation) {
+    // Get the rotation matrix from the orientation quaternion:
+    glm::mat3 rotations = glm::mat3_cast(mModelOrientation);
+    // calculate relative translation into the current model orientation
+    const glm::vec3 relativeTranslation = (rotations * aTranslation);
+    // and apply it to the current model position
+    mModelTranslation += relativeTranslation;
+    mLog.info() << "move: pos(" << mModelTranslation.x << ","
+                                << mModelTranslation.y << ","
+                                << mModelTranslation.z << ")";
 }
 
 /**
@@ -489,7 +433,7 @@ void Renderer::modelBack() {
  */
 void Renderer::modelPitch(float aAngle) {
     // calculate X unit vector of the current camera orientation
-    const glm::vec3 modelX = (mModelOrientation * unitX);
+    const glm::vec3 modelX = (mModelOrientation * UNIT_X_RIGHT);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
     rotateLeftMultiply(mModelOrientation, aAngle, modelX);
 
@@ -501,11 +445,11 @@ void Renderer::modelPitch(float aAngle) {
  */
 void Renderer::modelYaw(float aAngle) {
     // calculate Y unit vector of the current camera orientation
-    const glm::vec3 modelY = (mModelOrientation * unitY);
+    const glm::vec3 modelY = (mModelOrientation * UNIT_Y_UP);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
     rotateLeftMultiply(mModelOrientation, aAngle, modelY);
 
-    mLog.info() << "model yaw(" << aAngle << ")";
+//  mLog.info() << "model yaw(" << aAngle << ")";
 }
 
 /**
@@ -513,7 +457,7 @@ void Renderer::modelYaw(float aAngle) {
  */
 void Renderer::modelRoll(float aAngle) {
     // calculate Z unit vector of the current camera orientation
-    const glm::vec3 modelZ = (mModelOrientation * unitZ);
+    const glm::vec3 modelZ = (mModelOrientation * UNIT_Z_FRONT);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
     rotateLeftMultiply(mModelOrientation, aAngle, modelZ);
 

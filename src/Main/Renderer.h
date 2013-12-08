@@ -26,6 +26,12 @@
  */
 class Renderer {
 public:
+    // Base vector of a standard "Right Hand Coordinate System"
+    static const glm::vec3 UNIT_X_RIGHT;    ///< Unit vector to the "right of the world"
+    static const glm::vec3 UNIT_Y_UP;       ///< Unit vector to the "up of the world"
+    static const glm::vec3 UNIT_Z_FRONT;    ///< Unit vector to the "front of the world"
+
+public:
     Renderer();
     ~Renderer();
 
@@ -35,22 +41,12 @@ public:
 
     // called by Input::checkKeys()
     // camera:
-    void up();
-    void down();
-    void left();
-    void right();
-    void front();
-    void back();
+    void move(const glm::vec3& aTranslation);
     void pitch(float aAngle);
     void yaw(float aAngle);
     void roll(float aAngles);
     // model:
-    void modelUp();
-    void modelDown();
-    void modelLeft();
-    void modelRight();
-    void modelFront();
-    void modelBack();
+    void modelMove(const glm::vec3& aTranslation);
     void modelPitch(float aAngle);
     void modelYaw(float aAngle);
     void modelRoll(float aAngle);
