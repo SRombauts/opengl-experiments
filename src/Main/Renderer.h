@@ -67,8 +67,8 @@ private:
     glm::mat4 transform();
     glm::mat4 modelTransform();
 
-    void drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack);
-    void drawCube(glutil::MatrixStack& aModelToWorldMatrixStack);
+    void drawPlane(glutil::MatrixStack& aModelToCameraMatrixStack);
+    void drawCube(glutil::MatrixStack& aModelToCameraMatrixStack);
 
 private:
     Log::Logger mLog;                   ///< Logger object to output runtime information
@@ -76,8 +76,7 @@ private:
     GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
     GLuint mPositionAttrib;             ///< Location of the "position" vertex shader attribute (input stream)
     GLuint mColorAttrib;                ///< Location of the "color" vertex shader attribute (input stream)
-    GLuint mModelToWorldMatrixUnif;     ///< Location of the "modelToWorldMatrix"  vertex shader uniform input variable
-    GLuint mWorldToCameraMatrixUnif;    ///< Location of the "worldToCameraMatrix" vertex shader uniform input variable
+    GLuint mModelToCameraMatrixUnif;    ///< Location of the "modelToCameraMatrix" vertex shader uniform input variable
     GLuint mCameraToClipMatrixUnif;     ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
 
     GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh

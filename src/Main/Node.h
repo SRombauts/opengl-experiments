@@ -34,7 +34,7 @@ public:
     ~Node();
 
     // Draw
-    void draw(glutil::MatrixStack& aModelToWorldMatrixStack, GLuint aModelToWorldMatrixUnif) const;
+    void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
     // Calculate and return the current Rotations & Translations matrix
     const glm::mat4& getMatrix() const;

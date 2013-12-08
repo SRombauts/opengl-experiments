@@ -52,17 +52,17 @@ inline const glm::mat4& Node::getMatrix() const {
 /**
  * @brief Draw the node and its children
  */
-void Node::draw(glutil::MatrixStack& aModelToWorldMatrixStack, GLuint aModelToWorldMatrixUnif) const {
-    glutil::PushStack push(aModelToWorldMatrixStack); // RAII PushStack
+void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const {
+    glutil::PushStack push(aModelToCameraMatrixStack); // RAII PushStack
 
     // re-calculate the absolute Model to World transformations matrix
-    aModelToWorldMatrixStack.ApplyMatrix(getMatrix());
+    aModelToCameraMatrixStack.ApplyMatrix(getMatrix());
 
     // Set uniform values with the new "modelToWorldMatrix" matrix
-    glUniformMatrix4fv(aModelToWorldMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
+    glUniformMatrix4fv(aModelToWorldMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
 
     // And ask children to draw themselves:
     for (List::const_iterator iChild = mChildrenList.begin(); iChild != mChildrenList.end(); ++iChild) {
-        (*iChild)->draw(aModelToWorldMatrixStack, aModelToWorldMatrixUnif);
+        (*iChild)->draw(aModelToCameraMatrixStack, aModelToWorldMatrixUnif);
     }
 }

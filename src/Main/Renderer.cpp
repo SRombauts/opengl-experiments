@@ -126,8 +126,7 @@ Renderer::Renderer() :
     mProgram(0),
     mPositionAttrib(-1),
     mColorAttrib(-1),
-    mModelToWorldMatrixUnif(-1),
-    mWorldToCameraMatrixUnif(-1),
+    mModelToCameraMatrixUnif(-1),
     mCameraToClipMatrixUnif(-1),
     mVertexBufferObject(0),
     mIndexBufferObject(0),
@@ -248,11 +247,9 @@ void Renderer::initProgram() {
     mPositionAttrib = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
     mColorAttrib    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
     // Get location of uniforms - input variables of (vertex) shader
-    // "Model to World" matrix,  positioning our unique model into world space
-    // "World to Camera" matrix, defining the orientation of the viewer
+    // "Model to Camera" matrix, positioning the model into camera space
     // "Camera to Clip" matrix,  defining the perspective transformation
-    mModelToWorldMatrixUnif     = glGetUniformLocation(mProgram, "modelToWorldMatrix");
-    mWorldToCameraMatrixUnif    = glGetUniformLocation(mProgram, "worldToCameraMatrix");
+    mModelToCameraMatrixUnif    = glGetUniformLocation(mProgram, "modelToCameraMatrix");
     mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
 }
 
@@ -518,17 +515,15 @@ void Renderer::display() {
     // Use the linked program of compiled shaders
     glUseProgram(mProgram);
 
-    // re-calculate the "World to Camera" matrix, and pass it to the program
-    glm::mat4 worldToCamerMatrix = transform();
-    // Set uniform values with the new "World to Camera" matrix
-    glUniformMatrix4fv(mWorldToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(worldToCamerMatrix));
-
     // Bind the Vertex Array Object, bound to buffers with vertex position and colors
     glBindVertexArray(mVertexArrayObject);
 
-    // Use a matrix stack to manage the hierarchy of the scene (initialized with the identity matrix)
-    glutil::MatrixStack modelToWorldMatrixStack;
-    drawPlane(modelToWorldMatrixStack);
+    // re-calculate the "World to Camera" matrix, and initialize the "Model to Camera" matrix stack with it
+    glm::mat4 worldToCamerMatrix = transform();
+    glutil::MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
+
+    // Use the matrix stack to manage the hierarchy of the scene
+    drawPlane(modelToCameraMatrixStack);
 
     // Unbind the Vertex Array Object
     glBindVertexArray(0);
@@ -541,18 +536,18 @@ void Renderer::display() {
 /**
  * @brief Draw the plane at the root of the world
  *
- * @param[in] aModelToWorldMatrixStack  Matrix Stack of the scene hierarchy
+ * @param[in] aModelToCameraMatrixStack  Matrix Stack of the scene hierarchy
  */
-void Renderer::drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack) {
+void Renderer::drawPlane(glutil::MatrixStack& aModelToCameraMatrixStack) {
     // Root of the stack : the plane is centered at the origin, unscaled (no transformation, need to push the stack)
 
     // Set uniform values with the new "Model to World" matrix
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
+    glUniformMatrix4fv(mModelToCameraMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
     // Ask to Draw triangles from buffers pointed by the Vertex Array Object
     glDrawElements(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfPlaneStrip));
 
     // Now draw the sub elements
-    drawCube(aModelToWorldMatrixStack);
+    drawCube(aModelToCameraMatrixStack);
 }
 
 /**
@@ -560,17 +555,17 @@ void Renderer::drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack) {
  *
  * First level of the stack : the cube is translated and rotated above the plane
  *
- * @param[in] aModelToWorldMatrixStack  Matrix Stack of the scene hierarchy
+ * @param[in] aModelToCameraMatrixStack  Matrix Stack of the scene hierarchy
  */
-void Renderer::drawCube(glutil::MatrixStack& aModelToWorldMatrixStack) {
-    glutil::PushStack push(aModelToWorldMatrixStack); // RAII PushStack
+void Renderer::drawCube(glutil::MatrixStack& aModelToCameraMatrixStack) {
+    glutil::PushStack push(aModelToCameraMatrixStack); // RAII PushStack
 
     // re-calculate the model to world transformations matrix, and pass it to the program
     glm::mat4 cubeToWorldMatrix = modelTransform();
-    aModelToWorldMatrixStack.ApplyMatrix(cubeToWorldMatrix);
+    aModelToCameraMatrixStack.ApplyMatrix(cubeToWorldMatrix);
 
     // Set uniform values with the new "Model to World" matrix
-    glUniformMatrix4fv(mModelToWorldMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
+    glUniformMatrix4fv(mModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
     glDrawElements(GL_TRIANGLE_STRIP, _lenMainStrip,  GL_UNSIGNED_SHORT, 0);
     glDrawElements(GL_TRIANGLE_STRIP, _lenLeftStrip,  GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfLeftStrip));
     glDrawElements(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfRightStrip));
