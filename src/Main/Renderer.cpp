@@ -10,7 +10,6 @@
  */
 
 #include "Main/Renderer.h"
-#include "Main/Node.h"
 
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
@@ -181,7 +180,10 @@ void Renderer::init() {
     // 2) init the vertex buffer and vertex array objects
     initVertexArrayObject();
 
-    // 3) Initialize more OpenGL option
+    // 3) Initialize the scene hierarchy
+    initScene();
+
+    // 4) Initialize more OpenGL option
     // Face Culling
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -295,6 +297,16 @@ void Renderer::initVertexArrayObject(void) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
 
     glBindVertexArray(0);
+}
+
+/**
+ * @brief  Initialize the scene hierarchy
+ */
+void Renderer::initScene() {
+    Node::Ptr PlanePtr = Node::Ptr(new Node());
+    PlanePtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, _offsetOfPlaneStrip));
+    PlanePtr->move(glm::vec3(0.0f, -1.0f, 0.0f));
+    mSceneHierarchy.addChildNode(PlanePtr);
 }
 
 /**
@@ -486,11 +498,14 @@ void Renderer::display() {
     // Bind the Vertex Array Object, bound to buffers with vertex position and colors
     glBindVertexArray(mVertexArrayObject);
 
-    // re-calculate the "World to Camera" matrix, and initialize the "Model to Camera" matrix stack with it
+    // re-calculate the "World to Camera" matrix,
     glm::mat4 worldToCamerMatrix = transform();
+    // and initialize the "Model to Camera" matrix stack with it
     glutil::MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
 
     // Use the matrix stack to manage the hierarchy of the scene
+    mSceneHierarchy.draw(modelToCameraMatrixStack, mModelToCameraMatrixUnif);
+    // TODO(SRombauts) : remove this old stack
     drawPlane(modelToCameraMatrixStack);
 
     // Unbind the Vertex Array Object

@@ -45,7 +45,7 @@ void Node::move(const glm::vec3& aTranslation) {
     const glm::vec3 relativeTranslation = (rotations * aTranslation);
     // and apply it to the current model position
     mTranslationVector += relativeTranslation;
-    
+
     mbMatrixDirty = true;
 }
 
@@ -57,7 +57,7 @@ void Node::pitch(float aAngle) {
     const glm::vec3 modelX = (mOrientationQuat * UNIT_X_RIGHT);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
     rotateLeftMultiply(mOrientationQuat, aAngle, modelX);
-    
+
     mbMatrixDirty = true;
 }
 
@@ -69,7 +69,7 @@ void Node::yaw(float aAngle) {
     const glm::vec3 modelY = (mOrientationQuat * UNIT_Y_UP);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
     rotateLeftMultiply(mOrientationQuat, aAngle, modelY);
-    
+
     mbMatrixDirty = true;
 }
 
@@ -81,7 +81,7 @@ void Node::roll(float aAngle) {
     const glm::vec3 modelZ = (mOrientationQuat * UNIT_Z_FRONT);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
     rotateLeftMultiply(mOrientationQuat, aAngle, modelZ);
-    
+
     mbMatrixDirty = true;
 }
 
@@ -111,19 +111,27 @@ inline const glm::mat4& Node::getMatrix() const {
 
 /**
  * @brief Draw the node and its children
+ *
+ * @param[in] aModelToCameraMatrixStack "Model to Camera" matrix stack
+ * @param[in] aModelToCameraMatrixUnif  Location of the "modelToCameraMatrix" vertex shader uniform input variable
  */
-void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const {
+void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
     glutil::PushStack push(aModelToCameraMatrixStack); // RAII PushStack
 
     // re-calculate the absolute Model to World transformations matrix
     aModelToCameraMatrixStack.ApplyMatrix(getMatrix());
 
     // Set uniform values with the new "modelToWorldMatrix" matrix
-    glUniformMatrix4fv(aModelToWorldMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
+    glUniformMatrix4fv(aModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
 
-    // And ask children to draw themselves:
+    // Emit the draw calls of the current node
+    for (DrawCalls::const_iterator iDrawCall = mDrawCalls.begin(); iDrawCall != mDrawCalls.end(); ++iDrawCall) {
+        (*iDrawCall).draw();
+    }
+
+    // And ask children to draw themselves
     for (List::const_iterator iChild = mChildrenList.begin(); iChild != mChildrenList.end(); ++iChild) {
-        (*iChild)->draw(aModelToCameraMatrixStack, aModelToWorldMatrixUnif);
+        (*iChild)->draw(aModelToCameraMatrixStack, aModelToCameraMatrixUnif);
     }
 }
 

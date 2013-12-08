@@ -8,9 +8,11 @@
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
  */
+#pragma once
 
 #include "LoggerCpp/LoggerCpp.h"
 
+#include "Main/Node.h"
 #include "Utils/Utils.h"
 
 #include <glload/gl_3_3_comp.h> // GLuint, GLenum
@@ -51,12 +53,14 @@ private:
     void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
     void initProgram();
     void initVertexArrayObject();
+    void initScene();
     void uninitVertexArrayObject();
 
     // TODO(SRombauts) Generalize with the Node class (Presently Camera is the inverse of Model)
     glm::mat4 transform();
     glm::mat4 modelTransform();
 
+    // TODO(SRombauts) : remove this old stack
     void drawPlane(glutil::MatrixStack& aModelToCameraMatrixStack);
     void drawCube(glutil::MatrixStack& aModelToCameraMatrixStack);
 
@@ -78,6 +82,8 @@ private:
 
     glm::fquat  mModelOrientation;      ///< Axis and angle of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
+
+    Node        mSceneHierarchy;        ///< Scene node hierarchy
 
 private:
     /// disallow copy constructor and assignment operator
