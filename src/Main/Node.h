@@ -11,10 +11,12 @@
 
 #include "Utils/shared_ptr.hpp"         // std::shared_ptr replacement
 
+#include <glload/gl_3_3_comp.h>         // GLuint, GLenum
 #define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
 #include <glm/gtc/matrix_transform.hpp> // glm::rotate, glm::translate
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
+#include <glutil/MatrixStack.h>
 
 #include <vector>                       // std::vector
 
@@ -31,10 +33,13 @@ public:
     Node();
     ~Node();
 
-    inline const List&      getChildren() const;
-    inline       List&      getChildren();
+    // Draw
+    void draw(glutil::MatrixStack& aModelToWorldMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
-    inline const glm::mat4& getMatrix() const;
+    // Calculate and return the current Rotations & Translations matrix
+    const glm::mat4& getMatrix() const;
+
+    inline const List&  getChildren() const;
 
 private:
     Node::List          mChildrenList;          ///< Children Nodes of the current Node
@@ -54,30 +59,4 @@ private:
  */
 inline const Node::List& Node::getChildren() const {
     return mChildrenList;
-}
-
-/**
- * @brief   Get the list of children of the current Node
- *
- * @return  Vector of children of the current Node
- */
-inline Node::List& Node::getChildren() {
-    return mChildrenList;
-}
-
-/**
- * @brief   Get the up-to-date composed Matrix of orientation and translation
- *
- *  Recalculate the matrix from quaternion of orientation and vector of translation only when required.
- * Resulting matrix is cached until a change in orientation or translation flag it as "dirty".
- *
- * @return  Vector of children of the current Node
- */
-inline const glm::mat4& Node::getMatrix() const {
-    if (mbMatrixDirty) {
-        glm::mat4 rotation  = glm::mat4_cast(mOrientationQuaternion);
-        mMatrix             = glm::translate(rotation, mTranslationVector);
-    }
-
-    return mMatrix;
 }

@@ -63,7 +63,7 @@ private:
     static void rotateRightMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
     static void rotateLeftMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
 
-    // TODO(SRombauts) Generalize? (Presently Camera is the inverse of Model)
+    // TODO(SRombauts) Generalize with the Node class (Presently Camera is the inverse of Model)
     glm::mat4 transform();
     glm::mat4 modelTransform();
 

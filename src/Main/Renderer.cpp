@@ -398,7 +398,7 @@ void Renderer::roll(float aAngle) {
 /**
  * @brief Calculate the new "worldToCameradMatrix" transformation matrix from Translations and Rotations
  *
- *  We want to apply translations first, than rotations, but matrix have to be multiplied in reverse order :
+ *  We want to apply translations first, then rotations, but matrix have to be multiplied in reverse order :
  * out = (rotations * translations) * in;
  *
  * @return "worldToCameradMatrix"
@@ -465,9 +465,9 @@ void Renderer::modelRoll(float aAngle) {
 }
 
 /**
- * @brief Calculate the new "modelToWorldMatrix" transformation matrix from Rotations and Translations
+ * @brief Calculate the new relative "modelToWorldMatrix" transformation matrix from Rotations and Translations
  *
- *  We want to apply rotations first, than translations, but matrix have to be multiplied in reverse order :
+ *  We want to apply rotations first, then translations, but matrix have to be multiplied in reverse order :
  * out = (translations * rotations) * in;
  *
  * @return "modelToWorldMatrix"
@@ -526,7 +526,7 @@ void Renderer::display() {
     // Bind the Vertex Array Object, bound to buffers with vertex position and colors
     glBindVertexArray(mVertexArrayObject);
 
-    // Use a matrix stack to manage the tree-hierarchy of the scene (initialized with the identity matrix)
+    // Use a matrix stack to manage the hierarchy of the scene (initialized with the identity matrix)
     glutil::MatrixStack modelToWorldMatrixStack;
     drawPlane(modelToWorldMatrixStack);
 
@@ -541,7 +541,7 @@ void Renderer::display() {
 /**
  * @brief Draw the plane at the root of the world
  *
- * @param[in] aModelToWorldMatrixStack  Matrix Stack of the tree of the scene
+ * @param[in] aModelToWorldMatrixStack  Matrix Stack of the scene hierarchy
  */
 void Renderer::drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack) {
     // Root of the stack : the plane is centered at the origin, unscaled (no transformation, need to push the stack)
@@ -549,7 +549,6 @@ void Renderer::drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack) {
     // Set uniform values with the new "Model to World" matrix
     glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
     // Ask to Draw triangles from buffers pointed by the Vertex Array Object
-    // plane:
     glDrawElements(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfPlaneStrip));
 
     // Now draw the sub elements
@@ -561,7 +560,7 @@ void Renderer::drawPlane(glutil::MatrixStack& aModelToWorldMatrixStack) {
  *
  * First level of the stack : the cube is translated and rotated above the plane
  *
- * @param[in] aModelToWorldMatrixStack  Matrix Stack of the tree of the scene
+ * @param[in] aModelToWorldMatrixStack  Matrix Stack of the scene hierarchy
  */
 void Renderer::drawCube(glutil::MatrixStack& aModelToWorldMatrixStack) {
     glutil::PushStack push(aModelToWorldMatrixStack); // RAII PushStack
@@ -571,8 +570,7 @@ void Renderer::drawCube(glutil::MatrixStack& aModelToWorldMatrixStack) {
     aModelToWorldMatrixStack.ApplyMatrix(cubeToWorldMatrix);
 
     // Set uniform values with the new "Model to World" matrix
-    glUniformMatrix4fv(mModelToWorldMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
-    // cube:
+    glUniformMatrix4fv(mModelToWorldMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToWorldMatrixStack.Top()));
     glDrawElements(GL_TRIANGLE_STRIP, _lenMainStrip,  GL_UNSIGNED_SHORT, 0);
     glDrawElements(GL_TRIANGLE_STRIP, _lenLeftStrip,  GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfLeftStrip));
     glDrawElements(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfRightStrip));
