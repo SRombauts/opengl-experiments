@@ -12,6 +12,7 @@
 
 #include "LoggerCpp/LoggerCpp.h"
 
+#include "Main/Scene.h"
 #include "Main/Node.h"
 #include "Utils/Utils.h"
 
@@ -60,10 +61,6 @@ private:
     glm::mat4 transform();
     glm::mat4 modelTransform();
 
-    // TODO(SRombauts) : remove this old stack
-    void drawPlane(glutil::MatrixStack& aModelToCameraMatrixStack);
-    void drawCube(glutil::MatrixStack& aModelToCameraMatrixStack);
-
 private:
     Log::Logger mLog;                   ///< Logger object to output runtime information
 
@@ -83,7 +80,8 @@ private:
     glm::fquat  mModelOrientation;      ///< Axis and angle of rotation of the model
     glm::vec3   mModelTranslation;      ///< Vector of translation of the model
 
-    Node        mSceneHierarchy;        ///< Scene node hierarchy
+    Scene       mSceneHierarchy;        ///< Scene node hierarchy
+    Node::Ptr   mModelPtr;              ///< A movable model of a Cube
 
 private:
     /// disallow copy constructor and assignment operator

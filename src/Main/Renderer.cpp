@@ -305,8 +305,14 @@ void Renderer::initVertexArrayObject(void) {
 void Renderer::initScene() {
     Node::Ptr PlanePtr = Node::Ptr(new Node());
     PlanePtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, _offsetOfPlaneStrip));
-    PlanePtr->move(glm::vec3(0.0f, -1.0f, 0.0f));
-    mSceneHierarchy.addChildNode(PlanePtr);
+    mSceneHierarchy.addRootNode(PlanePtr);
+
+    mModelPtr = Node::Ptr(new Node());
+    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenMainStrip, GL_UNSIGNED_SHORT, 0));
+    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenLeftStrip, GL_UNSIGNED_SHORT, _offsetOfLeftStrip));
+    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, _offsetOfRightStrip));
+    mModelPtr->move(glm::vec3(1.0f, 1.5f, -1.0f));
+    mSceneHierarchy.addRootNode(mModelPtr);
 }
 
 /**
@@ -394,70 +400,28 @@ glm::mat4 Renderer::transform() {
  * @param[in] aTranslation  3D Translation vector to add to the given camera position
  */
 void Renderer::modelMove(const glm::vec3& aTranslation) {
-    // Get the rotation matrix from the orientation quaternion:
-    glm::mat3 rotations = glm::mat3_cast(mModelOrientation);
-    // calculate relative translation into the current model orientation
-    const glm::vec3 relativeTranslation = (rotations * aTranslation);
-    // and apply it to the current model position
-    mModelTranslation += relativeTranslation;
-    mLog.info() << "move: pos(" << mModelTranslation.x << ","
-                                << mModelTranslation.y << ","
-                                << mModelTranslation.z << ")";
+    mModelPtr->move(aTranslation);
 }
 
 /**
  * @brief Pitch, rotate the model vertically around its current relative horizontal X axis
  */
 void Renderer::modelPitch(float aAngle) {
-    // calculate X unit vector of the current camera orientation
-    const glm::vec3 modelX = (mModelOrientation * Node::UNIT_X_RIGHT);
-    // Offset the given quaternion by the given angle (in radians) and normalized axis
-    Node::rotateLeftMultiply(mModelOrientation, aAngle, modelX);
-
-//  mLog.info() << "model pitch(" << aAngle << ")";
+    mModelPtr->pitch(aAngle);
 }
 
 /**
  * @brief Yaw, rotate the model horizontally around its current relative vertical Y axis
  */
 void Renderer::modelYaw(float aAngle) {
-    // calculate Y unit vector of the current camera orientation
-    const glm::vec3 modelY = (mModelOrientation * Node::UNIT_Y_UP);
-    // Offset the given quaternion by the given angle (in radians) and normalized axis
-    Node::rotateLeftMultiply(mModelOrientation, aAngle, modelY);
-
-//  mLog.info() << "model yaw(" << aAngle << ")";
+    mModelPtr->yaw(aAngle);
 }
 
 /**
  * @brief Roll, rotate the model around its current relative viewing Z axis
  */
 void Renderer::modelRoll(float aAngle) {
-    // calculate Z unit vector of the current camera orientation
-    const glm::vec3 modelZ = (mModelOrientation * Node::UNIT_Z_FRONT);
-    // Offset the given quaternion by the given angle (in radians) and normalized axis
-    Node::rotateLeftMultiply(mModelOrientation, aAngle, modelZ);
-
-    mLog.info() << "model roll(" << aAngle << ")";
-}
-
-/**
- * @brief Calculate the new relative "modelToWorldMatrix" transformation matrix from Rotations and Translations
- *
- *  We want to apply rotations first, then translations, but matrix have to be multiplied in reverse order :
- * out = (translations * rotations) * in;
- *
- * @return "modelToWorldMatrix"
- */
-glm::mat4 Renderer::modelTransform() {
-    // Translations
-    glm::mat4 translations = glm::translate(glm::mat4(1.0f), mModelTranslation);
-
-    // Rotations
-    glm::mat4 rotations = glm::mat4_cast(mModelOrientation);
-
-    // Calculate the new "modelToWorldMatrix" (from right to left: rotations, then translations)
-    return (translations * rotations);
+    mModelPtr->roll(aAngle);
 }
 
 /**
@@ -505,8 +469,6 @@ void Renderer::display() {
 
     // Use the matrix stack to manage the hierarchy of the scene
     mSceneHierarchy.draw(modelToCameraMatrixStack, mModelToCameraMatrixUnif);
-    // TODO(SRombauts) : remove this old stack
-    drawPlane(modelToCameraMatrixStack);
 
     // Unbind the Vertex Array Object
     glBindVertexArray(0);
@@ -514,42 +476,4 @@ void Renderer::display() {
 
     glutSwapBuffers();
     glutPostRedisplay();    // Ask for refresh ; only needed if animation are present
-}
-
-/**
- * @brief Draw the plane at the root of the world
- *
- * @param[in] aModelToCameraMatrixStack  Matrix Stack of the scene hierarchy
- */
-void Renderer::drawPlane(glutil::MatrixStack& aModelToCameraMatrixStack) {
-    // Root of the stack : the plane is centered at the origin, unscaled (no transformation, need to push the stack)
-
-    // Set uniform values with the new "Model to World" matrix
-    glUniformMatrix4fv(mModelToCameraMatrixUnif,  1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
-    // Ask to Draw triangles from buffers pointed by the Vertex Array Object
-    glDrawElements(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfPlaneStrip));
-
-    // Now draw the sub elements
-    drawCube(aModelToCameraMatrixStack);
-}
-
-/**
- * @brief Draw the cube above the plane
- *
- * First level of the stack : the cube is translated and rotated above the plane
- *
- * @param[in] aModelToCameraMatrixStack  Matrix Stack of the scene hierarchy
- */
-void Renderer::drawCube(glutil::MatrixStack& aModelToCameraMatrixStack) {
-    glutil::PushStack push(aModelToCameraMatrixStack); // RAII PushStack
-
-    // re-calculate the model to world transformations matrix, and pass it to the program
-    glm::mat4 cubeToWorldMatrix = modelTransform();
-    aModelToCameraMatrixStack.ApplyMatrix(cubeToWorldMatrix);
-
-    // Set uniform values with the new "Model to World" matrix
-    glUniformMatrix4fv(mModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
-    glDrawElements(GL_TRIANGLE_STRIP, _lenMainStrip,  GL_UNSIGNED_SHORT, 0);
-    glDrawElements(GL_TRIANGLE_STRIP, _lenLeftStrip,  GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfLeftStrip));
-    glDrawElements(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(_offsetOfRightStrip));
 }

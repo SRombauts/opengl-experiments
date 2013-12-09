@@ -11,6 +11,8 @@
 
 #include "Main/Node.h"
 
+#include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
+
 
 // We use a standard "Right Hand Coordinate System"
 // UNIT_X_RIGHT, UNIT_Y_UP and UNIT_Z_FRONT are the unit vectors of the world coordinate system
@@ -118,10 +120,11 @@ inline const glm::mat4& Node::getMatrix() const {
 void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
     glutil::PushStack push(aModelToCameraMatrixStack); // RAII PushStack
 
-    // re-calculate the absolute Model to World transformations matrix
+    // Re-calculate the relative Model to World transformations matrix, and apply it to the stack
+    // => this effectively build the absolute "modelToCameraMatrix"
     aModelToCameraMatrixStack.ApplyMatrix(getMatrix());
 
-    // Set uniform values with the new "modelToWorldMatrix" matrix
+    // Set uniform values with this new "modelToCameraMatrix" matrix
     glUniformMatrix4fv(aModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
 
     // Emit the draw calls of the current node

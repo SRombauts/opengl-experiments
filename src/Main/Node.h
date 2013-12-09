@@ -15,7 +15,6 @@
 #include <glload/gl_3_3_comp.h>         // GLuint, GLenum
 #define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
-#include <glm/gtc/matrix_transform.hpp> // glm::rotate, glm::translate
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
 #include <glutil/MatrixStack.h>
 
@@ -90,7 +89,7 @@ public:
     // Draw
     void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
-    // Accessors
+    // Getters/Setters
     inline const List&  getChildren() const;
     inline       void   addChildNode(const Node::Ptr& aChildNodePtr);
     inline       void   addDrawCall(const IndexedDrawCall& aDrawCall);
