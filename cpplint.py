@@ -4676,7 +4676,7 @@ def ProcessFile(filename, vlevel, extra_check_functions=[]):
       # SRombauts: never use Windows endline
       # Outputting only one error for potentially
       # several lines.
-      Error(filename, carriage_return_found, 'whitespace/newline', 5,
+      Error(filename, 0, 'whitespace/newline', 5,
             'One or more carriage-return \\r (^M) (Windows endline) found; '
             'Use only UNIX endline \\n')
 
