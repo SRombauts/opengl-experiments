@@ -59,7 +59,6 @@ private:
 
     // TODO(SRombauts) Generalize with the Node class (Presently Camera is the inverse of Model)
     glm::mat4 transform();
-    glm::mat4 modelTransform();
 
 private:
     Log::Logger mLog;                   ///< Logger object to output runtime information

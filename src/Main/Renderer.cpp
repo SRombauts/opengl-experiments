@@ -40,73 +40,122 @@ static const float Z_PLANE_FRONT    = 5.0f;     ///< Front coordinate
 static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
-/// cube:
-///   6 - 7
-///  /   /|
-/// 0 - 1 5
-/// |   |/
-/// 2 - 3
+/// Counter Clockwise winding order (GL_CCW)
+///                           12- 13
+///                          /   /
+///                 10- 11  14- 15      16     21
+///                 | \ |              /|     /|
+/// 0 - 1    6 - 7  8 - 9            17 18  20 23
+/// | / |   / \ /                     |/     |/
+/// 2 - 3  4 - 5                      19     22
+///
 /// plane:
 ///   0 - 1
 ///  /   /
 /// 2 - 3
 static const float _vertexData[] = {
-    // cube: the 8 vertices (x,y,z,w) but w default to 1.0f
-    X_LEFT,  Y_TOP,     Z_FRONT,
-    X_RIGHT, Y_TOP,     Z_FRONT,
-    X_LEFT,  Y_BOTTOM,  Z_FRONT,
-    X_RIGHT, Y_BOTTOM,  Z_FRONT,
-    X_LEFT,  Y_BOTTOM,  Z_BACK,
-    X_RIGHT, Y_BOTTOM,  Z_BACK,
-    X_LEFT,  Y_TOP,     Z_BACK,
-    X_RIGHT, Y_TOP,     Z_BACK,
+    // cube: the 24 vertices (x,y,z,w) but w default to 1.0f
+    // front
+    X_LEFT,  Y_TOP,     Z_FRONT,    // 0
+    X_RIGHT, Y_TOP,     Z_FRONT,    // 1
+    X_LEFT,  Y_BOTTOM,  Z_FRONT,    // 2
+    X_RIGHT, Y_BOTTOM,  Z_FRONT,    // 3
+    // bottom
+    X_LEFT,  Y_BOTTOM,  Z_FRONT,    // 4
+    X_RIGHT, Y_BOTTOM,  Z_FRONT,    // 5
+    X_LEFT,  Y_BOTTOM,  Z_BACK,     // 6
+    X_RIGHT, Y_BOTTOM,  Z_BACK,     // 7
+    // back
+    X_LEFT,  Y_BOTTOM,  Z_BACK,     // 8
+    X_RIGHT, Y_BOTTOM,  Z_BACK,     // 9
+    X_LEFT,  Y_TOP,     Z_BACK,     // 10
+    X_RIGHT, Y_TOP,     Z_BACK,     // 11
+    // top
+    X_LEFT,  Y_TOP,     Z_BACK,     // 12
+    X_RIGHT, Y_TOP,     Z_BACK,     // 13
+    X_LEFT,  Y_TOP,     Z_FRONT,    // 14
+    X_RIGHT, Y_TOP,     Z_FRONT,    // 15
+    // left
+    X_LEFT,  Y_TOP,     Z_BACK,     // 16
+    X_LEFT,  Y_TOP,     Z_FRONT,    // 17
+    X_LEFT,  Y_BOTTOM,  Z_BACK,     // 18
+    X_LEFT,  Y_BOTTOM,  Z_FRONT,    // 19
+    // right
+    X_RIGHT, Y_TOP,     Z_FRONT,    // 20
+    X_RIGHT, Y_TOP,     Z_BACK,     // 21
+    X_RIGHT, Y_BOTTOM,  Z_FRONT,    // 22
+    X_RIGHT, Y_BOTTOM,  Z_BACK,     // 23
+
     // plane: the 4 vertices (x,y,z,w) but w default to 1.0f
     X_PLANE_LEFT,  Y_PLANE, Z_PLANE_BACK,
     X_PLANE_RIGHT, Y_PLANE, Z_PLANE_BACK,
     X_PLANE_LEFT,  Y_PLANE, Z_PLANE_FRONT,
     X_PLANE_RIGHT, Y_PLANE, Z_PLANE_FRONT,
-    // cube: the colors (r,g,b,a) of each of 8 vertices
+
+    // cube: the colors (r,g,b,a) of each of 24 vertices
+    // front
     0.7f, 0.0f, 0.0f, 1.0f,
+    0.7f, 0.0f, 0.0f, 1.0f,
+    0.7f, 0.0f, 0.0f, 1.0f,
+    0.7f, 0.0f, 0.0f, 1.0f,
+    // bottom
     0.0f, 0.7f, 0.0f, 1.0f,
+    0.0f, 0.7f, 0.0f, 1.0f,
+    0.0f, 0.7f, 0.0f, 1.0f,
+    0.0f, 0.7f, 0.0f, 1.0f,
+    // back
     0.0f, 0.0f, 0.7f, 1.0f,
+    0.0f, 0.0f, 0.7f, 1.0f,
+    0.0f, 0.0f, 0.7f, 1.0f,
+    0.0f, 0.0f, 0.7f, 1.0f,
+    // top
     0.5f, 0.4f, 0.0f, 1.0f,
+    0.5f, 0.4f, 0.0f, 1.0f,
+    0.5f, 0.4f, 0.0f, 1.0f,
+    0.5f, 0.4f, 0.0f, 1.0f,
+    // left
     0.0f, 0.5f, 0.4f, 1.0f,
+    0.0f, 0.5f, 0.4f, 1.0f,
+    0.0f, 0.5f, 0.4f, 1.0f,
+    0.0f, 0.5f, 0.4f, 1.0f,
+    // right
     0.4f, 0.0f, 0.5f, 1.0f,
-    0.3f, 0.3f, 0.3f, 1.0f,
-    0.1f, 0.1f, 0.1f, 1.0f,
+    0.4f, 0.0f, 0.5f, 1.0f,
+    0.4f, 0.0f, 0.5f, 1.0f,
+    0.4f, 0.0f, 0.5f, 1.0f,
     // plane: the colors (r,g,b,a) of each of 4 vertices
-    0.1f, 0.8f, 0.3f, 1.0f,
-    0.1f, 0.8f, 0.3f, 1.0f,
-    0.1f, 0.8f, 0.3f, 1.0f,
-    0.1f, 0.8f, 0.3f, 1.0f,
+    0.0f, 0.5f, 0.05f, 1.0f,
+    0.0f, 0.5f, 0.05f, 1.0f,
+    0.0f, 0.5f, 0.05f, 1.0f,
+    0.0f, 0.5f, 0.05f, 1.0f,
 };
-static const int _sizeOfVertexData  = sizeof(_vertexData);  ///< size of the _vertexData array
-static const int _nbVertices        = 12;                   ///< Total number of vertices (cube + plane)
+static const int _sizeOfDataArray   = sizeof(_vertexData);  ///< size of the _vertexData array
+static const int _nbVertices        = 24 + 4;               ///< Total number of vertices (cube + plane)
 static const int _vertexDim         = 3;                    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
 static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///< size of one vertex
-static const int _offsetOfColors    = _nbVertices * _sizeOfVertex;          ///< size of all vertices == start of colors
+static const int _offsetColors      = _nbVertices * _sizeOfVertex;          ///< size of vertices == start of colors
+static const int _nbColors          = _nbVertices;          ///< Total number of colors (cube + plane)
 static const int _colorDim          = 4;                    ///< Each color is in 4D (r,g,b,a)
 
 /// Indices of vertex (from vertex buffer above)
 static const GLshort _indexData[] = {
     // cube:
-    0, 1, 2, 3, 4, 5, 6, 7, 0, 1,
-    6, 0, 4, 2,
-    1, 7, 3, 5,
+    0, 1, 2,    3, 2, 1,    // front
+    4, 5, 6,    7, 6, 5,    // bottom
+    8, 9, 10,   11, 10, 9,  // back
+    12, 13, 14, 15, 14, 13, // top
+    16, 17, 18, 19, 18, 17, // left
+    20, 21, 22, 23, 22, 21, // right
     // plane
-    8, 9, 10, 11,
+    24, 25, 26, 27,
 };
-static const int _sizeOfIndexData       = sizeof(_indexData);   ///< size of the _indexData);  ///< size array
-static const int _lenMainStrip          = 10;                   ///< Number of indices for the main strip
-/// Offset of the lateral strip at the left of the cube
-static const int _offsetOfLeftStrip     = _lenMainStrip * sizeof(_indexData[0]);
-static const int _lenLeftStrip          = 4;                    ///< Number of indices for the lateral left strip
-/// Offset of the lateral strip at the right of the cube :
-static const int _offsetOfRightStrip    = (_lenMainStrip + _lenLeftStrip) * sizeof(_indexData[0]);
-static const int _lenRightStrip         = 4;                    ///< Number of indices for the lateral right strip
+static const int _sizeOfIndexData   = sizeof(_indexData);   ///< size of the _indexData;  ///< size array
+/// Offset of the cube list :
+static const int _offsetCube        = 0;
+static const int _lenCubeList       = 36;                   ///< Number of indices for the cube list
 /// Offset of the plane strip :
-static const int _offsetOfPlaneStrip    = (_lenMainStrip + _lenLeftStrip + _lenRightStrip) * sizeof(_indexData[0]);
-static const int _lenPlaneStrip         = 4;                    ///< Number of indices for the plane strip
+static const int _offsetPlane       = (_lenCubeList) * sizeof(_indexData[0]);
+static const int _lenPlane          = 4;                    ///< Number of indices for the plane strip
 
 
 static const float _zNear           = 1.0f;     ///< Z coordinate or the near/front frustum plane from which to render
@@ -265,7 +314,7 @@ void Renderer::initVertexArrayObject(void) {
 
     // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, _sizeOfVertexData, _vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _sizeOfDataArray, _vertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // here _vertexData is of no more use (dynamic memory could be deallocated)
 
@@ -292,7 +341,7 @@ void Renderer::initVertexArrayObject(void) {
     glEnableVertexAttribArray(mColorAttrib);       // layout(location = 1) in vec4 color;
     // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
     glVertexAttribPointer(mPositionAttrib, _vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribPointer(mColorAttrib, _colorDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetOfColors));
+    glVertexAttribPointer(mColorAttrib, _colorDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetColors));
     // this tells OpenGL that vertex are pointed by their index
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
 
@@ -304,13 +353,11 @@ void Renderer::initVertexArrayObject(void) {
  */
 void Renderer::initScene() {
     Node::Ptr PlanePtr = Node::Ptr(new Node());
-    PlanePtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenPlaneStrip, GL_UNSIGNED_SHORT, _offsetOfPlaneStrip));
+    PlanePtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenPlane, GL_UNSIGNED_SHORT, _offsetPlane));
     mSceneHierarchy.addRootNode(PlanePtr);
 
     mModelPtr = Node::Ptr(new Node());
-    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenMainStrip, GL_UNSIGNED_SHORT, 0));
-    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenLeftStrip, GL_UNSIGNED_SHORT, _offsetOfLeftStrip));
-    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenRightStrip, GL_UNSIGNED_SHORT, _offsetOfRightStrip));
+    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, _lenCubeList, GL_UNSIGNED_SHORT, _offsetCube));
     mModelPtr->move(glm::vec3(1.0f, 1.5f, -1.0f));
     mSceneHierarchy.addRootNode(mModelPtr);
 }
