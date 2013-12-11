@@ -139,13 +139,13 @@ void Input::checkKeys() {
     }
 
     if (isKeyPressed('p')) {
-        mRenderer.modelPitch(0.01f);
+        mRenderer.modelPitch(0.001f);
     }
     if (isKeyPressed('m')) {
-        mRenderer.modelYaw(0.01f);
+        mRenderer.modelYaw(0.001f);
     }
     if (isKeyPressed('l')) {
-        mRenderer.modelRoll(0.01f);
+        mRenderer.modelRoll(0.001f);
     }
 }
 
@@ -183,7 +183,7 @@ void Input::displayCallback() {
     // Timer for basic cube animation (rotation around the X axis at 60Hz)
     bool bCubeRotate = mCubeRotationTimer.isTimeElapsed(mFPS.getCurrentFrameTickUs());
     if (bCubeRotate) {
-        mRenderer.modelYaw(0.01f);
+        mRenderer.modelYaw(0.005f);
     }
 
     // Delegate management of OpenGL rendering

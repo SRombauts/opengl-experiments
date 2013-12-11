@@ -80,7 +80,7 @@ private:
     glm::fquat  mCameraOrientation;     ///< Axis and angle of rotation of the camera
     glm::vec3   mCameraTranslation;     ///< Vector of translation of the camera
 
-    glm::vec3   mDirToLight;            ///< Vector of directional light orientation (toward the light)
+    glm::vec4   mDirToLight;            ///< Vector of directional light orientation (oriented toward the light)
     glm::vec4   mLightIntensity;        ///< Directional light intensity and color
     glm::vec4   mAmbientIntensity;      ///< Ambiant light intensity and color
 

@@ -26,16 +26,16 @@
 
 // We use a standard "Right Hand Coordinate System"
 // Cube coordinates
-static const float X_RIGHT  = 0.5f;     ///< Right coordinate
-static const float X_LEFT   = -0.5f;    ///< Left coordinate
-static const float Y_TOP    = 0.5f;     ///< Top coordinate
-static const float Y_BOTTOM = -0.5f;    ///< Bottom coordinate
-static const float Z_FRONT  = 0.5f;     ///< Front coordinate
-static const float Z_BACK   = -0.5f;    ///< Back coordinate
+static const float X_RIGHT  = 1.0f;     ///< Right coordinate
+static const float X_LEFT   = -1.0f;    ///< Left coordinate
+static const float Y_TOP    = 1.0f;     ///< Top coordinate
+static const float Y_BOTTOM = -1.0f;    ///< Bottom coordinate
+static const float Z_FRONT  = 1.0f;     ///< Front coordinate
+static const float Z_BACK   = -1.0f;    ///< Back coordinate
 // Plane coordinates
 static const float X_PLANE_RIGHT    = 5.0f;     ///< Right coordinate
 static const float X_PLANE_LEFT     = -5.0f;    ///< Left coordinate
-static const float Y_PLANE          = -0.5f;    ///< Y coordinate
+static const float Y_PLANE          = -1.0f;    ///< Y coordinate
 static const float Z_PLANE_FRONT    = 5.0f;     ///< Front coordinate
 static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
 
@@ -125,6 +125,7 @@ static const float _vertexData[] = {
     0.4f, 0.0f, 0.5f, 1.0f,
     0.4f, 0.0f, 0.5f, 1.0f,
     0.4f, 0.0f, 0.5f, 1.0f,
+
     // plane: the colors (r,g,b,a) of each of 4 vertices
     0.0f, 0.5f, 0.05f, 1.0f,
     0.0f, 0.5f, 0.05f, 1.0f,
@@ -157,11 +158,11 @@ static const float _vertexData[] = {
     X_LEFT, 0.0f,       0.0f,
     X_LEFT, 0.0f,       0.0f,
     X_LEFT, 0.0f,       0.0f,
-    // front
-    0.0f,   0.0f,       Z_FRONT,
-    0.0f,   0.0f,       Z_FRONT,
-    0.0f,   0.0f,       Z_FRONT,
-    0.0f,   0.0f,       Z_FRONT,
+    // right
+    X_RIGHT, 0.0f,      0.0f,
+    X_RIGHT, 0.0f,      0.0f,
+    X_RIGHT, 0.0f,      0.0f,
+    X_RIGHT, 0.0f,      0.0f,
 
     // plane, the normals
     0.0f,   Y_TOP,      0.0f,
@@ -222,9 +223,9 @@ Renderer::Renderer() :
     mVertexArrayObject(0),
     mCameraOrientation(),
     mCameraTranslation(0.0f, 0.5f, 4.0f),
-    mDirToLight(0.866f, -0.5f, 0.0f),
-    mLightIntensity(0.9f, 0.9f, 0.9f, 1.0f),
-    mAmbientIntensity(0.05f, 0.05f, 0.05f, 1.0f) {
+    mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector !
+    mLightIntensity(0.8f, 0.8f, 0.8f, 1.0f),
+    mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f) {
     init();
 }
 
@@ -352,12 +353,13 @@ void Renderer::initProgram() {
 
     // Set uniform values with our constants
     glUseProgram(mProgram);
-    // TODO(SRombauts) mDirToLightUnif shall be recalculated with each camera orientation change
-    glUniform3fv(mDirToLightUnif, 1, glm::value_ptr(mDirToLight));
+/* TODO(SRombauts) testing
     glUniform4fv(mLightIntensityUnif, 1, glm::value_ptr(mLightIntensity));
     glUniform4fv(mAmbientIntensityUnif, 1, glm::value_ptr(mAmbientIntensity));
+*/
+    glUniform4f(mLightIntensityUnif, 0.8f, 0.8f, 0.8f, 1.0f);
+    glUniform4f(mAmbientIntensityUnif, 0.2f, 0.2f, 0.2f, 1.0f);
     glUseProgram(0);
-
 }
 
 /**
@@ -574,6 +576,11 @@ void Renderer::display() {
 
     // re-calculate the "World to Camera" matrix,
     glm::mat4 worldToCamerMatrix = transform();
+
+    // mDirToLight have to be recalculated with each camera orientation change
+    glm::vec4 lightDirCameraSpace = worldToCamerMatrix * mDirToLight;
+    glUniform3fv(mDirToLightUnif, 1, glm::value_ptr(lightDirCameraSpace));
+
     // and initialize the "Model to Camera" matrix stack with it
     glutil::MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
 
