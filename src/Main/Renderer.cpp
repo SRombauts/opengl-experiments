@@ -128,6 +128,44 @@ static const float _vertexData[] = {
     0.0f, 0.5f, 0.05f, 1.0f,
     0.0f, 0.5f, 0.05f, 1.0f,
     0.0f, 0.5f, 0.05f, 1.0f,
+
+    // cube, the normals
+    // front
+    0.0f,   0.0f,       Z_FRONT,
+    0.0f,   0.0f,       Z_FRONT,
+    0.0f,   0.0f,       Z_FRONT,
+    0.0f,   0.0f,       Z_FRONT,
+    // bottom
+    0.0f,   Y_BOTTOM,   0.0f,
+    0.0f,   Y_BOTTOM,   0.0f,
+    0.0f,   Y_BOTTOM,   0.0f,
+    0.0f,   Y_BOTTOM,   0.0f,
+    // back
+    0.0f,   0.0f,       Z_BACK,
+    0.0f,   0.0f,       Z_BACK,
+    0.0f,   0.0f,       Z_BACK,
+    0.0f,   0.0f,       Z_BACK,
+    // top
+    0.0f,   Y_TOP,      0.0f,
+    0.0f,   Y_TOP,      0.0f,
+    0.0f,   Y_TOP,      0.0f,
+    0.0f,   Y_TOP,      0.0f,
+    // left
+    X_LEFT, 0.0f,       0.0f,
+    X_LEFT, 0.0f,       0.0f,
+    X_LEFT, 0.0f,       0.0f,
+    X_LEFT, 0.0f,       0.0f,
+    // front
+    0.0f,   0.0f,       Z_FRONT,
+    0.0f,   0.0f,       Z_FRONT,
+    0.0f,   0.0f,       Z_FRONT,
+    0.0f,   0.0f,       Z_FRONT,
+
+    // plane, the normals
+    0.0f,   Y_TOP,      0.0f,
+    0.0f,   Y_TOP,      0.0f,
+    0.0f,   Y_TOP,      0.0f,
+    0.0f,   Y_TOP,      0.0f,
 };
 static const int _sizeOfDataArray   = sizeof(_vertexData);  ///< size of the _vertexData array
 static const int _nbVertices        = 24 + 4;               ///< Total number of vertices (cube + plane)
@@ -136,6 +174,10 @@ static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///<
 static const int _offsetColors      = _nbVertices * _sizeOfVertex;          ///< size of vertices == start of colors
 static const int _nbColors          = _nbVertices;          ///< Total number of colors (cube + plane)
 static const int _colorDim          = 4;                    ///< Each color is in 4D (r,g,b,a)
+static const int _sizeOfColor       = _colorDim * sizeof(_vertexData[0]);   ///< size of one color
+static const int _offsetNormals     = _offsetColors + _nbColors * _sizeOfColor; ///< vertices + colors == start normals
+static const int _nbNormals         = _nbVertices;          ///< Total number of colors (cube + plane)
+static const int _normalDim         = 3;                    ///< Each normal is in 3D (x,y,z) (so w default to 1.0f)
 
 /// Indices of vertex (from vertex buffer above)
 static const GLshort _indexData[] = {
@@ -170,6 +212,7 @@ Renderer::Renderer() :
     mProgram(0),
     mPositionAttrib(-1),
     mColorAttrib(-1),
+    mNormalAttrib(-1),
     mModelToCameraMatrixUnif(-1),
     mCameraToClipMatrixUnif(-1),
     mVertexBufferObject(0),
@@ -293,6 +336,7 @@ void Renderer::initProgram() {
     // TODO(SRombauts) test attribute and uniform != -1
     mPositionAttrib = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
     mColorAttrib    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
+    mNormalAttrib   = glGetAttribLocation(mProgram, "normal");     // layout(location = 2) in vec4 normal;
     // Get location of uniforms - input variables of (vertex) shader
     // "Model to Camera" matrix, positioning the model into camera space
     // "Camera to Clip" matrix,  defining the perspective transformation
@@ -337,12 +381,15 @@ void Renderer::initVertexArrayObject(void) {
 
     // Bind the vertex buffer, and init vertex position and colors input streams (shader attributes)
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glEnableVertexAttribArray(mPositionAttrib);    // layout(location = 0) in vec4 position;
-    glEnableVertexAttribArray(mColorAttrib);       // layout(location = 1) in vec4 color;
+    glEnableVertexAttribArray(mPositionAttrib); // layout(location = 0) in vec4 position;
+    glEnableVertexAttribArray(mColorAttrib);    // layout(location = 1) in vec4 color;
+    glEnableVertexAttribArray(mNormalAttrib);   // layout(location = 2) in vec4 normal;
+
     // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
     glVertexAttribPointer(mPositionAttrib, _vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribPointer(mColorAttrib, _colorDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetColors));
-    // this tells OpenGL that vertex are pointed by their index
+    glVertexAttribPointer(mNormalAttrib, _normalDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetNormals));
+    // this tells OpenGL that vertex are pointed by index
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
 
     glBindVertexArray(0);

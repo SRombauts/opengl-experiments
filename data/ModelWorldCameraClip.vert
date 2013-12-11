@@ -1,8 +1,9 @@
 #version 330
 
-// 2 input streams "attributes" (model vertex position & color)
+// 3 input streams "attributes" (model vertex position, color and normals)
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 color;
+layout(location = 2) in vec4 normal;
 
 // 2 output streams (default gl_Position & smoothColor)
 smooth out vec4 smoothColor;

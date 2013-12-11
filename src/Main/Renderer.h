@@ -66,6 +66,7 @@ private:
     GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
     GLuint mPositionAttrib;             ///< Location of the "position" vertex shader attribute (input stream)
     GLuint mColorAttrib;                ///< Location of the "color" vertex shader attribute (input stream)
+    GLuint mNormalAttrib;               ///< Location of the "normal" vertex shader attribute (input stream)
     GLuint mModelToCameraMatrixUnif;    ///< Location of the "modelToCameraMatrix" vertex shader uniform input variable
     GLuint mCameraToClipMatrixUnif;     ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
 
