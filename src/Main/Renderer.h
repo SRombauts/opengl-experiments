@@ -65,10 +65,13 @@ private:
 
     GLuint mProgram;                    ///< OpenGL program containing compiled and linked shaders
     GLuint mPositionAttrib;             ///< Location of the "position" vertex shader attribute (input stream)
-    GLuint mColorAttrib;                ///< Location of the "color" vertex shader attribute (input stream)
+    GLuint mColorAttrib;                ///< Location of the "diffuseColor" vertex shader attribute (input stream)
     GLuint mNormalAttrib;               ///< Location of the "normal" vertex shader attribute (input stream)
     GLuint mModelToCameraMatrixUnif;    ///< Location of the "modelToCameraMatrix" vertex shader uniform input variable
-    GLuint mCameraToClipMatrixUnif;     ///< Location of the "cameraToClipMatrix"  vertex shader uniform input variable
+    GLuint mCameraToClipMatrixUnif;     ///< Location of the "cameraToClipMatrix" vertex shader uniform input variable
+    GLuint mDirToLightUnif;             ///< Location of the "dirToLight" vertex shader uniform input variable
+    GLuint mLightIntensityUnif;         ///< Location of the "lightIntensity" vertex shader uniform input variable
+    GLuint mAmbientIntensityUnif;       ///< Location of the "ambientIntensity" vertex shader uniform input variable
 
     GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh
     GLuint mIndexBufferObject;          ///< Index buffer object containing the indices of vertices of our mesh
@@ -77,8 +80,9 @@ private:
     glm::fquat  mCameraOrientation;     ///< Axis and angle of rotation of the camera
     glm::vec3   mCameraTranslation;     ///< Vector of translation of the camera
 
-    glm::fquat  mModelOrientation;      ///< Axis and angle of rotation of the model
-    glm::vec3   mModelTranslation;      ///< Vector of translation of the model
+    glm::vec3   mDirToLight;            ///< Vector of directional light orientation (toward the light)
+    glm::vec4   mLightIntensity;        ///< Directional light intensity and color
+    glm::vec4   mAmbientIntensity;      ///< Ambiant light intensity and color
 
     Scene       mSceneHierarchy;        ///< Scene node hierarchy
     Node::Ptr   mModelPtr;              ///< A movable model of a Cube

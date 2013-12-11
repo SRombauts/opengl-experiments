@@ -40,7 +40,9 @@ static const float Z_PLANE_FRONT    = 5.0f;     ///< Front coordinate
 static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
-/// Counter Clockwise winding order (GL_CCW)
+/// We use the Clockwise winding order (GL_CW)
+/// TODO SRO this is the inverse of OpenGL default winding order
+/// cube (6 faces with normals):
 ///                           12- 13
 ///                          /   /
 ///                 10- 11  14- 15      16     21
@@ -49,7 +51,7 @@ static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
 /// | / |   / \ /                     |/     |/
 /// 2 - 3  4 - 5                      19     22
 ///
-/// plane:
+/// plane (1 face with normals):
 ///   0 - 1
 ///  /   /
 /// 2 - 3
@@ -220,10 +222,12 @@ Renderer::Renderer() :
     mVertexArrayObject(0),
     mCameraOrientation(),
     mCameraTranslation(0.0f, 0.5f, 4.0f),
-    mModelOrientation(),
-    mModelTranslation(1.0f, 1.5f, -1.0f) {
+    mDirToLight(0.866f, -0.5f, 0.0f),
+    mLightIntensity(0.9f, 0.9f, 0.9f, 1.0f),
+    mAmbientIntensity(0.05f, 0.05f, 0.05f, 1.0f) {
     init();
 }
+
 /**
  * @brief Destructor
  */
@@ -334,14 +338,26 @@ void Renderer::initProgram() {
 
     // Get location of (vertex) attributes (input streams of (vertex) shader
     // TODO(SRombauts) test attribute and uniform != -1
-    mPositionAttrib = glGetAttribLocation(mProgram, "position");   // layout(location = 0) in vec4 position;
-    mColorAttrib    = glGetAttribLocation(mProgram, "color");      // layout(location = 1) in vec4 color;
-    mNormalAttrib   = glGetAttribLocation(mProgram, "normal");     // layout(location = 2) in vec4 normal;
+    mPositionAttrib = glGetAttribLocation(mProgram, "position");        // layout(location = 0) in vec4 position;
+    mColorAttrib    = glGetAttribLocation(mProgram, "diffuseColor");    // layout(location = 1) in vec4 diffuseColor;
+    mNormalAttrib   = glGetAttribLocation(mProgram, "normal");          // layout(location = 2) in vec4 normal;
     // Get location of uniforms - input variables of (vertex) shader
     // "Model to Camera" matrix, positioning the model into camera space
     // "Camera to Clip" matrix,  defining the perspective transformation
     mModelToCameraMatrixUnif    = glGetUniformLocation(mProgram, "modelToCameraMatrix");
     mCameraToClipMatrixUnif     = glGetUniformLocation(mProgram, "cameraToClipMatrix");
+    mDirToLightUnif             = glGetUniformLocation(mProgram, "dirToLight");
+    mLightIntensityUnif         = glGetUniformLocation(mProgram, "lightIntensity");
+    mAmbientIntensityUnif       = glGetUniformLocation(mProgram, "ambientIntensity");
+
+    // Set uniform values with our constants
+    glUseProgram(mProgram);
+    // TODO(SRombauts) mDirToLightUnif shall be recalculated with each camera orientation change
+    glUniform3fv(mDirToLightUnif, 1, glm::value_ptr(mDirToLight));
+    glUniform4fv(mLightIntensityUnif, 1, glm::value_ptr(mLightIntensity));
+    glUniform4fv(mAmbientIntensityUnif, 1, glm::value_ptr(mAmbientIntensity));
+    glUseProgram(0);
+
 }
 
 /**
@@ -382,7 +398,7 @@ void Renderer::initVertexArrayObject(void) {
     // Bind the vertex buffer, and init vertex position and colors input streams (shader attributes)
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
     glEnableVertexAttribArray(mPositionAttrib); // layout(location = 0) in vec4 position;
-    glEnableVertexAttribArray(mColorAttrib);    // layout(location = 1) in vec4 color;
+    glEnableVertexAttribArray(mColorAttrib);    // layout(location = 1) in vec4 diffuseColor;
     glEnableVertexAttribArray(mNormalAttrib);   // layout(location = 2) in vec4 normal;
 
     // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
