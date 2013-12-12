@@ -16,6 +16,10 @@
 #include <glm/gtc/type_ptr.hpp>         // glm::value_ptr
 #include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
 
+#include <assimp/Importer.hpp>  // Open Asset Importer
+#include <assimp/scene.h>       // Output data structure
+#include <assimp/postprocess.h> // Post processing flags
+
 #include <fstream>      // NOLINT(readability/streams) for shader files
 #include <sstream>
 #include <string>
@@ -353,12 +357,8 @@ void Renderer::initProgram() {
 
     // Set uniform values with our constants
     glUseProgram(mProgram);
-/* TODO(SRombauts) testing
     glUniform4fv(mLightIntensityUnif, 1, glm::value_ptr(mLightIntensity));
     glUniform4fv(mAmbientIntensityUnif, 1, glm::value_ptr(mAmbientIntensity));
-*/
-    glUniform4f(mLightIntensityUnif, 0.8f, 0.8f, 0.8f, 1.0f);
-    glUniform4f(mAmbientIntensityUnif, 0.2f, 0.2f, 0.2f, 1.0f);
     glUseProgram(0);
 }
 
@@ -425,6 +425,16 @@ void Renderer::initScene() {
     mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, _lenCubeList, GL_UNSIGNED_SHORT, _offsetCube));
     mModelPtr->move(glm::vec3(1.0f, 1.5f, -1.0f));
     mSceneHierarchy.addRootNode(mModelPtr);
+
+    // TODO(SRombauts) assimp tests in progress
+    std::string         modelFile("data/cube.dae");
+    Assimp::Importer    importer;
+    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate);
+    if (pScene) {
+        mLog.notice() << "importer.ReadFile(" << modelFile << ") sucessed";
+    }  else {
+        mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
+    }
 }
 
 /**
