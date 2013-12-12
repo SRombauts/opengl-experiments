@@ -7,3 +7,6 @@
 [submodule "LoggerCpp"]
 	path = LoggerCpp
 	url = https://github.com/SRombauts/LoggerCpp.git
+[submodule "assimp"]
+	path = assimp
+	url = https://github.com/assimp/assimp.git
