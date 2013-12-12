@@ -23,13 +23,12 @@ project("LoggerCpp")
         defines {"DEBUG", "_DEBUG"};
         objdir "Debug";
         flags "Symbols";
-        targetname "LoggerCppD";
+        targetsuffix "d"
 
     configuration "Release"
         defines {"NDEBUG", "RELEASE"};
         flags {"OptimizeSpeed", "NoFramePointer", "ExtraWarnings", "NoEditAndContinue"};
         objdir "Release";
-        targetname "LoggerCpp"
 
 project "OpenGL"
     kind "ConsoleApp"
@@ -42,10 +41,9 @@ project "OpenGL"
     includedirs "src/"
     
     includedirs "LoggerCpp/include/"
-    links "LoggerCpp"
+    libdirs "LoggerCpp/lib"
     
     includedirs "assimp/include/"
-    links "assimp"
     libdirs "assimp/lib"
     
     UseLibs {"glload", "freeglut", "glutil", "glm"}
@@ -61,7 +59,9 @@ project "OpenGL"
         defines {"DEBUG", "_DEBUG"}
         targetsuffix "d"
         flags "Symbols"
+			  links {"assimpd", "LoggerCppd"}
 
     configuration "Release"
         defines {"RELEASE", "NDEBUG"}
         flags {"OptimizeSpeed", "NoFramePointer", "ExtraWarnings", "NoEditAndContinue"};
+  			links {"assimp", "LoggerCpp"}
