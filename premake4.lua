@@ -17,7 +17,7 @@ project("LoggerCpp")
            "LoggerCpp/include/LoggerCpp/*.hpp"}
 	
     configuration "windows"
-        defines {"WIN32"}
+        defines "WIN32"
 	
     configuration "Debug"
         defines {"DEBUG", "_DEBUG"};
@@ -42,7 +42,11 @@ project "OpenGL"
     includedirs "src/"
     
     includedirs "LoggerCpp/include/"
-    links {"LoggerCpp"}
+    links "LoggerCpp"
+    
+    includedirs "assimp/include/"
+    links "assimp"
+    libdirs "assimp/lib"
     
     UseLibs {"glload", "freeglut", "glutil", "glm"}
     
