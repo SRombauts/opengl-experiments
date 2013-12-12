@@ -59,9 +59,9 @@ project "OpenGL"
         defines {"DEBUG", "_DEBUG"}
         targetsuffix "d"
         flags "Symbols"
-			  links {"assimpd", "LoggerCppd"}
+			  links {"assimpd", "zlibstaticd", "LoggerCppd"}
 
     configuration "Release"
         defines {"RELEASE", "NDEBUG"}
         flags {"OptimizeSpeed", "NoFramePointer", "ExtraWarnings", "NoEditAndContinue"};
-  			links {"assimp", "LoggerCpp"}
+  			links {"assimp", "zlibstatic", "LoggerCpp"}
