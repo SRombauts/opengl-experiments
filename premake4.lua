@@ -51,7 +51,8 @@ project "OpenGL"
     configuration "windows"
         defines "WIN32"
         links {"glu32", "opengl32", "gdi32", "winmm", "user32"}
-         
+        links {"zlibstatic"}
+    
     configuration "linux"
         links {"GL", "GLU", "Xrandr", "Xi"}
     
@@ -59,9 +60,13 @@ project "OpenGL"
         defines {"DEBUG", "_DEBUG"}
         targetsuffix "d"
         flags "Symbols"
-			  links {"assimpd", "zlibstaticd", "LoggerCppd"}
+        links {"assimpd", "LoggerCppd"}
 
     configuration "Release"
         defines {"RELEASE", "NDEBUG"}
         flags {"OptimizeSpeed", "NoFramePointer", "ExtraWarnings", "NoEditAndContinue"};
-  			links {"assimp", "zlibstatic", "LoggerCpp"}
+        links {"assimp", "LoggerCpp"}
+
+    configuration "linux"
+        links {"z"}
+        
