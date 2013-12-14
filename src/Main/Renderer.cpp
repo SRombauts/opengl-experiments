@@ -16,6 +16,7 @@
 #include <glm/gtc/type_ptr.hpp>         // glm::value_ptr
 #include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
 
+#include <assimp/cimport.h>     // Log Stream
 #include <assimp/Importer.hpp>  // Open Asset Importer
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
@@ -37,15 +38,15 @@ static const float Y_BOTTOM = -1.0f;    ///< Bottom coordinate
 static const float Z_FRONT  = 1.0f;     ///< Front coordinate
 static const float Z_BACK   = -1.0f;    ///< Back coordinate
 // Plane coordinates
-static const float X_PLANE_RIGHT    = 5.0f;     ///< Right coordinate
-static const float X_PLANE_LEFT     = -5.0f;    ///< Left coordinate
-static const float Y_PLANE          = -1.0f;    ///< Y coordinate
-static const float Z_PLANE_FRONT    = 5.0f;     ///< Front coordinate
-static const float Z_PLANE_BACK     = -5.0f;    ///< Back coordinate
+static const float X_PLANE_RIGHT    = 10.0f;    ///< Right coordinate
+static const float X_PLANE_LEFT     = -10.0f;   ///< Left coordinate
+static const float Y_PLANE          = 0.0f;     ///< Y coordinate
+static const float Z_PLANE_FRONT    = 10.0f;    ///< Front coordinate
+static const float Z_PLANE_BACK     = -10.0f;   ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
 /// We use the Clockwise winding order (GL_CW)
-/// TODO SRO this is the inverse of OpenGL default winding order
+/// TODO SRO this is the inverse of OpenGL default CCW winding order
 /// cube (6 faces with normals):
 ///                           12- 13
 ///                          /   /
@@ -226,7 +227,7 @@ Renderer::Renderer() :
     mIndexBufferObject(0),
     mVertexArrayObject(0),
     mCameraOrientation(),
-    mCameraTranslation(0.0f, 0.5f, 4.0f),
+    mCameraTranslation(0.0f, 2.0f, 6.0f),
     mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector !
     mLightIntensity(0.8f, 0.8f, 0.8f, 1.0f),
     mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f) {
@@ -423,15 +424,32 @@ void Renderer::initScene() {
 
     mModelPtr = Node::Ptr(new Node());
     mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, _lenCubeList, GL_UNSIGNED_SHORT, _offsetCube));
-    mModelPtr->move(glm::vec3(1.0f, 1.5f, -1.0f));
+    mModelPtr->move(glm::vec3(2.0f, 4.0f, -2.0f));
     mSceneHierarchy.addRootNode(mModelPtr);
 
     // TODO(SRombauts) assimp tests in progress
+
+    // get a handle to the predefined STDOUT log stream and attach
+    // it to the logging system. It remains active for all further
+    // calls to aiImportFile(Ex) and aiApplyPostProcessing.
+    struct aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
+    aiAttachLogStream(&stream);
+
+    // ... same procedure, but this stream now writes the
+    // log messages to assimp_log.txt
+    stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
+    aiAttachLogStream(&stream);
+
     std::string         modelFile("data/cube.dae");
     Assimp::Importer    importer;
-    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate);
+    // TODO(SRombauts) : revert CW to CCW then remove aiProcess_FlipWindingOrder
+    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate | aiProcess_FlipWindingOrder);
     if (pScene) {
         mLog.notice() << "importer.ReadFile(" << modelFile << ") sucessed";
+        mLog.info() << "Meshes: " << pScene->mNumMeshes;
+        for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
+            aiMesh* pMesh = pScene->mMeshes[i];
+        }
     }  else {
         mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
     }
