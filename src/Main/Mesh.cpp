@@ -1,7 +1,7 @@
 /**
- * @file    Scene.cpp
+ * @file    Mesh.cpp
  * @ingroup opengl-experiments
- * @brief   Container for root Nodes of a hierarchical Scene graph
+ * @brief   Description of a mesh/model at a #Node of the #Scene
  *
  * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
@@ -9,18 +9,18 @@
  * or copy at http://opensource.org/licenses/MIT)
  */
 
-#include "Main/Scene.h"
+#include "Main/Mesh.h"
 
 
 /**
  * @brief Constructor
  */
-Scene::Scene() {
+Mesh::Mesh() {
 }
 
 /**
  * @brief Destructor
  */
-Scene::~Scene() {
+Mesh::~Mesh() {
 }
 

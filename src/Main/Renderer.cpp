@@ -623,6 +623,8 @@ void Renderer::display() {
     // Bind the Vertex Array Object, bound to buffers with vertex position and colors
     glBindVertexArray(mVertexArrayObject);
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // TODO(SRombauts) This camera related calculation need to go into a Camera class into the Scene
     // re-calculate the "World to Camera" matrix,
     glm::mat4 worldToCamerMatrix = transform();
 
@@ -632,6 +634,7 @@ void Renderer::display() {
 
     // and initialize the "Model to Camera" matrix stack with it
     glutil::MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
+    /////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Use the matrix stack to manage the hierarchy of the scene
     mSceneHierarchy.draw(modelToCameraMatrixStack, mModelToCameraMatrixUnif);

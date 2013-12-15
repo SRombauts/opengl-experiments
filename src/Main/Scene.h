@@ -1,7 +1,7 @@
 /**
  * @file    Scene.h
  * @ingroup opengl-experiments
- * @brief   Root Nodes of a hierarchical scene graph
+ * @brief   Container for root Nodes of a hierarchical Scene graph
  *
  * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
@@ -22,7 +22,10 @@
 
 
 /**
- * @brief Root Nodes of a hierarchical scene graph
+ * @brief Container for root Nodes of a hierarchical Scene graph
+ *
+ *  This base level of a scene graph does not have a matrix of transformation of its own.
+ * It does not contain any mesh objects, and thus do no drawing at all.
  */
 class Scene {
 public:
@@ -39,7 +42,8 @@ public:
 private:
     Node::List  mRootNodes; ///< Root Nodes of the current Scene
 
-    // TODO(SRombauts) Add a
+    // TODO(SRombauts) Add Camera (or stereoscopic camera) object
+    // TODO(SRombauts) Add Lights objects
 };
 
 
