@@ -444,11 +444,32 @@ void Renderer::initScene() {
     Assimp::Importer    importer;
     // TODO(SRombauts) : revert CW to CCW then remove aiProcess_FlipWindingOrder
     const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate | aiProcess_FlipWindingOrder);
-    if (pScene) {
+    if (nullptr != pScene) {
         mLog.notice() << "importer.ReadFile(" << modelFile << ") sucessed";
         mLog.info() << "Meshes: " << pScene->mNumMeshes;
-        for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
-            aiMesh* pMesh = pScene->mMeshes[i];
+        // TODO(SRombauts)
+        //for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; iMesh++)
+        unsigned int iMesh = 0;
+        if (iMesh < pScene->mNumMeshes) {
+            aiMesh* pMesh = pScene->mMeshes[iMesh];
+            if (nullptr != pMesh) {
+                mLog.info() << " Vertices: " << pMesh->mNumVertices;
+                mLog.info() << " Normals: " << (pMesh->HasNormals()?"true":"false");
+                for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; iVertex++) {
+                    mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
+                    if (pMesh->HasNormals()) {
+                        mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
+                    }
+                }
+                mLog.info() << " Faces: " << pMesh->mNumFaces; // Indicies
+                for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; iFace++) {
+                    aiFace& face = pMesh->mFaces[iFace];
+                    mLog.info() << "  Indices: " << face.mNumIndices;
+                    for (unsigned int iIndice = 0; iIndice < face.mNumIndices; iIndice++) {
+                        mLog.info() << "   - " << face.mIndices[iIndice];
+                    }
+                }
+            }
         }
     }  else {
         mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
