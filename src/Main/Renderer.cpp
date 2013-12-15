@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <cassert>
 
 #include <cmath>    // cos, sin, tan
 
@@ -46,7 +47,7 @@ static const float Z_PLANE_BACK     = -10.0f;   ///< Back coordinate
 
 /// Vertex data (indexed bellow), followed by their color data
 /// We use the Clockwise winding order (GL_CW)
-/// TODO SRO this is the inverse of OpenGL default CCW winding order
+/// TODO(SRombauts) this is the inverse of OpenGL default CCW winding order
 /// cube (6 faces with normals):
 ///                           12- 13
 ///                          /   /
@@ -175,7 +176,7 @@ static const float _vertexData[] = {
     0.0f,   Y_TOP,      0.0f,
     0.0f,   Y_TOP,      0.0f,
 };
-static const int _sizeOfDataArray   = sizeof(_vertexData);  ///< size of the _vertexData array
+static const int _nbOfDataArray   = sizeof(_vertexData);  ///< size of the _vertexData array
 static const int _nbVertices        = 24 + 4;               ///< Total number of vertices (cube + plane)
 static const int _vertexDim         = 3;                    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
 static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///< size of one vertex
@@ -279,17 +280,14 @@ void Renderer::init() {
     // 1) compile shaders and link them in a program
     initProgram();
 
-    // 2) init the vertex buffer and vertex array objects
-    initVertexArrayObject();
-
-    // 3) Initialize the scene hierarchy
+    // 2) Initialize the scene hierarchy
     initScene();
 
-    // 4) Initialize more OpenGL option
+    // 2) Initialize more OpenGL option
     // Face Culling
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
     // Depth Test
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -366,20 +364,25 @@ void Renderer::initProgram() {
 /**
  * @brief Initialize the vertex buffer and vertex array objects
  *
- *  Init the vertex buffer object with the data of our mesh (triangle strip)
- * and bind it to a vertex array to 
+ *  Init the VBO (Vertex Buffer Object) with the data of our mesh (vertex positions, colors, and normals),
+ * same for the IBO (Index Buffer Object) with short integers pointing to vertex data (forming triangle list),
+ * and retain all the states needed with a VAO (Vertex Array Object)
+ *
+ * @param[in] aVertexData   Vertex data (vertex positions, colors, and normals)
+ * @param[in] aIndexData    Index data (triangle list)
  */
-void Renderer::initVertexArrayObject(void) {
+void Renderer::initVertexArrayObject(const VertexData& aVertexData, const IndexData& aIndexData) {
     // Generate a VBO: Ask for a buffer of GPU memory
     mLog.debug() << "initializing vertex buffer objet...";
-    // TODO(SRombauts) test buffers != 0
     glGenBuffers(1, &mVertexBufferObject);
+    assert(0 != mVertexBufferObject); // TODO(SRombauts) test buffers != 0 with a dedicated ASSERT_VBO
 
     // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, _sizeOfDataArray, _vertexData, GL_STATIC_DRAW);
+    // TODO(SRombauts) use templates to get size and buffer
+    glBufferData(GL_ARRAY_BUFFER, aVertexData.size() * sizeof(aVertexData[0]), &aVertexData[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // here _vertexData is of no more use (dynamic memory could be deallocated)
+    // here aVertexData is of no more use (dynamic memory will be deallocated)
 
     // Generate a IBO: Ask for a buffer of GPU memory
     mLog.debug() << "initializing index buffer objet...";
@@ -387,7 +390,8 @@ void Renderer::initVertexArrayObject(void) {
 
     // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _sizeOfIndexData, _indexData, GL_STATIC_DRAW);
+    // TODO(SRombauts) use templates to get size and buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, aIndexData.size() * sizeof(aIndexData[0]), &aIndexData[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     // here _indexData is of no more use (dynamic memory could be deallocated)
 
@@ -402,12 +406,17 @@ void Renderer::initVertexArrayObject(void) {
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
     glEnableVertexAttribArray(mPositionAttrib); // layout(location = 0) in vec4 position;
     glEnableVertexAttribArray(mColorAttrib);    // layout(location = 1) in vec4 diffuseColor;
-    glEnableVertexAttribArray(mNormalAttrib);   // layout(location = 2) in vec4 normal;
+    glEnableVertexAttribArray(mNormalAttrib);   // layout(location = 2) in vec3 normal;
 
     // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
-    glVertexAttribPointer(mPositionAttrib, _vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribPointer(mColorAttrib, _colorDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetColors));
-    glVertexAttribPointer(mNormalAttrib, _normalDim, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(_offsetNormals));
+    const size_t vertexDim = 3;
+    mLog.debug() << "vertexDim=" << vertexDim << ", 3 * sizeof(aVertexData[0])=" << 3 * sizeof(aVertexData[0]);
+    glVertexAttribPointer(mPositionAttrib,  vertexDim, GL_FLOAT, GL_FALSE, 3 * sizeof(aVertexData[0]),
+            reinterpret_cast<void*>(0));
+    glVertexAttribPointer(mColorAttrib,     vertexDim, GL_FLOAT, GL_FALSE, 3 * sizeof(aVertexData[0]),
+            reinterpret_cast<void*>(sizeof(aVertexData[0])));
+    glVertexAttribPointer(mNormalAttrib,    vertexDim, GL_FLOAT, GL_FALSE, 3 * sizeof(aVertexData[0]),
+            reinterpret_cast<void*>(2*sizeof(aVertexData[0])));
     // this tells OpenGL that vertex are pointed by index
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
 
@@ -418,57 +427,87 @@ void Renderer::initVertexArrayObject(void) {
  * @brief  Initialize the scene hierarchy
  */
 void Renderer::initScene() {
-    Node::Ptr PlanePtr = Node::Ptr(new Node());
-    PlanePtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLE_STRIP, _lenPlane, GL_UNSIGNED_SHORT, _offsetPlane));
-    mSceneHierarchy.addRootNode(PlanePtr);
-
-    mModelPtr = Node::Ptr(new Node());
-    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, _lenCubeList, GL_UNSIGNED_SHORT, _offsetCube));
-    mModelPtr->move(glm::vec3(2.0f, 4.0f, -2.0f));
-    mSceneHierarchy.addRootNode(mModelPtr);
-
-    // TODO(SRombauts) assimp tests in progress
-
     // get a handle to the predefined STDOUT log stream and attach
     // it to the logging system. It remains active for all further
     // calls to aiImportFile(Ex) and aiApplyPostProcessing.
-    struct aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
+    struct aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
     aiAttachLogStream(&stream);
 
     // ... same procedure, but this stream now writes the
     // log messages to assimp_log.txt
-    stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
+    stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
     aiAttachLogStream(&stream);
 
     std::string         modelFile("data/cube.dae");
     Assimp::Importer    importer;
-    // TODO(SRombauts) : revert CW to CCW then remove aiProcess_FlipWindingOrder
-    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate | aiProcess_FlipWindingOrder);
+    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate);
     if (nullptr != pScene) {
         mLog.notice() << "importer.ReadFile(" << modelFile << ") sucessed";
         mLog.info() << "Meshes: " << pScene->mNumMeshes;
         // TODO(SRombauts)
-        //for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; iMesh++)
+        // for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; ++iMesh)
         unsigned int iMesh = 0;
         if (iMesh < pScene->mNumMeshes) {
             aiMesh* pMesh = pScene->mMeshes[iMesh];
             if (nullptr != pMesh) {
+                const size_t nbSet = 1 + (pMesh->HasNormals()?1:0) + (pMesh->HasVertexColors(0)?1:0);
+                const size_t nbOfData = pMesh->mNumVertices * nbSet;
+                std::vector<glm::vec3> vertexData;
+                vertexData.reserve(nbOfData);
+
+                mLog.debug() << "nbOfData=" << nbOfData << " (sizeOfData=" << nbOfData * sizeof(glm::vec3) << ")";
                 mLog.info() << " Vertices: " << pMesh->mNumVertices;
-                mLog.info() << " Normals: " << (pMesh->HasNormals()?"true":"false");
-                for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; iVertex++) {
-                    mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
+                mLog.info() << " Normals: "  << (pMesh->HasNormals()?"true":"false");
+                mLog.info() << " Colors: "   << (pMesh->HasVertexColors(0)?"true":"false");
+                for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
+                    mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x
+                            << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
+                    vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
+                                                   pMesh->mVertices[iVertex].y,
+                                                   pMesh->mVertices[iVertex].z));
                     if (pMesh->HasNormals()) {
-                        mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
+                        mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x
+                                << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
+                        vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
+                                                       pMesh->mNormals[iVertex].y,
+                                                       pMesh->mNormals[iVertex].z));
+                    }
+                    if (pMesh->HasVertexColors(0)) {
+                        mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
+                                << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
+                        vertexData.push_back(glm::vec3(pMesh->mColors[0][iVertex].r,
+                                                       pMesh->mColors[0][iVertex].g,
+                                                       pMesh->mColors[0][iVertex].b));
                     }
                 }
-                mLog.info() << " Faces: " << pMesh->mNumFaces; // Indicies
-                for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; iFace++) {
+
+                // If only triangles :
+                // TODO(SRombauts) : test there is no more than 64k indices!
+                const size_t nbOfIndex = pMesh->mNumFaces * 3;
+                std::vector<GLshort> vertexIndex;
+                vertexIndex.reserve(nbOfIndex);
+
+                mLog.info() << " Faces: " << pMesh->mNumFaces;
+                for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; ++iFace) {
                     aiFace& face = pMesh->mFaces[iFace];
                     mLog.info() << "  Indices: " << face.mNumIndices;
-                    for (unsigned int iIndice = 0; iIndice < face.mNumIndices; iIndice++) {
+                    // TODO(SRombauts) verify if only triangles :
+                    for (unsigned int iIndice = 0; iIndice < face.mNumIndices; ++iIndice) {
                         mLog.info() << "   - " << face.mIndices[iIndice];
+                        vertexIndex.push_back(static_cast<GLshort>(face.mIndices[iIndice]));
                     }
                 }
+
+                // Generate a VBO/VBI & VAO in GPU memory with those data
+                initVertexArrayObject(vertexData, vertexIndex);
+                // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
+                // here pScene is of no more use, Assimp::Importer will release it
+
+                // TODO(SRombauts)
+                mModelPtr = Node::Ptr(new Node());
+                mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, nbOfIndex, GL_UNSIGNED_SHORT, 0));
+                mModelPtr->move(glm::vec3(2.0f, 4.0f, -2.0f));
+                mSceneHierarchy.addRootNode(mModelPtr);
             }
         }
     }  else {

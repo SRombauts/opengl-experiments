@@ -48,16 +48,21 @@ public:
     void modelYaw(float aAngle);
     void modelRoll(float aAngle);
 
+    /// A Vector of Vertex data composed of 3 float elements
+    typedef std::vector<glm::vec3>  VertexData;
+    /// A Vector of Index data composed of short elements
+    typedef std::vector<GLshort>    IndexData;
+
 private:
     // Initialization
     void init();
     void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
     void initProgram();
-    void initVertexArrayObject();
+    void initVertexArrayObject(const VertexData& aVertexData, const IndexData& aIndexData);
     void initScene();
     void uninitVertexArrayObject();
 
-    // TODO(SRombauts) Generalize with the Node class (Presently Camera is the inverse of Model)
+    // TODO(SRombauts) Generalize like the Node class (but Camera is the inverse of Model)
     glm::mat4 transform();
 
 private:
