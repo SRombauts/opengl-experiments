@@ -15,13 +15,13 @@
 /**
  * @dir     Utils Utils
  * @brief   Shared utilities.
- * @ingroup Utils Utils
+ * @ingroup Utils
  */
 #pragma once
 
 /**
  * @brief   Shared utilities.
- * @ingroup Utils Utils
+ * @ingroup Utils
  */
 namespace Utils {
 } // namespace Utils
@@ -30,6 +30,7 @@ namespace Utils {
 
 /**
  * @brief A macro to disallow the copy constructor and operator= functions.
+ * @ingroup Utils
  *
  * This should be used in the private: declarations for a class
  *
@@ -53,6 +54,7 @@ namespace Utils {
 #define HAVE_NULLPTR
 /**
  * @brief nullptr_t is the type of the null pointer literal, nullptr.
+ * @ingroup Utils
 */
 class nullptr_t {
 public:

@@ -1,6 +1,6 @@
 /**
  * @file    Renderer.cpp
- * @ingroup opengl-experiments
+ * @ingroup Main
  * @brief   Management of OpenGL drawing/rendering
  *
  * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
@@ -10,6 +10,7 @@
  */
 
 #include "Main/Renderer.h"
+#include "Utils/Exception.h"
 
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
@@ -30,184 +31,14 @@
 
 #include <cmath>    // cos, sin, tan
 
-// We use a standard "Right Hand Coordinate System"
-// Cube coordinates
+// We use the OpenGL default Counter Clockwise Winding order (GL_CCW)
+// We use a standard "Right Hand Coordinate System", like this:
 static const float X_RIGHT  = 1.0f;     ///< Right coordinate
 static const float X_LEFT   = -1.0f;    ///< Left coordinate
 static const float Y_TOP    = 1.0f;     ///< Top coordinate
 static const float Y_BOTTOM = -1.0f;    ///< Bottom coordinate
 static const float Z_FRONT  = 1.0f;     ///< Front coordinate
 static const float Z_BACK   = -1.0f;    ///< Back coordinate
-// Plane coordinates
-static const float X_PLANE_RIGHT    = 10.0f;    ///< Right coordinate
-static const float X_PLANE_LEFT     = -10.0f;   ///< Left coordinate
-static const float Y_PLANE          = 0.0f;     ///< Y coordinate
-static const float Z_PLANE_FRONT    = 10.0f;    ///< Front coordinate
-static const float Z_PLANE_BACK     = -10.0f;   ///< Back coordinate
-
-/// Vertex data (indexed bellow), followed by their color data
-/// We use the Clockwise winding order (GL_CW)
-/// TODO(SRombauts) this is the inverse of OpenGL default CCW winding order
-/// cube (6 faces with normals):
-///                           12- 13
-///                          /   /
-///                 10- 11  14- 15      16     21
-///                 | \ |              /|     /|
-/// 0 - 1    6 - 7  8 - 9            17 18  20 23
-/// | / |   / \ /                     |/     |/
-/// 2 - 3  4 - 5                      19     22
-///
-/// plane (1 face with normals):
-///   0 - 1
-///  /   /
-/// 2 - 3
-static const float _vertexData[] = {
-    // cube: the 24 vertices (x,y,z,w) but w default to 1.0f
-    // front
-    X_LEFT,  Y_TOP,     Z_FRONT,    // 0
-    X_RIGHT, Y_TOP,     Z_FRONT,    // 1
-    X_LEFT,  Y_BOTTOM,  Z_FRONT,    // 2
-    X_RIGHT, Y_BOTTOM,  Z_FRONT,    // 3
-    // bottom
-    X_LEFT,  Y_BOTTOM,  Z_FRONT,    // 4
-    X_RIGHT, Y_BOTTOM,  Z_FRONT,    // 5
-    X_LEFT,  Y_BOTTOM,  Z_BACK,     // 6
-    X_RIGHT, Y_BOTTOM,  Z_BACK,     // 7
-    // back
-    X_LEFT,  Y_BOTTOM,  Z_BACK,     // 8
-    X_RIGHT, Y_BOTTOM,  Z_BACK,     // 9
-    X_LEFT,  Y_TOP,     Z_BACK,     // 10
-    X_RIGHT, Y_TOP,     Z_BACK,     // 11
-    // top
-    X_LEFT,  Y_TOP,     Z_BACK,     // 12
-    X_RIGHT, Y_TOP,     Z_BACK,     // 13
-    X_LEFT,  Y_TOP,     Z_FRONT,    // 14
-    X_RIGHT, Y_TOP,     Z_FRONT,    // 15
-    // left
-    X_LEFT,  Y_TOP,     Z_BACK,     // 16
-    X_LEFT,  Y_TOP,     Z_FRONT,    // 17
-    X_LEFT,  Y_BOTTOM,  Z_BACK,     // 18
-    X_LEFT,  Y_BOTTOM,  Z_FRONT,    // 19
-    // right
-    X_RIGHT, Y_TOP,     Z_FRONT,    // 20
-    X_RIGHT, Y_TOP,     Z_BACK,     // 21
-    X_RIGHT, Y_BOTTOM,  Z_FRONT,    // 22
-    X_RIGHT, Y_BOTTOM,  Z_BACK,     // 23
-
-    // plane: the 4 vertices (x,y,z,w) but w default to 1.0f
-    X_PLANE_LEFT,  Y_PLANE, Z_PLANE_BACK,
-    X_PLANE_RIGHT, Y_PLANE, Z_PLANE_BACK,
-    X_PLANE_LEFT,  Y_PLANE, Z_PLANE_FRONT,
-    X_PLANE_RIGHT, Y_PLANE, Z_PLANE_FRONT,
-
-    // cube: the colors (r,g,b,a) of each of 24 vertices
-    // front
-    0.7f, 0.0f, 0.0f, 1.0f,
-    0.7f, 0.0f, 0.0f, 1.0f,
-    0.7f, 0.0f, 0.0f, 1.0f,
-    0.7f, 0.0f, 0.0f, 1.0f,
-    // bottom
-    0.0f, 0.7f, 0.0f, 1.0f,
-    0.0f, 0.7f, 0.0f, 1.0f,
-    0.0f, 0.7f, 0.0f, 1.0f,
-    0.0f, 0.7f, 0.0f, 1.0f,
-    // back
-    0.0f, 0.0f, 0.7f, 1.0f,
-    0.0f, 0.0f, 0.7f, 1.0f,
-    0.0f, 0.0f, 0.7f, 1.0f,
-    0.0f, 0.0f, 0.7f, 1.0f,
-    // top
-    0.5f, 0.4f, 0.0f, 1.0f,
-    0.5f, 0.4f, 0.0f, 1.0f,
-    0.5f, 0.4f, 0.0f, 1.0f,
-    0.5f, 0.4f, 0.0f, 1.0f,
-    // left
-    0.0f, 0.5f, 0.4f, 1.0f,
-    0.0f, 0.5f, 0.4f, 1.0f,
-    0.0f, 0.5f, 0.4f, 1.0f,
-    0.0f, 0.5f, 0.4f, 1.0f,
-    // right
-    0.4f, 0.0f, 0.5f, 1.0f,
-    0.4f, 0.0f, 0.5f, 1.0f,
-    0.4f, 0.0f, 0.5f, 1.0f,
-    0.4f, 0.0f, 0.5f, 1.0f,
-
-    // plane: the colors (r,g,b,a) of each of 4 vertices
-    0.0f, 0.5f, 0.05f, 1.0f,
-    0.0f, 0.5f, 0.05f, 1.0f,
-    0.0f, 0.5f, 0.05f, 1.0f,
-    0.0f, 0.5f, 0.05f, 1.0f,
-
-    // cube, the normals
-    // front
-    0.0f,   0.0f,       Z_FRONT,
-    0.0f,   0.0f,       Z_FRONT,
-    0.0f,   0.0f,       Z_FRONT,
-    0.0f,   0.0f,       Z_FRONT,
-    // bottom
-    0.0f,   Y_BOTTOM,   0.0f,
-    0.0f,   Y_BOTTOM,   0.0f,
-    0.0f,   Y_BOTTOM,   0.0f,
-    0.0f,   Y_BOTTOM,   0.0f,
-    // back
-    0.0f,   0.0f,       Z_BACK,
-    0.0f,   0.0f,       Z_BACK,
-    0.0f,   0.0f,       Z_BACK,
-    0.0f,   0.0f,       Z_BACK,
-    // top
-    0.0f,   Y_TOP,      0.0f,
-    0.0f,   Y_TOP,      0.0f,
-    0.0f,   Y_TOP,      0.0f,
-    0.0f,   Y_TOP,      0.0f,
-    // left
-    X_LEFT, 0.0f,       0.0f,
-    X_LEFT, 0.0f,       0.0f,
-    X_LEFT, 0.0f,       0.0f,
-    X_LEFT, 0.0f,       0.0f,
-    // right
-    X_RIGHT, 0.0f,      0.0f,
-    X_RIGHT, 0.0f,      0.0f,
-    X_RIGHT, 0.0f,      0.0f,
-    X_RIGHT, 0.0f,      0.0f,
-
-    // plane, the normals
-    0.0f,   Y_TOP,      0.0f,
-    0.0f,   Y_TOP,      0.0f,
-    0.0f,   Y_TOP,      0.0f,
-    0.0f,   Y_TOP,      0.0f,
-};
-static const int _nbOfDataArray   = sizeof(_vertexData);  ///< size of the _vertexData array
-static const int _nbVertices        = 24 + 4;               ///< Total number of vertices (cube + plane)
-static const int _vertexDim         = 3;                    ///< Each vertex is in 3D (x,y,z) (so w default to 1.0f)
-static const int _sizeOfVertex      = _vertexDim * sizeof(_vertexData[0]);  ///< size of one vertex
-static const int _offsetColors      = _nbVertices * _sizeOfVertex;          ///< size of vertices == start of colors
-static const int _nbColors          = _nbVertices;          ///< Total number of colors (cube + plane)
-static const int _colorDim          = 4;                    ///< Each color is in 4D (r,g,b,a)
-static const int _sizeOfColor       = _colorDim * sizeof(_vertexData[0]);   ///< size of one color
-static const int _offsetNormals     = _offsetColors + _nbColors * _sizeOfColor; ///< vertices + colors == start normals
-static const int _nbNormals         = _nbVertices;          ///< Total number of colors (cube + plane)
-static const int _normalDim         = 3;                    ///< Each normal is in 3D (x,y,z) (so w default to 1.0f)
-
-/// Indices of vertex (from vertex buffer above)
-static const GLshort _indexData[] = {
-    // cube:
-    0, 1, 2,    3, 2, 1,    // front
-    4, 5, 6,    7, 6, 5,    // bottom
-    8, 9, 10,   11, 10, 9,  // back
-    12, 13, 14, 15, 14, 13, // top
-    16, 17, 18, 19, 18, 17, // left
-    20, 21, 22, 23, 22, 21, // right
-    // plane
-    24, 25, 26, 27,
-};
-static const int _sizeOfIndexData   = sizeof(_indexData);   ///< size of the _indexData;  ///< size array
-/// Offset of the cube list :
-static const int _offsetCube        = 0;
-static const int _lenCubeList       = 36;                   ///< Number of indices for the cube list
-/// Offset of the plane strip :
-static const int _offsetPlane       = (_lenCubeList) * sizeof(_indexData[0]);
-static const int _lenPlane          = 4;                    ///< Number of indices for the plane strip
-
 
 static const float _zNear           = 1.0f;     ///< Z coordinate or the near/front frustum plane from which to render
 static const float _zFar            = 100.0f;   ///< Z coordinate or the far/back frustum plane to which to render
@@ -264,7 +95,7 @@ void Renderer::compileShader(std::vector<GLuint>& aShaderList,
             aShaderList.push_back(glutil::CompileShader(aShaderType, isShader.str()));
         } else {
             mLog.critic() << "compileShader: unavailable file \"" << apShaderFilename << "\"";
-            throw std::runtime_error(std::string("compileShader: unavailable file ") + apShaderFilename);
+            UTILS_THROW("compileShader: unavailable file " << apShaderFilename);
         }
     }
     catch(glutil::CompileLinkException& e) {
@@ -438,81 +269,92 @@ void Renderer::initScene() {
     stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
     aiAttachLogStream(&stream);
 
-    // TODO(SRombauts) use a text file to tell which test mesh to load
-    std::string         modelFile("data/cube.dae");
-    Assimp::Importer    importer;
-    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcessPreset_TargetRealtime_Fast);
-    if (nullptr != pScene) {
-        mLog.notice() << "importer.ReadFile(" << modelFile << ") sucessed";
-        mLog.info() << "Meshes: " << pScene->mNumMeshes;
-        // TODO(SRombauts)
-        // for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; ++iMesh)
-        unsigned int iMesh = 0;
-        if (iMesh < pScene->mNumMeshes) {
-            aiMesh* pMesh = pScene->mMeshes[iMesh];
-            if (nullptr != pMesh) {
-                const size_t nbSet = 1 + (pMesh->HasNormals()?1:0) + (pMesh->HasVertexColors(0)?1:0);
-                const size_t nbOfData = pMesh->mNumVertices * nbSet;
-                std::vector<glm::vec3> vertexData;
-                vertexData.reserve(nbOfData);
+    // We use a text file to tell which test mesh to load
+    std::string importFilename = "data/import.txt";
+    mLog.debug() << "initScene(" << importFilename << ")...";
+    std::ifstream importFile(importFilename);
+    if (false == importFile.is_open()) {
+        mLog.critic() << "initScene: unavailable file \"" << importFilename << "\"";
+        UTILS_THROW("compileShader: unavailable file \"" << importFilename << "\"");
+    }
 
-                mLog.debug() << "nbOfData=" << nbOfData << " (sizeOfData=" << nbOfData * sizeof(glm::vec3) << ")";
-                mLog.info() << " Vertices: " << pMesh->mNumVertices;
-                mLog.info() << " Colors: "   << (pMesh->HasVertexColors(0)?"true":"false");
-                mLog.info() << " Normals: "  << (pMesh->HasNormals()?"true":"false");
-                for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
-                    mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x
-                            << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
-                    vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
-                                                   pMesh->mVertices[iVertex].y,
-                                                   pMesh->mVertices[iVertex].z));
-                    if (pMesh->HasVertexColors(0)) {
-                        mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
-                                << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
-                        vertexData.push_back(glm::vec3(pMesh->mColors[0][iVertex].r,
-                                                       pMesh->mColors[0][iVertex].g,
-                                                       pMesh->mColors[0][iVertex].b));
+    // TODO(SRombauts) move all this in separate methods, and use the Mesh & Node classes
+    std::string modelFile;
+    while (std::getline(importFile, modelFile)) {
+        Assimp::Importer    importer;
+        mLog.notice() << "importer.ReadFile(" << modelFile << ")...";
+        const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcessPreset_TargetRealtime_Fast);
+        if (nullptr != pScene) {
+            mLog.info() << "Meshes: " << pScene->mNumMeshes;
+            // TODO(SRombauts)
+            // for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; ++iMesh)
+            unsigned int iMesh = 0;
+            if (iMesh < pScene->mNumMeshes) {
+                aiMesh* pMesh = pScene->mMeshes[iMesh];
+                if (nullptr != pMesh) {
+                    const size_t nbSet = 1 + (pMesh->HasNormals()?1:0) + (pMesh->HasVertexColors(0)?1:0);
+                    const size_t nbOfData = pMesh->mNumVertices * nbSet;
+                    std::vector<glm::vec3> vertexData;
+                    vertexData.reserve(nbOfData);
+
+                    mLog.debug() << "nbOfData=" << nbOfData << " (sizeOfData=" << nbOfData * sizeof(glm::vec3) << ")";
+                    mLog.info() << " Vertices: " << pMesh->mNumVertices;
+                    mLog.info() << " Colors: "   << (pMesh->HasVertexColors(0)?"true":"false");
+                    mLog.info() << " Normals: "  << (pMesh->HasNormals()?"true":"false");
+                    for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
+                        mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x
+                                << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
+                        vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
+                                                       pMesh->mVertices[iVertex].y,
+                                                       pMesh->mVertices[iVertex].z));
+                        if (pMesh->HasVertexColors(0)) {
+                            mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
+                                    << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
+                            vertexData.push_back(glm::vec3(pMesh->mColors[0][iVertex].r,
+                                                           pMesh->mColors[0][iVertex].g,
+                                                           pMesh->mColors[0][iVertex].b));
+                        }
+                        if (pMesh->HasNormals()) {
+                            mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x
+                                    << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
+                            vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
+                                                           pMesh->mNormals[iVertex].y,
+                                                           pMesh->mNormals[iVertex].z));
+                        }
                     }
-                    if (pMesh->HasNormals()) {
-                        mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x
-                                << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
-                        vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
-                                                       pMesh->mNormals[iVertex].y,
-                                                       pMesh->mNormals[iVertex].z));
+
+                    // If only triangles :
+                    // TODO(SRombauts) : test there is no more than 64k indices!
+                    const size_t nbOfIndex = pMesh->mNumFaces * 3;
+                    std::vector<GLshort> vertexIndex;
+                    vertexIndex.reserve(nbOfIndex);
+
+                    mLog.info() << " Faces: " << pMesh->mNumFaces;
+                    for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; ++iFace) {
+                        aiFace& face = pMesh->mFaces[iFace];
+                        mLog.info() << "  Indices: " << face.mNumIndices;
+                        // TODO(SRombauts) verify if only triangles :
+                        for (unsigned int iIndice = 0; iIndice < face.mNumIndices; ++iIndice) {
+                            mLog.info() << "   - " << face.mIndices[iIndice];
+                            vertexIndex.push_back(static_cast<GLshort>(face.mIndices[iIndice]));
+                        }
                     }
+
+                    // Generate a VBO/VBI & VAO in GPU memory with those data
+                    initVertexArrayObject(vertexData, vertexIndex);
+                    // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
+                    // here pScene is of no more use, Assimp::Importer will release it
+
+                    // TODO(SRombauts)
+                    mModelPtr = Node::Ptr(new Node());
+                    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, nbOfIndex, GL_UNSIGNED_SHORT, 0));
+                    mModelPtr->move(glm::vec3(2.0f, 4.0f, -2.0f));
+                    mSceneHierarchy.addRootNode(mModelPtr);
                 }
-
-                // If only triangles :
-                // TODO(SRombauts) : test there is no more than 64k indices!
-                const size_t nbOfIndex = pMesh->mNumFaces * 3;
-                std::vector<GLshort> vertexIndex;
-                vertexIndex.reserve(nbOfIndex);
-
-                mLog.info() << " Faces: " << pMesh->mNumFaces;
-                for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; ++iFace) {
-                    aiFace& face = pMesh->mFaces[iFace];
-                    mLog.info() << "  Indices: " << face.mNumIndices;
-                    // TODO(SRombauts) verify if only triangles :
-                    for (unsigned int iIndice = 0; iIndice < face.mNumIndices; ++iIndice) {
-                        mLog.info() << "   - " << face.mIndices[iIndice];
-                        vertexIndex.push_back(static_cast<GLshort>(face.mIndices[iIndice]));
-                    }
-                }
-
-                // Generate a VBO/VBI & VAO in GPU memory with those data
-                initVertexArrayObject(vertexData, vertexIndex);
-                // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
-                // here pScene is of no more use, Assimp::Importer will release it
-
-                // TODO(SRombauts)
-                mModelPtr = Node::Ptr(new Node());
-                mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, nbOfIndex, GL_UNSIGNED_SHORT, 0));
-                mModelPtr->move(glm::vec3(2.0f, 4.0f, -2.0f));
-                mSceneHierarchy.addRootNode(mModelPtr);
             }
+        }  else {
+            mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
         }
-    }  else {
-        mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
     }
 }
 

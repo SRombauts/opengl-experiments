@@ -17,6 +17,7 @@ namespace Utils {
 
 /**
  * @brief Cyclic timing event generation
+ * @ingroup Utils
  */
 class Timer {
 public:

@@ -1,6 +1,6 @@
 /**
  * @file    Scene.cpp
- * @ingroup opengl-experiments
+ * @ingroup Main
  * @brief   Container for root Nodes of a hierarchical Scene graph
  *
  * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)

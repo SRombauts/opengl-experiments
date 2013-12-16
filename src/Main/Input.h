@@ -1,6 +1,6 @@
 /**
  * @file    Input.h
- * @ingroup opengl-experiments
+ * @ingroup Main
  * @brief   Management of the GLUT input callbacks
  *
  * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)

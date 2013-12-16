@@ -1,6 +1,6 @@
 /**
  * @file    Node.h
- * @ingroup opengl-experiments
+ * @ingroup Main
  * @brief   Node of a #Scene graph
  *
  * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)

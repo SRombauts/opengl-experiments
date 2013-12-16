@@ -1,6 +1,6 @@
 /**
  * @file    Main.cpp
- * @ingroup opengl-experiments
+ * @ingroup Main
  * @brief   Simple experiments in C++ using the Unofficial OpenGL SDK
  *
  * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)

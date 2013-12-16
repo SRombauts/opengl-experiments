@@ -1,6 +1,6 @@
 /**
  * @file    App.h
- * @ingroup opengl-experiments
+ * @ingroup Main
  * @brief   Application managing the lifecycle of GLUT and the rendering
  *
  * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)

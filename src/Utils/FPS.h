@@ -18,6 +18,7 @@ namespace Utils {
 
 /**
  * @brief Frame-Per-Seconds and inter-frame timing calculation
+ * @ingroup Utils
  */
 class FPS {
 public:
