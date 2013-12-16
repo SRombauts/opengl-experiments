@@ -229,7 +229,7 @@ Renderer::Renderer() :
     mVertexArrayObject(0),
     mCameraOrientation(),
     mCameraTranslation(0.0f, 2.0f, 6.0f),
-    mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector !
+    mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector!
     mLightIntensity(0.8f, 0.8f, 0.8f, 1.0f),
     mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f) {
     init();
@@ -438,9 +438,10 @@ void Renderer::initScene() {
     stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
     aiAttachLogStream(&stream);
 
+    // TODO(SRombauts) use a text file to tell which test mesh to load
     std::string         modelFile("data/cube.dae");
     Assimp::Importer    importer;
-    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcess_Triangulate);
+    const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcessPreset_TargetRealtime_Fast);
     if (nullptr != pScene) {
         mLog.notice() << "importer.ReadFile(" << modelFile << ") sucessed";
         mLog.info() << "Meshes: " << pScene->mNumMeshes;
@@ -457,27 +458,27 @@ void Renderer::initScene() {
 
                 mLog.debug() << "nbOfData=" << nbOfData << " (sizeOfData=" << nbOfData * sizeof(glm::vec3) << ")";
                 mLog.info() << " Vertices: " << pMesh->mNumVertices;
-                mLog.info() << " Normals: "  << (pMesh->HasNormals()?"true":"false");
                 mLog.info() << " Colors: "   << (pMesh->HasVertexColors(0)?"true":"false");
+                mLog.info() << " Normals: "  << (pMesh->HasNormals()?"true":"false");
                 for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
                     mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x
                             << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
                     vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
                                                    pMesh->mVertices[iVertex].y,
                                                    pMesh->mVertices[iVertex].z));
-                    if (pMesh->HasNormals()) {
-                        mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x
-                                << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
-                        vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
-                                                       pMesh->mNormals[iVertex].y,
-                                                       pMesh->mNormals[iVertex].z));
-                    }
                     if (pMesh->HasVertexColors(0)) {
                         mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
                                 << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
                         vertexData.push_back(glm::vec3(pMesh->mColors[0][iVertex].r,
                                                        pMesh->mColors[0][iVertex].g,
                                                        pMesh->mColors[0][iVertex].b));
+                    }
+                    if (pMesh->HasNormals()) {
+                        mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x
+                                << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
+                        vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
+                                                       pMesh->mNormals[iVertex].y,
+                                                       pMesh->mNormals[iVertex].z));
                     }
                 }
 
