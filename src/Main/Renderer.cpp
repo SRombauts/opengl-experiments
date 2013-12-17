@@ -11,6 +11,7 @@
 
 #include "Main/Renderer.h"
 #include "Utils/Exception.h"
+#include "Utils/Measure.h"
 #include "Utils/String.h"
 
 #include <GL/freeglut.h>
@@ -211,11 +212,12 @@ void Renderer::initScene() {
     // TODO(SRombauts) move all this in separate methods, and use the Mesh & Node classes
     std::string modelFile;
     while (std::getline(importFile, modelFile)) {
+        Utils::Measure      measure;
         Assimp::Importer    importer;
         Utils::trim(modelFile);
         mLog.notice() << "importer.ReadFile(" << modelFile << ")...";
         const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcessPreset_TargetRealtime_Fast);
-        if (nullptr != pScene) {
+        if ( (nullptr != pScene) && (0 == (pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)) ) {
             mLog.info() << "Meshes: " << pScene->mNumMeshes;
             // TODO(SRombauts)
             // for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; ++iMesh)
@@ -238,7 +240,7 @@ void Renderer::initScene() {
                         //             << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
                         vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
                                                        pMesh->mVertices[iVertex].y,
-                                                       pMesh->mVertices[iVertex].z));
+                                                       pMesh->mVertices[iVertex].z) * 20.0f); // TODO(SRombauts) Scale matrix
                         if (pMesh->HasVertexColors(0)) {
                             // mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
                             //             << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
@@ -262,8 +264,12 @@ void Renderer::initScene() {
                     }
 
                     // If only triangles :
-                    // TODO(SRombauts) : test there is no more than 64k indices!
                     const size_t nbOfIndex = pMesh->mNumFaces * 3;
+                    if (65536 < nbOfIndex) {
+                        // TODO(SRombauts) : if there is more than 64k indices, switch to GL_UNSIGNED_INT !
+                        mLog.critic() << "initScene: too many indices for GL_UNSIGNED_SHORT (" << nbOfIndex << " > " << 65536 << ")";
+                        UTILS_THROW("initScene: too many indices for GL_UNSIGNED_SHORT (" << nbOfIndex << " > " << 65536 << ")");
+                    }
                     std::vector<GLshort> vertexIndex;
                     vertexIndex.reserve(nbOfIndex);
 
@@ -278,9 +284,9 @@ void Renderer::initScene() {
                         }
                     }
 
+                    // TODO(SRombauts) The following API
                     // Generate a Mesh objet to draw the imported model
                     Mesh::Ptr MeshPtr(new Mesh(GL_TRIANGLES, vertexIndex.size(), GL_UNSIGNED_SHORT, 0));
-
                     // Generate a VBO/VBI & VAO in GPU memory with those data
                     MeshPtr->genOpenGlObjects(vertexData, vertexIndex, mPositionAttrib, mColorAttrib, mNormalAttrib);
                     // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
@@ -293,9 +299,11 @@ void Renderer::initScene() {
                     mSceneHierarchy.addRootNode(mModelPtr);
                 }
             }
-            mLog.notice() << "initScene done";
+            time_t ellapsedUs = measure.diff();
+            mLog.notice() << "importer.ReadFile(" << modelFile << ") done in " << ellapsedUs/1000000 << "." << ellapsedUs/1000 << "s";
         }  else {
-            mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
+            mLog.critic() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
+            UTILS_THROW("importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'");
         }
     }
 }

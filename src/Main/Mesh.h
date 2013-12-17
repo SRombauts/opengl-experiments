@@ -38,11 +38,12 @@ public:
          GLuint aStartPosition);
     ~Mesh();
 
+    // Generate OpenGL objects
     void genOpenGlObjects(const VertexData& aVertexData,
-                               const IndexData& aIndexData,
-                               GLuint aPositionAttrib,
-                               GLuint aColorAttrib,
-                               GLuint aNormalAttrib);
+                          const IndexData&  aIndexData,
+                          GLuint            aPositionAttrib,
+                          GLuint            aColorAttrib,
+                          GLuint            aNormalAttrib);
     void deleteOpenGlObjects();
 
     /**

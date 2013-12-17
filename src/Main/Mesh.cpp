@@ -46,11 +46,11 @@ Mesh::Mesh(GLenum aPrimitiveType,
  * @param[in] aColorAttrib      Location of the "diffuseColor" vertex shader attribute (input stream)
  * @param[in] aNormalAttrib     Location of the "normal" vertex shader attribute (input stream)
  */
-void Mesh::genOpenGlObjects(const VertexData& aVertexData,
-                                 const IndexData& aIndexData,
-                                 GLuint aPositionAttrib,
-                                 GLuint aColorAttrib,
-                                 GLuint aNormalAttrib) {
+void Mesh::genOpenGlObjects(const VertexData&   aVertexData,
+                            const IndexData&    aIndexData,
+                            GLuint              aPositionAttrib,
+                            GLuint              aColorAttrib,
+                            GLuint              aNormalAttrib) {
     // Generate a VBO: Ask for a buffer of GPU memory
     glGenBuffers(1, &mVertexBufferObject);
     assert(0 != mVertexBufferObject); // TODO(SRombauts) test buffers != 0 with a dedicated ASSERT_VBO
@@ -67,7 +67,7 @@ void Mesh::genOpenGlObjects(const VertexData& aVertexData,
 
     // Allocate GPU memory and copy our data onto this new buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
-    // TODO(SRombauts) use templates to get size and buffer
+    // TODO(SRombauts) use templates to get size and start of buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, aIndexData.size() * sizeof(aIndexData[0]), &aIndexData[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     // here _indexData is of no more use (dynamic memory could be deallocated)
