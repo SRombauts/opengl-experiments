@@ -8,6 +8,15 @@
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
  */
+/**
+ * @defgroup  Main Main
+ * @brief     Simple experiments in C++ using the Unofficial OpenGL SDK
+ */
+/**
+ * @dir     Main Main
+ * @brief   Simple experiments in C++ using the Unofficial OpenGL SDK
+ * @ingroup Main
+ */
 
 #include "Main/App.h"
 

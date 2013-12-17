@@ -127,9 +127,9 @@ void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToC
     // Set uniform values with this new "modelToCameraMatrix" matrix
     glUniformMatrix4fv(aModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
 
-    // Emit the draw calls of the current node
-    for (DrawCalls::const_iterator iDrawCall = mDrawCalls.begin(); iDrawCall != mDrawCalls.end(); ++iDrawCall) {
-        (*iDrawCall).draw();
+    // Draw meshes of the current node
+    for (Mesh::List::const_iterator iMesh = mMeshesList.begin(); iMesh != mMeshesList.end(); ++iMesh) {
+        (*iMesh)->draw();
     }
 
     // And ask children to draw themselves

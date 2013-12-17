@@ -1,7 +1,7 @@
 /**
  * @file    Node.h
  * @ingroup Main
- * @brief   Node of a #Scene graph
+ * @brief   Node of a Scene graph
  *
  * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
@@ -9,6 +9,8 @@
  * or copy at http://opensource.org/licenses/MIT)
  */
 #pragma once
+
+#include "Main/Mesh.h"
 
 #include "Utils/shared_ptr.hpp"         // std::shared_ptr replacement
 
@@ -22,7 +24,8 @@
 
 
 /**
- * @brief Node of a scene graph
+ * @brief Node of a Scene graph
+ * @ingroup Main
  */
 class Node {
 public:
@@ -31,47 +34,9 @@ public:
     static const glm::vec3 UNIT_Y_UP;       ///< Unit vector to the "up of the world"
     static const glm::vec3 UNIT_Z_FRONT;    ///< Unit vector to the "front of the world"
 
-    /**
-     * @brief Public structure managing an OpenGL indexed draw call
-     */
-    class IndexedDrawCall {
-     public:
-        /**
-         * @brief Constructor
-         *
-         * @param[in] aPrimitiveType    GL_TRIANGLES, GL_TRIANGLE_STRIP...
-         * @param[in] aElementCount;    Number of indexed vertex to draw
-         * @param[in] aIndexDataType;   GL_UNSIGNED_SHORT...
-         * @param[in] aStartPosition;   Offset in bytes from where start indices in the buffer
-         */
-        inline IndexedDrawCall(GLenum aPrimitiveType,
-                               GLuint aElementCount,
-                               GLenum aIndexDataType,
-                               GLuint aStartPosition) :
-            mPrimitiveType(aPrimitiveType),
-            mElementCount(aElementCount),
-            mIndexDataType(aIndexDataType),
-            mStartPosition(aStartPosition) {
-        }
-
-        /**
-         * @brief Indexed Draw Call glDrawElements()
-         */
-        inline void draw() const {
-            glDrawElements(mPrimitiveType, mElementCount, mIndexDataType, reinterpret_cast<void*>(mStartPosition));
-        }
-
-     private:
-        GLenum mPrimitiveType;  ///< GL_TRIANGLES, GL_TRIANGLE_STRIP...
-        GLuint mElementCount;   ///< Number of indexed vertex to draw
-        GLenum mIndexDataType;  ///< GL_UNSIGNED_SHORT...
-        GLuint mStartPosition;  ///< Offset in bytes from where start indices in the buffer
-    };
-
 public:
-    typedef Utils::shared_ptr<Node>         Ptr;        ///< Shared Pointer to a Node
-    typedef std::vector<Ptr>                List;       ///< List (std::vector) of pointers to a Node
-    typedef std::vector<IndexedDrawCall>    DrawCalls;  ///< List (std::vector) of pointers to a Node
+    typedef Utils::shared_ptr<Node> Ptr;        ///< Shared Pointer to a Node
+    typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to a Node
 
 public:
     Node();
@@ -92,7 +57,7 @@ public:
     // Getters/Setters
     inline const List&  getChildren() const;
     inline       void   addChildNode(const Node::Ptr& aChildNodePtr);
-    inline       void   addDrawCall(const IndexedDrawCall& aDrawCall);
+    inline       void   addMesh(const Mesh::Ptr& aMeshPtr);
 
     // Rotate a given quaternion by an axis and an angle
     static void rotateRightMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
@@ -100,7 +65,7 @@ public:
 
 private:
     Node::List          mChildrenList;          ///< Children Nodes of the current Node
-    DrawCalls           mDrawCalls;             ///< Index draw call(s) for the current Node
+    Mesh::List          mMeshesList;            ///< List of Mesh(es) for the current Node
 
     glm::fquat          mOrientationQuat;       ///< Quaternion of orientation of the Node
     glm::vec3           mTranslationVector;     ///< Vector of translation of the Node
@@ -108,6 +73,10 @@ private:
     // Mutable to enable updating in const getter
     mutable glm::mat4   mMatrix;                ///< Composed resulting Matrix of orientation and translation
     mutable bool        mbMatrixDirty;          ///< Tell if the composed Matrix is up to date or need recalculation
+
+private:
+    /// disallow copy constructor and assignment operator
+    // TODO SRO DISALLOW_COPY_AND_ASSIGN(Node);
 };
 
 /**
@@ -131,8 +100,8 @@ inline void Node::addChildNode(const Node::Ptr& aChildNodePtr) {
 /**
  * @brief   Add a draw call to the current Node
  *
- * @param[in] aDrawCall Draw call to add 
+ * @param[in] aMeshPtr Draw call to add
  */
-inline void Node::addDrawCall(const IndexedDrawCall& aDrawCall) {
-    mDrawCalls.push_back(aDrawCall);
+inline void Node::addMesh(const Mesh::Ptr& aMeshPtr) {
+    mMeshesList.push_back(aMeshPtr);
 }

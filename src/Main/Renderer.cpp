@@ -32,14 +32,14 @@
 
 #include <cmath>    // cos, sin, tan
 
-// We use the OpenGL default Counter Clockwise Winding order (GL_CCW)
-// We use a standard "Right Hand Coordinate System", like this:
+/* We use a standard "Right Hand Coordinate System", like this:
 static const float X_RIGHT  = 1.0f;     ///< Right coordinate
 static const float X_LEFT   = -1.0f;    ///< Left coordinate
 static const float Y_TOP    = 1.0f;     ///< Top coordinate
 static const float Y_BOTTOM = -1.0f;    ///< Bottom coordinate
 static const float Z_FRONT  = 1.0f;     ///< Front coordinate
 static const float Z_BACK   = -1.0f;    ///< Back coordinate
+*/
 
 static const float _zNear           = 1.0f;     ///< Z coordinate or the near/front frustum plane from which to render
 static const float _zFar            = 100.0f;   ///< Z coordinate or the far/back frustum plane to which to render
@@ -56,9 +56,6 @@ Renderer::Renderer() :
     mNormalAttrib(-1),
     mModelToCameraMatrixUnif(-1),
     mCameraToClipMatrixUnif(-1),
-    mVertexBufferObject(0),
-    mIndexBufferObject(0),
-    mVertexArrayObject(0),
     mCameraOrientation(),
     mCameraTranslation(0.0f, 2.0f, 6.0f),
     mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector!
@@ -71,7 +68,6 @@ Renderer::Renderer() :
  * @brief Destructor
  */
 Renderer::~Renderer() {
-    uninitVertexArrayObject();
 }
 
 
@@ -116,7 +112,7 @@ void Renderer::init() {
     initScene();
 
     // 2) Initialize more OpenGL option
-    // Face Culling
+    // Face Culling : We use the OpenGL default Counter Clockwise Winding order (GL_CCW)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
@@ -128,15 +124,9 @@ void Renderer::init() {
     // Enable blending transparency (and also the unused following OpenGL "SMOOTH" anti-aliasing)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-/*
-    // Enable OpenGL "SMOOTH" polygon anti-aliasing
-    // NO, does not work nicely; this would require to do depth sorted rendering
-    // => prefer following modern multisampling MSAA or FSAA
-    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    glEnable(GL_POLYGON_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
-*/
+
+    // NOTE OpenGL "SMOOTH" polygon anti-aliasing, does NOT work nicely; it requires to do depth sorted rendering
+    //   => prefer following modern multisampling MSAA or FSAA
     // Query OpenGL for Multisampling support
     GLint multiSampling = 0;
     GLint numSamples  = 0;
@@ -191,68 +181,6 @@ void Renderer::initProgram() {
     glUniform4fv(mLightIntensityUnif, 1, glm::value_ptr(mLightIntensity));
     glUniform4fv(mAmbientIntensityUnif, 1, glm::value_ptr(mAmbientIntensity));
     glUseProgram(0);
-}
-
-/**
- * @brief Initialize the vertex buffer and vertex array objects
- *
- *  Init the VBO (Vertex Buffer Object) with the data of our mesh (vertex positions, colors, and normals),
- * same for the IBO (Index Buffer Object) with short integers pointing to vertex data (forming triangle list),
- * and retain all the states needed with a VAO (Vertex Array Object)
- *
- * @param[in] aVertexData   Vertex data (vertex positions, colors, and normals)
- * @param[in] aIndexData    Index data (triangle list)
- */
-void Renderer::initVertexArrayObject(const VertexData& aVertexData, const IndexData& aIndexData) {
-    // Generate a VBO: Ask for a buffer of GPU memory
-    mLog.debug() << "initializing vertex buffer objet...";
-    glGenBuffers(1, &mVertexBufferObject);
-    assert(0 != mVertexBufferObject); // TODO(SRombauts) test buffers != 0 with a dedicated ASSERT_VBO
-
-    // Allocate GPU memory and copy our data onto this new buffer
-    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    // TODO(SRombauts) use templates to get size and buffer
-    glBufferData(GL_ARRAY_BUFFER, aVertexData.size() * sizeof(aVertexData[0]), &aVertexData[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // here aVertexData is of no more use (dynamic memory will be deallocated)
-
-    // Generate a IBO: Ask for a buffer of GPU memory
-    mLog.debug() << "initializing index buffer objet...";
-    glGenBuffers(1, &mIndexBufferObject);
-
-    // Allocate GPU memory and copy our data onto this new buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
-    // TODO(SRombauts) use templates to get size and buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, aIndexData.size() * sizeof(aIndexData[0]), &aIndexData[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    // here _indexData is of no more use (dynamic memory could be deallocated)
-
-    // Generate a VAO: Ask for a place on GPU to associate states with our data
-    mLog.debug() << "initializing vertex array objet...";
-    glGenVertexArrays(1, &mVertexArrayObject);
-
-    // Bind the vertex array, so that it can memorize the following states
-    glBindVertexArray(mVertexArrayObject);
-
-    // Bind the vertex buffer, and init vertex position and colors input streams (shader attributes)
-    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glEnableVertexAttribArray(mPositionAttrib); // layout(location = 0) in vec4 position;
-    glEnableVertexAttribArray(mColorAttrib);    // layout(location = 1) in vec4 diffuseColor;
-    glEnableVertexAttribArray(mNormalAttrib);   // layout(location = 2) in vec3 normal;
-
-    // this tells the GPU witch part of the buffer to route to which attribute (shader input stream)
-    const size_t vertexDim = 3;
-    mLog.debug() << "vertexDim=" << vertexDim << ", 3 * sizeof(aVertexData[0])=" << 3 * sizeof(aVertexData[0]);
-    glVertexAttribPointer(mPositionAttrib,  vertexDim, GL_FLOAT, GL_FALSE, 3 * sizeof(aVertexData[0]),
-            reinterpret_cast<void*>(0));
-    glVertexAttribPointer(mColorAttrib,     vertexDim, GL_FLOAT, GL_FALSE, 3 * sizeof(aVertexData[0]),
-            reinterpret_cast<void*>(sizeof(aVertexData[0])));
-    glVertexAttribPointer(mNormalAttrib,    vertexDim, GL_FLOAT, GL_FALSE, 3 * sizeof(aVertexData[0]),
-            reinterpret_cast<void*>(2*sizeof(aVertexData[0])));
-    // this tells OpenGL that vertex are pointed by index
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
-
-    glBindVertexArray(0);
 }
 
 /**
@@ -342,14 +270,16 @@ void Renderer::initScene() {
                         }
                     }
 
+                    // TODO(SRombauts)
+                    Mesh::Ptr MeshPtr(new Mesh(GL_TRIANGLES, nbOfIndex, GL_UNSIGNED_SHORT, 0));
+
                     // Generate a VBO/VBI & VAO in GPU memory with those data
-                    initVertexArrayObject(vertexData, vertexIndex);
+                    MeshPtr->genOpenGlObjects(vertexData, vertexIndex, mPositionAttrib, mColorAttrib, mNormalAttrib);
                     // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
                     // here pScene is of no more use, Assimp::Importer will release it
 
-                    // TODO(SRombauts)
                     mModelPtr = Node::Ptr(new Node());
-                    mModelPtr->addDrawCall(Node::IndexedDrawCall(GL_TRIANGLES, nbOfIndex, GL_UNSIGNED_SHORT, 0));
+                    mModelPtr->addMesh(MeshPtr);
                     mModelPtr->move(glm::vec3(2.0f, 4.0f, -2.0f));
                     mSceneHierarchy.addRootNode(mModelPtr);
                 }
@@ -358,16 +288,6 @@ void Renderer::initScene() {
             mLog.error() << "importer.ReadFile(" << modelFile << ") failed '" << importer.GetErrorString() << "'";
         }
     }
-}
-
-/**
- * @brief Uninitialize the vertex buffer and vertex array objects
- */
-void Renderer::uninitVertexArrayObject(void) {
-    mLog.debug() << "uninitializing vertex buffer and array objet...";
-    glDeleteBuffers(1, &mVertexBufferObject);
-    glDeleteBuffers(1, &mIndexBufferObject);
-    glDeleteVertexArrays(1, &mVertexArrayObject);
 }
 
 /**
@@ -504,9 +424,6 @@ void Renderer::display() {
     // Use the linked program of compiled shaders
     glUseProgram(mProgram);
 
-    // Bind the Vertex Array Object, bound to buffers with vertex position and colors
-    glBindVertexArray(mVertexArrayObject);
-
     /////////////////////////////////////////////////////////////////////////////////////////////////
     // TODO(SRombauts) This camera related calculation need to go into a Camera class into the Scene
     // re-calculate the "World to Camera" matrix,
@@ -523,8 +440,7 @@ void Renderer::display() {
     // Use the matrix stack to manage the hierarchy of the scene
     mSceneHierarchy.draw(modelToCameraMatrixStack, mModelToCameraMatrixUnif);
 
-    // Unbind the Vertex Array Object
-    glBindVertexArray(0);
+    // Unbind the Vertex Program
     glUseProgram(0);
 
     glutSwapBuffers();

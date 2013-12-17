@@ -48,19 +48,12 @@ public:
     void modelYaw(float aAngle);
     void modelRoll(float aAngle);
 
-    /// A Vector of Vertex data composed of 3 float elements
-    typedef std::vector<glm::vec3>  VertexData;
-    /// A Vector of Index data composed of short elements
-    typedef std::vector<GLshort>    IndexData;
-
 private:
     // Initialization
     void init();
     void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
     void initProgram();
-    void initVertexArrayObject(const VertexData& aVertexData, const IndexData& aIndexData);
     void initScene();
-    void uninitVertexArrayObject();
 
     // TODO(SRombauts) Generalize like the Node class (but Camera is the inverse of Model)
     glm::mat4 transform();
@@ -77,10 +70,6 @@ private:
     GLuint mDirToLightUnif;             ///< Location of the "dirToLight" vertex shader uniform input variable
     GLuint mLightIntensityUnif;         ///< Location of the "lightIntensity" vertex shader uniform input variable
     GLuint mAmbientIntensityUnif;       ///< Location of the "ambientIntensity" vertex shader uniform input variable
-
-    GLuint mVertexBufferObject;         ///< Vertex buffer object containing the data of our mesh
-    GLuint mIndexBufferObject;          ///< Index buffer object containing the indices of vertices of our mesh
-    GLuint mVertexArrayObject;          ///< Vertex array object
 
     glm::fquat  mCameraOrientation;     ///< Axis and angle of rotation of the camera
     glm::vec3   mCameraTranslation;     ///< Vector of translation of the camera
