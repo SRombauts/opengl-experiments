@@ -11,6 +11,7 @@
 
 #include "Main/Renderer.h"
 #include "Utils/Exception.h"
+#include "Utils/String.h"
 
 #include <GL/freeglut.h>
 #include <glutil/Shader.h>
@@ -272,7 +273,7 @@ void Renderer::initScene() {
     // We use a text file to tell which test mesh to load
     std::string importFilename = "data/import.txt";
     mLog.debug() << "initScene(" << importFilename << ")...";
-    std::ifstream importFile(importFilename);
+    std::ifstream importFile(importFilename.c_str());
     if (false == importFile.is_open()) {
         mLog.critic() << "initScene: unavailable file \"" << importFilename << "\"";
         UTILS_THROW("compileShader: unavailable file \"" << importFilename << "\"");
@@ -282,6 +283,7 @@ void Renderer::initScene() {
     std::string modelFile;
     while (std::getline(importFile, modelFile)) {
         Assimp::Importer    importer;
+        Utils::trim(modelFile);
         mLog.notice() << "importer.ReadFile(" << modelFile << ")...";
         const aiScene* pScene = importer.ReadFile(modelFile.c_str(), aiProcessPreset_TargetRealtime_Fast);
         if (nullptr != pScene) {
