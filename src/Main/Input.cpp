@@ -317,10 +317,10 @@ void Input::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
 
     if (0 > aDirection) {
         // Update Z translation value to the front
-        mRenderer.move(0.1f * Node::UNIT_Z_FRONT);;
+        mRenderer.move(1.0f * Node::UNIT_Z_FRONT);;
     } else {
         // Update Z translation value to the back
-        mRenderer.move(-0.1f * Node::UNIT_Z_FRONT);
+        mRenderer.move(-1.0f * Node::UNIT_Z_FRONT);
     }
     // transform() will re-calculate the model to world transformations matrix in next displayCallback()
 }
