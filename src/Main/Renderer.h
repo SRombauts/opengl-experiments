@@ -55,6 +55,8 @@ private:
     void initProgram();
     void initScene();
 
+    Node::Ptr loadMesh(const char* apFilename, float aScale);
+
     // TODO(SRombauts) Generalize like the Node class (but Camera is the inverse of Model)
     glm::mat4 transform();
 
@@ -79,7 +81,7 @@ private:
     glm::vec4   mAmbientIntensity;      ///< Ambiant light intensity and color
 
     Scene       mSceneHierarchy;        ///< Scene node hierarchy
-    Node::Ptr   mModelPtr;              ///< A movable model of a Cube
+    Node::Ptr   mModelPtr;              ///< The loadble/movable model
 
 private:
     /// disallow copy constructor and assignment operator
