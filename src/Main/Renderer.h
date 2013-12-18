@@ -55,7 +55,7 @@ private:
     void initProgram();
     void initScene();
 
-    Node::Ptr loadMesh(const char* apFilename, float aScale);
+    Node::Ptr loadMesh(const char* apFilename);
 
     // TODO(SRombauts) Generalize like the Node class (but Camera is the inverse of Model)
     glm::mat4 transform();

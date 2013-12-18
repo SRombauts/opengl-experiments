@@ -58,7 +58,7 @@ Renderer::Renderer() :
     mModelToCameraMatrixUnif(-1),
     mCameraToClipMatrixUnif(-1),
     mCameraOrientation(),
-    mCameraTranslation(0.0f, 2.0f, 20.0f),
+    mCameraTranslation(0.0f, 0.0f, 20.0f),
     mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector!
     mLightIntensity(0.8f, 0.8f, 0.8f, 1.0f),
     mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f) {
@@ -209,24 +209,15 @@ void Renderer::initScene() {
     }
 
     // TODO(SRombauts) multi-line multi-mesh loading
-    std::string line;
-    if (std::getline(importFile, line)) {
-        std::stringstream   stream;
-        std::string         modelFile;
-        float               scale = 1.0f;
-        Utils::trim(line);
-        stream << line;
-        stream >> modelFile;
-        stream >> scale;
+    std::string modelFile;
+    if (std::getline(importFile, modelFile)) {
+        Utils::trim(modelFile);
 
-        mLog.notice() << "initScene(\"" << importFilename << "\") line=\"" << line
-                      << "\" => modelFile=\"" << modelFile << "\" scale=\"" << scale << "\"";
+        mLog.notice() << "initScene(\"" << importFilename << "\") modelFile=\"" << modelFile << "\"";
 
         // Load the mesh of our main movable model (a colored cube by default), and add it to the Scene hierarchy
         // TODO(SRombauts) here we bind the *unique* model => use a dictionary (map) to bind mesh by name
-        mModelPtr = loadMesh(modelFile.c_str(), scale);
-        // 90 degree = 1.57079633 radians
-        //mModelPtr->pitch(1.57);
+        mModelPtr = loadMesh(modelFile.c_str());
         mSceneHierarchy.addRootNode(mModelPtr);
     } else  {
         mLog.critic() << "initScene: no model file in \"" << importFilename << "\"";
@@ -240,11 +231,10 @@ void Renderer::initScene() {
  * @brief Load of Mesh file and put it on a new Node
  *
  * @param[in] apFilename    Name of the mesh file to load (must be supported by assimp)
- * @param[in] aScale        Scale applied to each loaded vertex
  *
  * @return A pointer to the new Node, or throw a std::exception if none loaded
  */
-Node::Ptr Renderer::loadMesh(const char* apFilename, float aScale) {
+Node::Ptr Renderer::loadMesh(const char* apFilename) {
     Node::Ptr           NodePtr;
     Utils::Measure      measure;
     Assimp::Importer    importer;
@@ -273,9 +263,9 @@ Node::Ptr Renderer::loadMesh(const char* apFilename, float aScale) {
                 for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
                     // mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x
                     //             << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
-                    vertexData.push_back(aScale * glm::vec3(pMesh->mVertices[iVertex].x,
-                                                            pMesh->mVertices[iVertex].y,
-                                                            pMesh->mVertices[iVertex].z));
+                    vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
+                                                   pMesh->mVertices[iVertex].y,
+                                                   pMesh->mVertices[iVertex].z));
                     if (pMesh->HasVertexColors(0)) {
                         // mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
                         //             << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;

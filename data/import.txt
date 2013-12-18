@@ -1,1 +1,1 @@
-data/cube.dae
+data/teapot_flat.dae
