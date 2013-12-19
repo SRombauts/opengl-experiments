@@ -225,6 +225,9 @@ void Renderer::initScene() {
     }
 
     // TODO(SRombauts) add a big plane or some kind of big fixe reference (a big sphere, like a planet ?)
+    loadMesh(modelFile.c_str());
+    Node::Ptr PlanePtr = loadMesh("data/plane.dae");
+    mSceneHierarchy.addRootNode(PlanePtr);
 }
 
 /**
