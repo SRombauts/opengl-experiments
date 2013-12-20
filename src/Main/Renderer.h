@@ -21,6 +21,8 @@
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
 #include <glutil/MatrixStack.h>
 
+#include <assimp/scene.h>       // Assimp output data structure
+
 #include <vector>
 
 
@@ -55,7 +57,8 @@ private:
     void initProgram();
     void initScene();
 
-    Node::Ptr loadMesh(const char* apFilename);
+    Node::Ptr loadFile(const char* apFilename);
+    Node::Ptr loadNode(const aiScene* apScene, const aiNode* apNode);
 
     // TODO(SRombauts) Generalize like the Node class (but Camera is the inverse of Model)
     glm::mat4 transform();

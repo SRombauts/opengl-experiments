@@ -21,7 +21,6 @@
 
 #include <assimp/cimport.h>     // Log Stream
 #include <assimp/Importer.hpp>  // Open Asset Importer
-#include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
 #include <fstream>      // NOLINT(readability/streams) for shader files
@@ -216,17 +215,17 @@ void Renderer::initScene() {
         mLog.notice() << "initScene(\"" << importFilename << "\") modelFile=\"" << modelFile << "\"";
 
         // Load the mesh of our main movable model (a colored cube by default), and add it to the Scene hierarchy
-        // TODO(SRombauts) here we bind the *unique* model => use a dictionary (map) to bind mesh by name
-        mModelPtr = loadMesh(modelFile.c_str());
+        // TODO(SRombauts) here we bind the *unique* model => use a dictionary (map) to bind models by names
+        mModelPtr = loadFile(modelFile.c_str());
+        mModelPtr = mModelPtr->getChildren().front();
         mSceneHierarchy.addRootNode(mModelPtr);
     } else  {
         mLog.critic() << "initScene: no model file in \"" << importFilename << "\"";
         UTILS_THROW("compileShader: no model file in \"" << importFilename << "\"");
     }
 
-    // TODO(SRombauts) add a big plane or some kind of big fixe reference (a big sphere, like a planet ?)
-    loadMesh(modelFile.c_str());
-    Node::Ptr PlanePtr = loadMesh("data/plane.dae");
+    // Load a plane for some kind of fixe reference
+    Node::Ptr PlanePtr = loadFile("data/plane.dae");
     mSceneHierarchy.addRootNode(PlanePtr);
 }
 
@@ -237,98 +236,126 @@ void Renderer::initScene() {
  *
  * @return A pointer to the new Node, or throw a std::exception if none loaded
  */
-Node::Ptr Renderer::loadMesh(const char* apFilename) {
+Node::Ptr Renderer::loadFile(const char* apFilename) {
     Node::Ptr           NodePtr;
     Utils::Measure      measure;
     Assimp::Importer    importer;
-    mLog.notice() << "loadMesh(" << apFilename << ")...";
+    mLog.notice() << "loadFile(" << apFilename << ")...";
 
-    // TODO(SRombauts) move all this in separate methods, and use the Mesh & Node classes
+    // Read the mesh file
     const aiScene* pScene = importer.ReadFile(apFilename, aiProcessPreset_TargetRealtime_Fast);
     if ( (nullptr != pScene) && (0 == (pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)) ) {
         mLog.info() << "Meshes: " << pScene->mNumMeshes;
-        // TODO(SRombauts) load multiple mesh on a unique Node ?
-        // for (unsigned int iMesh = 0; iMesh < pScene->mNumMeshes; ++iMesh)
-        unsigned int iMesh = 0;
-        if (iMesh < pScene->mNumMeshes) {
-            aiMesh* pMesh = pScene->mMeshes[iMesh];
-            if (nullptr != pMesh) {
-                const size_t nbSet = 1 + (pMesh->HasNormals()?1:0) + (pMesh->HasVertexColors(0)?1:0);
-                const size_t nbOfData = pMesh->mNumVertices * nbSet;
-                std::vector<glm::vec3> vertexData;
-                vertexData.reserve(nbOfData);
 
-                mLog.info() << "Mesh '" << pMesh->mName.C_Str() << "'";
-                mLog.debug() << "nbOfData=" << nbOfData << " (sizeOfData=" << nbOfData * sizeof(glm::vec3) << ")";
-                mLog.info() << " Vertices: " << pMesh->mNumVertices;
-                mLog.info() << " Colors: "   << (pMesh->HasVertexColors(0)?"true":"false");
-                mLog.info() << " Normals: "  << (pMesh->HasNormals()?"true":"false");
-                for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
-                    // mLog.info() << "  Vertex: " << pMesh->mVertices[iVertex].x
-                    //             << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
-                    vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
-                                                   pMesh->mVertices[iVertex].y,
-                                                   pMesh->mVertices[iVertex].z));
-                    if (pMesh->HasVertexColors(0)) {
-                        // mLog.info() << "  Colors: " << pMesh->mColors[0][iVertex].r
-                        //             << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
-                        vertexData.push_back(glm::vec3(pMesh->mColors[0][iVertex].r,
-                                                       pMesh->mColors[0][iVertex].g,
-                                                       pMesh->mColors[0][iVertex].b));
-                    } else {
-                        // NOTE if no colors, use pure white
-                        vertexData.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-                    }
-                    if (pMesh->HasNormals()) {
-                        // mLog.info() << "  Normal: " << pMesh->mNormals[iVertex].x
-                        //             << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
-                        vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
-                                                       pMesh->mNormals[iVertex].y,
-                                                       pMesh->mNormals[iVertex].z));
-                    } else {
-                        // NOTE if no normals, we cannot render properly, but we can still see something
-                        vertexData.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-                    }
-                }
+        aiNode* pNode = pScene->mRootNode;
+        // Load recursively all the nodes
+        NodePtr = loadNode(pScene, pNode);
+    }  else {
+        mLog.critic() << "loadFile(" << apFilename << ") failed '" << importer.GetErrorString() << "'";
+        UTILS_THROW("loadFile(" << apFilename << ") failed '" << importer.GetErrorString() << "'");
+    }
+    time_t diffUs = measure.diff();
+    mLog.notice() << "loadFile(" << apFilename << ") done in " << diffUs/1000000 << "." << diffUs/1000 << "s";
 
-                // If only triangles :
-                const size_t nbOfIndex = pMesh->mNumFaces * 3;
-                if (65536 < nbOfIndex) {
-                    // TODO(SRombauts) : if there is more than 64k indices, switch to GL_UNSIGNED_INT !
-                    mLog.critic() << "loadMesh: too many indices for SHORT (" << nbOfIndex << " > " << 65536 << ")";
-                    UTILS_THROW("loadMesh: too many indices for SHORT (" << nbOfIndex << " > " << 65536 << ")");
-                }
-                std::vector<GLshort> vertexIndex;
-                vertexIndex.reserve(nbOfIndex);
+    return NodePtr;
+}
 
-                mLog.info() << " Faces: " << pMesh->mNumFaces;
-                for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; ++iFace) {
-                    aiFace& face = pMesh->mFaces[iFace];
-                    // mLog.info() << "  Indices: " << face.mNumIndices;
-                    // TODO(SRombauts) verify if only triangles :
-                    for (unsigned int iIndice = 0; iIndice < face.mNumIndices; ++iIndice) {
-                        // mLog.info() << "   - " << face.mIndices[iIndice];
-                        vertexIndex.push_back(static_cast<GLshort>(face.mIndices[iIndice]));
-                    }
-                }
+/**
+ * @brief Load recursively a node and its Meshes and put it on a new Node
+ *
+ * @param[in] apScene   Pointer to the Assimp Scene
+ * @param[in] apNode    Pointer to the Assimp Node
+ *
+ * @return A pointer to the new Node, or throw a std::exception if none loaded
+ */
+Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
+    Node::Ptr NodePtr(new Node());
 
-                // TODO(SRombauts) The following API
-                // Generate a Mesh objet to draw the imported model
-                Mesh::Ptr MeshPtr(new Mesh(GL_TRIANGLES, vertexIndex.size(), GL_UNSIGNED_SHORT, 0));
-                // Generate a VBO/VBI & VAO in GPU memory with those data
-                MeshPtr->genOpenGlObjects(vertexData, vertexIndex, mPositionAttrib, mColorAttrib, mNormalAttrib);
-                // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
-                // here pScene is of no more use, Assimp::Importer will release it
+    assert (nullptr != apNode);
+    mLog.info() << "Node '" << apNode->mName.C_Str() << "'";
 
-                NodePtr = Node::Ptr(new Node());
-                NodePtr->addMesh(MeshPtr);
+    // Load all meshes of the current Node
+    // TODO(SRombauts) if no Mesh, skip this Node of the hierarchy ?
+    for (unsigned int iMesh = 0; iMesh < apNode->mNumMeshes; ++iMesh) {
+        unsigned int idxMesh = apNode->mMeshes[iMesh];
+        aiMesh* pMesh = apScene->mMeshes[idxMesh];
+        assert (nullptr != pMesh);
+        const size_t nbSet = 1 + (pMesh->HasNormals()?1:0) + (pMesh->HasVertexColors(0)?1:0);
+        const size_t nbOfData = pMesh->mNumVertices * nbSet;
+        std::vector<glm::vec3> vertexData;
+        vertexData.reserve(nbOfData);
+
+        mLog.info() << " Mesh '" << pMesh->mName.C_Str() << "'";
+        mLog.info() << "  Vertices: " << pMesh->mNumVertices;
+        mLog.info() << "  Colors: "   << (pMesh->HasVertexColors(0)?"true":"false");
+        mLog.info() << "  Normals: "  << (pMesh->HasNormals()?"true":"false");
+        for (unsigned int iVertex = 0; iVertex < pMesh->mNumVertices; ++iVertex) {
+            // mLog.info() << "   Vertex: " << pMesh->mVertices[iVertex].x
+            //             << ", " << pMesh->mVertices[iVertex].y << ", " << pMesh->mVertices[iVertex].z;
+            vertexData.push_back(glm::vec3(pMesh->mVertices[iVertex].x,
+                                            pMesh->mVertices[iVertex].y,
+                                            pMesh->mVertices[iVertex].z));
+            if (pMesh->HasVertexColors(0)) {
+                // mLog.info() << "   Colors: " << pMesh->mColors[0][iVertex].r
+                //             << ", " << pMesh->mColors[0][iVertex].g << ", " << pMesh->mColors[0][iVertex].b;
+                vertexData.push_back(glm::vec3(pMesh->mColors[0][iVertex].r,
+                                                pMesh->mColors[0][iVertex].g,
+                                                pMesh->mColors[0][iVertex].b));
+            } else {
+                // NOTE if no colors, use pure white
+                vertexData.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+            }
+            if (pMesh->HasNormals()) {
+                // mLog.info() << "   Normal: " << pMesh->mNormals[iVertex].x
+                //             << ", " << pMesh->mNormals[iVertex].y << ", " << pMesh->mNormals[iVertex].z;
+                vertexData.push_back(glm::vec3(pMesh->mNormals[iVertex].x,
+                                                pMesh->mNormals[iVertex].y,
+                                                pMesh->mNormals[iVertex].z));
+            } else {
+                // NOTE if no normals, we cannot render properly, but we can still see something
+                vertexData.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
             }
         }
-        time_t diffUs = measure.diff();
-        mLog.notice() << "loadMesh(" << apFilename << ") done in " << diffUs/1000000 << "." << diffUs/1000 << "s";
-    }  else {
-        mLog.critic() << "loadMesh(" << apFilename << ") failed '" << importer.GetErrorString() << "'";
-        UTILS_THROW("loadMesh(" << apFilename << ") failed '" << importer.GetErrorString() << "'");
+
+        // If only triangles :
+        const size_t nbOfIndex = pMesh->mNumFaces * 3;
+        if (65536 < nbOfIndex) {
+            // TODO(SRombauts) : if there is more than 64k indices, switch to GL_UNSIGNED_INT !
+            mLog.critic() << "loadNode: too many indices for SHORT (" << nbOfIndex << " > " << 65536 << ")";
+            UTILS_THROW("loadNode: too many indices for SHORT (" << nbOfIndex << " > " << 65536 << ")");
+        }
+        std::vector<GLshort> vertexIndex;
+        vertexIndex.reserve(nbOfIndex);
+
+        mLog.info() << " Faces: " << pMesh->mNumFaces;
+        for (unsigned int iFace = 0; iFace < pMesh->mNumFaces; ++iFace) {
+            aiFace& face = pMesh->mFaces[iFace];
+            // mLog.info() << "  Indices: " << face.mNumIndices;
+            assert(3 == face.mNumIndices);
+            for (unsigned int iIndice = 0; iIndice < face.mNumIndices; ++iIndice) {
+                // mLog.info() << "   - " << face.mIndices[iIndice];
+                vertexIndex.push_back(static_cast<GLshort>(face.mIndices[iIndice]));
+            }
+        }
+
+        // TODO(SRombauts) The following API is not good => short<->int
+        // Generate a Mesh objet to draw the imported model
+        Mesh::Ptr MeshPtr(new Mesh(GL_TRIANGLES, vertexIndex.size(), GL_UNSIGNED_SHORT, 0));
+        // Generate a VBO/VBI & VAO in GPU memory with those data
+        MeshPtr->genOpenGlObjects(vertexData, vertexIndex, mPositionAttrib, mColorAttrib, mNormalAttrib);
+        // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
+        // here pScene is of no more use, Assimp::Importer will release it
+
+        NodePtr->addMesh(MeshPtr);
+    }
+
+    // Load all children of the current Node recursively
+    for (unsigned int iChild = 0; iChild < apNode->mNumChildren; ++iChild) {
+        const aiNode* pChildNode = apNode->mChildren[iChild];
+        // Load a child Node...
+        Node::Ptr ChildNodePtr = loadNode(apScene, pChildNode);
+        // and add it to the current Node
+        NodePtr->addChildNode(ChildNodePtr);
     }
 
     return NodePtr;
