@@ -21,7 +21,7 @@
 #include <glutil/MatrixStack.h>
 
 #include <vector>                       // std::vector
-
+#include <string>                       // std::string
 
 /**
  * @brief Node of a Scene graph
@@ -39,7 +39,7 @@ public:
     typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to a Node
 
 public:
-    Node();
+    Node(const char* apName);
     ~Node();
 
     // Basic movements
@@ -55,6 +55,7 @@ public:
     void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
     // Getters/Setters
+    inline const std::string& getName() const;
     inline const List&  getChildren() const;
     inline       void   addChildNode(const Node::Ptr& aChildNodePtr);
     inline       void   addMesh(const Mesh::Ptr& aMeshPtr);
@@ -64,6 +65,8 @@ public:
     static void rotateLeftMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
 
 private:
+    const std::string   mName;                  ///< Name of the Node
+
     Node::List          mChildrenList;          ///< Children Nodes of the current Node
     Mesh::List          mMeshesList;            ///< List of Mesh(es) for the current Node
 
@@ -78,6 +81,15 @@ private:
     /// disallow copy constructor and assignment operator
     // TODO SRO DISALLOW_COPY_AND_ASSIGN(Node);
 };
+
+/**
+ * @brief   Get the Name of the current Node
+ *
+ * @return  Const string whit the name of the current Node
+ */
+inline const std::string& Node::getName() const {
+    return mName;
+}
 
 /**
  * @brief   Get the list of children of the current Node

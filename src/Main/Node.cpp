@@ -23,8 +23,11 @@ const glm::vec3 Node::UNIT_Z_FRONT(0.0f, 0.0f, 1.0f);   // "front of the world"
 
 /**
  * @brief Constructor
+ *
+ * @param[in] apName    Name of the new Node
  */
-Node::Node() :
+Node::Node(const char* apName) :
+    mName(apName),
     mbMatrixDirty(false) {
 }
 

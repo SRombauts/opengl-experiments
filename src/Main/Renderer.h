@@ -85,6 +85,7 @@ private:
 
     Scene       mSceneHierarchy;        ///< Scene node hierarchy
     Node::Ptr   mModelPtr;              ///< The loadble/movable model
+    Node::Ptr   mTurretPtr;             ///< The turret sub-model
 
 private:
     /// disallow copy constructor and assignment operator

@@ -215,10 +215,11 @@ void Renderer::initScene() {
         mLog.notice() << "initScene(\"" << importFilename << "\") modelFile=\"" << modelFile << "\"";
 
         // Load the mesh of our main movable model (a colored cube by default), and add it to the Scene hierarchy
-        // TODO(SRombauts) here we bind the *unique* model => use a dictionary (map) to bind models by names
-        mModelPtr = loadFile(modelFile.c_str());
-        mModelPtr = mModelPtr->getChildren().front();
-        mSceneHierarchy.addRootNode(mModelPtr);
+        Node::Ptr HierarchyPtr = loadFile(modelFile.c_str());
+        mSceneHierarchy.addRootNode(HierarchyPtr);
+        // TODO(SRombauts) here we get to the Cuboid model => use a dictionary (map) to get model by name
+        mModelPtr = HierarchyPtr->getChildren().front();
+        mTurretPtr = mModelPtr->getChildren().front();
     } else  {
         mLog.critic() << "initScene: no model file in \"" << importFilename << "\"";
         UTILS_THROW("compileShader: no model file in \"" << importFilename << "\"");
@@ -269,9 +270,8 @@ Node::Ptr Renderer::loadFile(const char* apFilename) {
  * @return A pointer to the new Node, or throw a std::exception if none loaded
  */
 Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
-    Node::Ptr NodePtr(new Node());
-
     assert (nullptr != apNode);
+    Node::Ptr NodePtr(new Node(apNode->mName.C_Str()));
     mLog.info() << "Node '" << apNode->mName.C_Str() << "'";
 
     // Load all meshes of the current Node
@@ -340,7 +340,7 @@ Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
 
         // TODO(SRombauts) The following API is not good => short<->int
         // Generate a Mesh objet to draw the imported model
-        Mesh::Ptr MeshPtr(new Mesh(GL_TRIANGLES, vertexIndex.size(), GL_UNSIGNED_SHORT, 0));
+        Mesh::Ptr MeshPtr(new Mesh(pMesh->mName.C_Str(), GL_TRIANGLES, vertexIndex.size(), GL_UNSIGNED_SHORT, 0));
         // Generate a VBO/VBI & VAO in GPU memory with those data
         MeshPtr->genOpenGlObjects(vertexData, vertexIndex, mPositionAttrib, mColorAttrib, mNormalAttrib);
         // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
@@ -350,6 +350,7 @@ Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
     }
 
     // Load all children of the current Node recursively
+    mLog.info() << " Children: " << apNode->mNumChildren;
     for (unsigned int iChild = 0; iChild < apNode->mNumChildren; ++iChild) {
         const aiNode* pChildNode = apNode->mChildren[iChild];
         // Load a child Node...
@@ -443,21 +444,21 @@ void Renderer::modelMove(const glm::vec3& aTranslation) {
  * @brief Pitch, rotate the model vertically around its current relative horizontal X axis
  */
 void Renderer::modelPitch(float aAngle) {
-    mModelPtr->pitch(aAngle);
+    mTurretPtr->pitch(aAngle);
 }
 
 /**
  * @brief Yaw, rotate the model horizontally around its current relative vertical Y axis
  */
 void Renderer::modelYaw(float aAngle) {
-    mModelPtr->yaw(aAngle);
+    mTurretPtr->yaw(aAngle);
 }
 
 /**
  * @brief Roll, rotate the model around its current relative viewing Z axis
  */
 void Renderer::modelRoll(float aAngle) {
-    mModelPtr->roll(aAngle);
+    mTurretPtr->roll(aAngle);
 }
 
 /**

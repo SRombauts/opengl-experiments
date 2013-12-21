@@ -15,15 +15,18 @@
 /**
  * @brief Constructor
  *
- * @param[in] aPrimitiveType        GL_TRIANGLES, GL_TRIANGLE_STRIP...
- * @param[in] aElementCount;        Number of indexed vertex to draw
- * @param[in] aIndexDataType;       GL_UNSIGNED_SHORT...
- * @param[in] aStartPosition;       Offset in bytes from where start indices in the buffer
+ * @param[in] apName            Name of the new Node
+ * @param[in] aPrimitiveType    GL_TRIANGLES, GL_TRIANGLE_STRIP...
+ * @param[in] aElementCount     Number of indexed vertex to draw
+ * @param[in] aIndexDataType    GL_UNSIGNED_SHORT...
+ * @param[in] aStartPosition    Offset in bytes from where start indices in the buffer
  */
-Mesh::Mesh(GLenum aPrimitiveType,
+Mesh::Mesh(const char* apName,
+           GLenum aPrimitiveType,
            GLuint aElementCount,
            GLenum aIndexDataType,
            GLuint aStartPosition) :
+    mName(apName),
     mVertexBufferObject(0),
     mIndexBufferObject(0),
     mVertexArrayObject(0),

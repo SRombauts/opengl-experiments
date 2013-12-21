@@ -17,7 +17,7 @@
 #include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
 
 #include <vector>                       // std::vector
-
+#include <string>                       // std::string
 
 /**
  * @brief Description of a mesh/model at a Node of the Scene
@@ -32,7 +32,8 @@ public:
     typedef std::vector<GLshort>    IndexData;  ///< A Vector of Index data composed of short elements
 
 public:
-    Mesh(GLenum aPrimitiveType,
+    Mesh(const char* apName,
+         GLenum aPrimitiveType,
          GLuint aElementCount,
          GLenum aIndexDataType,
          GLuint aStartPosition);
@@ -52,6 +53,9 @@ public:
     inline void draw() const {
         mDrawCall.draw(mVertexArrayObject);
     }
+
+    // Getter
+    inline const std::string& getName() const;
 
 private:
     /**
@@ -87,9 +91,20 @@ private:
     };
 
 private:
+    const std::string   mName;  ///< Name of the Node
+
     GLuint mVertexBufferObject; ///< VBO: Vertex Buffer Object containing the data of our Mesh (vertices, normals, UVs)
     GLuint mIndexBufferObject;  ///< IBO: Index Buffer Object containing the indices of vertices of our Mesh
     GLuint mVertexArrayObject;  ///< VAO: Vertex Array Object retaining the states needed for the render calls
 
     IndexedDrawCall mDrawCall;  ///< Indexed draw call of the current Mesh
 };
+
+/**
+ * @brief   Get the Name of the current Node
+ *
+ * @return  Const string whit the name of the current Node
+ */
+inline const std::string& Mesh::getName() const {
+    return mName;
+}
