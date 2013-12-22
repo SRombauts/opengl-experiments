@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 #endif
 
     // Configure the Output objects
-    // TODO(SRombauts) Use a configuration file!
+    /// @todo Use a configuration file for LoggerCpp!
     Log::Config::Vector configList;
 #if 0
     Log::Config::addOutput(configList, "OutputFile");

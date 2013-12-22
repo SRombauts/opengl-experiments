@@ -13,6 +13,7 @@
 #include "Main/Mesh.h"
 
 #include "Utils/shared_ptr.hpp"         // std::shared_ptr replacement
+#include "Utils/Utils.h"
 
 #include <glload/gl_3_3_comp.h>         // GLuint, GLenum
 #define GLM_FORCE_RADIANS // Using radians
@@ -39,7 +40,7 @@ public:
     typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to a Node
 
 public:
-    Node(const char* apName);
+    explicit Node(const char* apName);
     ~Node();
 
     // Basic movements
@@ -47,6 +48,10 @@ public:
     void pitch(float aAngle);
     void yaw(float aAngle);
     void roll(float aAngle);
+
+    // Explicit setters (used at load time with Assimp)
+    inline void setOrientationQuaternion(float w, float x, float y, float z);
+    inline void setTranslationVector(float x, float y, float z);
 
     // Calculate and return the current Rotations & Translations matrix
     const glm::mat4& getMatrix() const;
@@ -70,7 +75,7 @@ private:
     Node::List          mChildrenList;          ///< Children Nodes of the current Node
     Mesh::List          mMeshesList;            ///< List of Mesh(es) for the current Node
 
-    glm::fquat          mOrientationQuat;       ///< Quaternion of orientation of the Node
+    glm::fquat          mOrientationQuaternion; ///< Quaternion of orientation of the Node
     glm::vec3           mTranslationVector;     ///< Vector of translation of the Node
 
     // Mutable to enable updating in const getter
@@ -79,8 +84,36 @@ private:
 
 private:
     /// disallow copy constructor and assignment operator
-    // TODO SRO DISALLOW_COPY_AND_ASSIGN(Node);
+    DISALLOW_COPY_AND_ASSIGN(Node);
 };
+
+/**
+ * @brief   Set the relative orientation of the Node (from its parent)
+ *
+ * @param[in]   w component of the quaternion of relative orientation of the Node
+ * @param[in]   x component of the quaternion of relative orientation of the Node
+ * @param[in]   y component of the quaternion of relative orientation of the Node
+ * @param[in]   z component of the quaternion of relative orientation of the Node
+ */
+inline void Node::setOrientationQuaternion(float w, float x, float y, float z) {
+    mOrientationQuaternion.w = w;
+    mOrientationQuaternion.x = x;
+    mOrientationQuaternion.y = y;
+    mOrientationQuaternion.z = z;
+}
+
+/**
+ * @brief   Set the relative translation of the Node (from its parent)
+ *
+ * @param[in]   x component of the quaternion of relative orientation of the Node
+ * @param[in]   y component of the quaternion of relative orientation of the Node
+ * @param[in]   z component of the quaternion of relative orientation of the Node
+ */
+inline void Node::setTranslationVector(float x, float y, float z) {
+    mTranslationVector.x = x;
+    mTranslationVector.y = y;
+    mTranslationVector.z = z;
+}
 
 /**
  * @brief   Get the Name of the current Node

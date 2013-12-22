@@ -163,7 +163,7 @@ void Renderer::initProgram() {
     std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 
     // Get location of (vertex) attributes (input streams of (vertex) shader
-    // TODO(SRombauts) test attribute and uniform != -1
+    /// @todo test attribute and uniform != -1
     mPositionAttrib = glGetAttribLocation(mProgram, "position");        // layout(location = 0) in vec4 position;
     mColorAttrib    = glGetAttribLocation(mProgram, "diffuseColor");    // layout(location = 1) in vec4 diffuseColor;
     mNormalAttrib   = glGetAttribLocation(mProgram, "normal");          // layout(location = 2) in vec4 normal;
@@ -190,7 +190,7 @@ void Renderer::initScene() {
     // get a handle to the predefined STDOUT log stream and attach
     // it to the logging system. It remains active for all further
     // calls to aiImportFile(Ex) and aiApplyPostProcessing.
-    // TODO(SRombauts) redirect to a LoggerCpp stream
+    /// @todo redirect to a LoggerCpp stream
     struct aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
     aiAttachLogStream(&stream);
 
@@ -207,7 +207,7 @@ void Renderer::initScene() {
         UTILS_THROW("compileShader: unavailable file \"" << importFilename << "\"");
     }
 
-    // TODO(SRombauts) multi-line multi-mesh loading
+    /// @todo multi-line multi-mesh loading
     std::string modelFile;
     if (std::getline(importFile, modelFile)) {
         Utils::trim(modelFile);
@@ -217,7 +217,7 @@ void Renderer::initScene() {
         // Load the mesh of our main movable model (a colored cube by default), and add it to the Scene hierarchy
         Node::Ptr HierarchyPtr = loadFile(modelFile.c_str());
         mSceneHierarchy.addRootNode(HierarchyPtr);
-        // TODO(SRombauts) here we get to the Cuboid & Cube models => use a dictionary (map) to get models by names
+        /// @todo here we get to the Cuboid & Cube models => use a dictionary (map) to get models by names
         mModelPtr  = HierarchyPtr;
         mTurretPtr = HierarchyPtr->getChildren().front();
     } else  {
@@ -271,19 +271,26 @@ Node::Ptr Renderer::loadFile(const char* apFilename) {
  */
 Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
     Node::Ptr NodePtr;
-    assert (nullptr != apNode);
+    assert(nullptr != apNode);
 
     // If the Node has at least one Mesh or more than one Child
-    // TODO(SRombauts) Loading Cameras and Lights
+    /// @todo Loading Cameras and Lights
     if ( (1 <= apNode->mNumMeshes) || (2 < apNode->mNumChildren) ) {
         NodePtr.reset(new Node(apNode->mName.C_Str()));
         mLog.info() << "Node '" << apNode->mName.C_Str() << "'";
+
+        // Decompose the Node traformation matrix with no scaling into its original components
+        aiQuaternion rotation;
+        aiVector3D position;
+        apNode->mTransformation.DecomposeNoScaling(rotation, position);
+        NodePtr->setOrientationQuaternion(rotation.w, rotation.x, rotation.y, rotation.z);
+        NodePtr->setTranslationVector(position.x, position.y, position.z);
 
         // Load all meshes of the current Node
         for (unsigned int iMesh = 0; iMesh < apNode->mNumMeshes; ++iMesh) {
             unsigned int idxMesh = apNode->mMeshes[iMesh];
             aiMesh* pMesh = apScene->mMeshes[idxMesh];
-            assert (nullptr != pMesh);
+            assert(nullptr != pMesh);
             const size_t nbSet = 1 + (pMesh->HasNormals()?1:0) + (pMesh->HasVertexColors(0)?1:0);
             const size_t nbOfData = pMesh->mNumVertices * nbSet;
             std::vector<glm::vec3> vertexData;
@@ -324,7 +331,7 @@ Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
             // If only triangles :
             const size_t nbOfIndex = pMesh->mNumFaces * 3;
             if (65536 < nbOfIndex) {
-                // TODO(SRombauts) : if there is more than 64k indices, switch to GL_UNSIGNED_INT !
+                /// @todo if there is more than 64k indices, switch to GL_UNSIGNED_INT !
                 mLog.critic() << "loadNode: too many indices for SHORT (" << nbOfIndex << " > " << 65536 << ")";
                 UTILS_THROW("loadNode: too many indices for SHORT (" << nbOfIndex << " > " << 65536 << ")");
             }
@@ -342,7 +349,7 @@ Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
                 }
             }
 
-            // TODO(SRombauts) The following API is not good => short<->int
+            /// @todo The following API is not good => short<->int
             // Generate a Mesh objet to draw the imported model
             Mesh::Ptr MeshPtr(new Mesh(pMesh->mName.C_Str(), GL_TRIANGLES, vertexIndex.size(), GL_UNSIGNED_SHORT, 0));
             // Generate a VBO/VBI & VAO in GPU memory with those data
@@ -366,6 +373,7 @@ Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
         }
     } else if (1 == apNode->mNumChildren) {
         // No Mesh and only one child: skip this Node of the hierarchy! (ex. Root Scene Node)
+        /// @todo Accumulate matrix transformation not to loose relative positionning if any
         mLog.debug() << "Skipped Node '" << apNode->mName.C_Str() << "'";
         const aiNode* pChildNode = apNode->mChildren[0];
         NodePtr = loadNode(apScene, pChildNode);
@@ -508,7 +516,7 @@ void Renderer::display() {
     glUseProgram(mProgram);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
-    // TODO(SRombauts) This camera related calculation need to go into a Camera class into the Scene
+    /// @todo This camera related calculation need to go into a Camera class into the Scene
     // re-calculate the "World to Camera" matrix,
     glm::mat4 worldToCamerMatrix = transform();
 

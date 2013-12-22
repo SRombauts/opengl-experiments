@@ -60,7 +60,7 @@ private:
     Node::Ptr loadFile(const char* apFilename);
     Node::Ptr loadNode(const aiScene* apScene, const aiNode* apNode);
 
-    // TODO(SRombauts) Generalize like the Node class (but Camera is the inverse of Model)
+    /// @todo Generalize like the Node class (but Camera is the inverse of Model)
     glm::mat4 transform();
 
 private:

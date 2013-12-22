@@ -45,7 +45,7 @@ Node::~Node() {
  */
 void Node::move(const glm::vec3& aTranslation) {
     // Get the rotation matrix from the orientation quaternion:
-    glm::mat3 rotations = glm::mat3_cast(mOrientationQuat);
+    glm::mat3 rotations = glm::mat3_cast(mOrientationQuaternion);
     // calculate relative translation into the current model orientation
     const glm::vec3 relativeTranslation = (rotations * aTranslation);
     // and apply it to the current model position
@@ -59,9 +59,9 @@ void Node::move(const glm::vec3& aTranslation) {
  */
 void Node::pitch(float aAngle) {
     // calculate X unit vector of the current camera orientation
-    const glm::vec3 modelX = (mOrientationQuat * UNIT_X_RIGHT);
+    const glm::vec3 modelX = (mOrientationQuaternion * UNIT_X_RIGHT);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
-    rotateLeftMultiply(mOrientationQuat, aAngle, modelX);
+    rotateLeftMultiply(mOrientationQuaternion, aAngle, modelX);
 
     mbMatrixDirty = true;
 }
@@ -71,9 +71,9 @@ void Node::pitch(float aAngle) {
  */
 void Node::yaw(float aAngle) {
     // calculate Y unit vector of the current camera orientation
-    const glm::vec3 modelY = (mOrientationQuat * UNIT_Y_UP);
+    const glm::vec3 modelY = (mOrientationQuaternion * UNIT_Y_UP);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
-    rotateLeftMultiply(mOrientationQuat, aAngle, modelY);
+    rotateLeftMultiply(mOrientationQuaternion, aAngle, modelY);
 
     mbMatrixDirty = true;
 }
@@ -83,9 +83,9 @@ void Node::yaw(float aAngle) {
  */
 void Node::roll(float aAngle) {
     // calculate Z unit vector of the current camera orientation
-    const glm::vec3 modelZ = (mOrientationQuat * UNIT_Z_FRONT);
+    const glm::vec3 modelZ = (mOrientationQuaternion * UNIT_Z_FRONT);
     // Offset the given quaternion by the given angle (in radians) and normalized axis
-    rotateLeftMultiply(mOrientationQuat, aAngle, modelZ);
+    rotateLeftMultiply(mOrientationQuaternion, aAngle, modelZ);
 
     mbMatrixDirty = true;
 }
@@ -106,7 +106,7 @@ inline const glm::mat4& Node::getMatrix() const {
         // Translation matrix
         glm::mat4 translation   = glm::translate(glm::mat4(1.0f), mTranslationVector);
         // Rotation matrix
-        glm::mat4 rotation      = glm::mat4_cast(mOrientationQuat);
+        glm::mat4 rotation      = glm::mat4_cast(mOrientationQuaternion);
         // Calculate the new relative "modelToWorldMatrix" (from right to left: rotation , then translation )
         mMatrix                 = (translation  * rotation );
     }

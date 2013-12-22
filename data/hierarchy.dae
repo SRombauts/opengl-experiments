@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.69.0 r60995</authoring_tool>
     </contributor>
-    <created>2013-12-19T22:24:21</created>
-    <modified>2013-12-19T22:24:21</modified>
+    <created>2013-12-21T21:37:10</created>
+    <modified>2013-12-21T21:37:10</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -54,7 +54,7 @@
     <geometry id="Cube-mesh" name="Cube">
       <mesh>
         <source id="Cube-mesh-positions">
-          <float_array id="Cube-mesh-positions-array" count="24">0.2711128 1.00348 -0.513221 0.2711128 2.00348 -0.513221 1.271113 2.00348 -0.513221 1.271113 1.00348 -0.513221 0.2711128 1.00348 0.486779 0.2711128 2.00348 0.486779 1.271113 2.00348 0.486779 1.271113 1.00348 0.486779</float_array>
+          <float_array id="Cube-mesh-positions-array" count="24">-0.5000001 -0.5 -0.5 -0.5000001 0.5000001 -0.5 0.5 0.5000001 -0.5 0.5 -0.5 -0.5 -0.5000001 -0.5 0.5 -0.5000001 0.5000001 0.5 0.5 0.5000001 0.5 0.5 -0.5 0.5</float_array>
           <technique_common>
             <accessor source="#Cube-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
@@ -155,7 +155,7 @@
           </bind_material>
         </instance_geometry>
         <node id="Cube" name="Cube" type="NODE">
-          <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+          <matrix sid="transform">1 0 0 1 0 1 0 1.5 0 0 1 0 0 0 0 1</matrix>
           <instance_geometry url="#Cube-mesh"/>
         </node>
       </node>
