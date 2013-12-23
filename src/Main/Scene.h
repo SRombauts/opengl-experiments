@@ -32,6 +32,9 @@ public:
     Scene();
     ~Scene();
 
+    // Calculate new position and orientation given current Node movements
+    inline void move(float aDeltaTime);
+
     // Draw
     inline void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
@@ -48,6 +51,18 @@ private:
 
 
 /**
+ * @brief Calculate new position and orientation given current Node movements
+ *
+ * @param[in] aDeltaTime    Time elapsed since last movement (in seconds)
+ */
+inline void Scene::move(float aDeltaTime) {
+    // Ask root Nodes to move themselves
+    for (Node::List::const_iterator iChild = mRootNodes.begin(); iChild != mRootNodes.end(); ++iChild) {
+        (*iChild)->move(aDeltaTime);
+    }
+}
+
+/**
  * @brief Draw the root nodes of the scene, and their children
  *
  * @param[in] aModelToCameraMatrixStack "Model to Camera" matrix stack
@@ -56,12 +71,11 @@ private:
 inline void Scene::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
     // Root of the stack : no transformation, no need to push the stack
 
-    // Ask rote Nodes to draw themselves
+    // Ask root Nodes to draw themselves
     for (Node::List::const_iterator iChild = mRootNodes.begin(); iChild != mRootNodes.end(); ++iChild) {
         (*iChild)->draw(aModelToCameraMatrixStack, aModelToCameraMatrixUnif);
     }
 }
-
 
 /**
  * @brief   Get the list of children of the current Scene

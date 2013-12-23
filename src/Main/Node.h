@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Main/Mesh.h"
+#include "Main/Physic.h"
 
 #include "Utils/shared_ptr.hpp"         // std::shared_ptr replacement
 #include "Utils/Utils.h"
@@ -43,11 +44,15 @@ public:
     explicit Node(const char* apName);
     ~Node();
 
-    // Basic movements
+    // Basic direct movements
     void move(const glm::vec3& aTranslation);
     void pitch(float aAngle);
     void yaw(float aAngle);
     void roll(float aAngle);
+
+    // Set speeds
+    inline void setLinearSpeed(const glm::vec3& aLinearSpeed);
+    inline void setRotationalSpeed(const glm::vec3& aRotationalSpeed);
 
     // Explicit setters (used at load time with Assimp)
     inline void setOrientationQuaternion(float w, float x, float y, float z);
@@ -55,6 +60,9 @@ public:
 
     // Calculate and return the current Rotations & Translations matrix
     const glm::mat4& getMatrix() const;
+
+    // Calculate new position and orientation given current Node movements
+    void move(float aDeltaTime);
 
     // Draw
     void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
@@ -75,6 +83,8 @@ private:
     Node::List          mChildrenList;          ///< Children Nodes of the current Node
     Mesh::List          mMeshesList;            ///< List of Mesh(es) for the current Node
 
+    Physic              mPhysic;                ///< Physical properties og the currrent Node
+
     glm::fquat          mOrientationQuaternion; ///< Quaternion of orientation of the Node
     glm::vec3           mTranslationVector;     ///< Vector of translation of the Node
 
@@ -83,9 +93,28 @@ private:
     mutable bool        mbMatrixDirty;          ///< Tell if the composed Matrix is up to date or need recalculation
 
 private:
-    /// disallow copy constructor and assignment operator
+    /// disallow copy constructor and assignment operator (needs an explicit clone() method to handle hierarchy)
     DISALLOW_COPY_AND_ASSIGN(Node);
 };
+
+
+/**
+ * @brief   Set the linear speed of the Node
+ *
+ * @param[in] aLinearSpeed  3D vector whith the new translationnal speed
+ */
+inline void Node::setLinearSpeed(const glm::vec3& aLinearSpeed) {
+    mPhysic.setLinearSpeed(aLinearSpeed);
+}
+
+/**
+ * @brief   Set the linear speed of the Node
+ *
+ * @param[in] aRotationalSpeed  3D vector whith the new rotational speed
+ */
+inline void Node::setRotationalSpeed(const glm::vec3& aRotationalSpeed) {
+    mPhysic.setRotationalSpeed(aRotationalSpeed);
+}
 
 /**
  * @brief   Set the relative orientation of the Node (from its parent)
@@ -100,6 +129,8 @@ inline void Node::setOrientationQuaternion(float w, float x, float y, float z) {
     mOrientationQuaternion.x = x;
     mOrientationQuaternion.y = y;
     mOrientationQuaternion.z = z;
+
+    mbMatrixDirty = true;
 }
 
 /**
@@ -113,6 +144,8 @@ inline void Node::setTranslationVector(float x, float y, float z) {
     mTranslationVector.x = x;
     mTranslationVector.y = y;
     mTranslationVector.z = z;
+
+    mbMatrixDirty = true;
 }
 
 /**

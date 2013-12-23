@@ -115,6 +115,26 @@ inline const glm::mat4& Node::getMatrix() const {
 }
 
 /**
+ * @brief Calculate new position and orientation given current Node movements
+ *
+ * @param[in] aDeltaTime    Time elapsed since last movement (in seconds)
+ */
+void Node::move(float aDeltaTime) {
+    // Move the current Node is it has any motion
+    if (mPhysic.isInMotion()) {
+        move(aDeltaTime * mPhysic.getLinearSpeed());
+        pitch(aDeltaTime * mPhysic.getRotationalSpeed().x);
+        yaw(aDeltaTime * mPhysic.getRotationalSpeed().y);
+        roll(aDeltaTime * mPhysic.getRotationalSpeed().z);
+    }
+
+    // And ask children Nodes to move themselves
+    for (List::const_iterator iChild = mChildrenList.begin(); iChild != mChildrenList.end(); ++iChild) {
+        (*iChild)->move(aDeltaTime);
+    }
+}
+
+/**
  * @brief Draw the node and its children
  *
  * @param[in] aModelToCameraMatrixStack "Model to Camera" matrix stack
@@ -130,12 +150,12 @@ void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToC
     // Set uniform values with this new "modelToCameraMatrix" matrix
     glUniformMatrix4fv(aModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
 
-    // Draw meshes of the current node
+    // Draw meshes of the current Node
     for (Mesh::List::const_iterator iMesh = mMeshesList.begin(); iMesh != mMeshesList.end(); ++iMesh) {
         (*iMesh)->draw();
     }
 
-    // And ask children to draw themselves
+    // And ask children Nodes to draw themselves
     for (List::const_iterator iChild = mChildrenList.begin(); iChild != mChildrenList.end(); ++iChild) {
         (*iChild)->draw(aModelToCameraMatrixStack, aModelToCameraMatrixUnif);
     }

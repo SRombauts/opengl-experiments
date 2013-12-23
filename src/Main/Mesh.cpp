@@ -1,7 +1,7 @@
 /**
  * @file    Mesh.cpp
  * @ingroup Main
- * @brief   Description of a mesh/model at a #Node of the #Scene
+ * @brief   Description of a mesh/model at a Node of the Scene
  *
  * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *

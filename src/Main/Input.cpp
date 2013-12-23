@@ -34,8 +34,7 @@ Input::Input(Renderer& aRenderer) :
     mRenderer(aRenderer),
     mKeyPressed(256, false),
     mSpecialKeyPressed(128, false),
-    mFPS(1000000),
-    mCubeRotationTimer(16667) { // 16,667ms = 60Hz
+    mFPS(1000000) {
     _mpSelf = this;
     init();
 }
@@ -180,11 +179,8 @@ void Input::displayCallback() {
     // Check current key pressed
     checkKeys();
 
-    // Timer for basic cube animation (rotation around the X axis at 60Hz)
-    bool bCubeRotate = mCubeRotationTimer.isTimeElapsed(mFPS.getCurrentFrameTickUs());
-    if (bCubeRotate) {
-        mRenderer.modelYaw(0.005f);
-    }
+    // Do all movements based on Node speed
+    mRenderer.move(mFPS.getElapsedTimeUs()/1000000.0f);
 
     // Delegate management of OpenGL rendering
     mRenderer.display();

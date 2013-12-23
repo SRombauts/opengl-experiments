@@ -38,6 +38,9 @@ public:
     void reshape(int aW, int aH);
     void display();
 
+    // Calculate new position and orientation given current Node movements
+    inline void move(float aDeltaTime);
+
     // called by Input::checkKeys()
     // camera:
     void move(const glm::vec3& aTranslation);
@@ -92,3 +95,12 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
 
+
+/**
+ * @brief Calculate new position and orientation given current Node movements
+ *
+ * @param[in] aDeltaTime    Time elapsed since last movement (in seconds)
+ */
+inline void Renderer::move(float aDeltaTime) {
+    mSceneHierarchy.move(aDeltaTime);
+}

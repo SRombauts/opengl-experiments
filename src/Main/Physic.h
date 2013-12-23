@@ -48,7 +48,7 @@ private:
  * @param[in] aLinearSpeed  3D vector whith the new translationnal speed
  */
 inline void Physic::setLinearSpeed(const glm::vec3& aLinearSpeed) {
-    mbInMotion = ( (0 != aLinearSpeed.x) && (0 != aLinearSpeed.y) &&  (0 != aLinearSpeed.z) );
+    mbInMotion = ( (0 != aLinearSpeed.x) || (0 != aLinearSpeed.y) || (0 != aLinearSpeed.z) );
     mLinearSpeed = aLinearSpeed;
 }
 
@@ -58,7 +58,7 @@ inline void Physic::setLinearSpeed(const glm::vec3& aLinearSpeed) {
  * @param[in] aRotationalSpeed  3D vector whith the new rotational speed
  */
 inline void Physic::setRotationalSpeed(const glm::vec3& aRotationalSpeed) {
-    mbInMotion = ( (0 != aRotationalSpeed.x) && (0 != aRotationalSpeed.y) &&  (0 != aRotationalSpeed.z) );
+    mbInMotion = ( (0 != aRotationalSpeed.x) || (0 != aRotationalSpeed.y) || (0 != aRotationalSpeed.z) );
     mRotationalSpeed = aRotationalSpeed;
 }
 

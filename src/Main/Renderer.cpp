@@ -220,6 +220,7 @@ void Renderer::initScene() {
         /// @todo here we get to the Cuboid & Cube models => use a dictionary (map) to get models by names
         mModelPtr  = HierarchyPtr;
         mTurretPtr = HierarchyPtr->getChildren().front();
+        mTurretPtr->setRotationalSpeed(glm::vec3(0.0f, 0.1f, 0.0f));
     } else  {
         mLog.critic() << "initScene: no model file in \"" << importFilename << "\"";
         UTILS_THROW("compileShader: no model file in \"" << importFilename << "\"");
