@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.69.0 r60995</authoring_tool>
     </contributor>
-    <created>2013-12-21T21:37:10</created>
-    <modified>2013-12-21T21:37:10</modified>
+    <created>2013-12-24T17:01:25</created>
+    <modified>2013-12-24T17:01:25</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -51,92 +51,272 @@
     </material>
   </library_materials>
   <library_geometries>
-    <geometry id="Cube-mesh" name="Cube">
+    <geometry id="Turret-mesh" name="Turret">
       <mesh>
-        <source id="Cube-mesh-positions">
-          <float_array id="Cube-mesh-positions-array" count="24">-0.5000001 -0.5 -0.5 -0.5000001 0.5000001 -0.5 0.5 0.5000001 -0.5 0.5 -0.5 -0.5 -0.5000001 -0.5 0.5 -0.5000001 0.5000001 0.5 0.5 0.5000001 0.5 0.5 -0.5 0.5</float_array>
+        <source id="Turret-mesh-positions">
+          <float_array id="Turret-mesh-positions-array" count="96">0.4008674 -0.2999151 2.55348e-7 1.188714 -0.1609964 -2.48683e-7 0.4015653 -0.3038733 -0.01499974 1.189411 -0.1649546 -0.01500022 0.4034721 -0.3146872 -0.02598047 1.191318 -0.1757686 -0.025981 0.4060768 -0.3294593 -0.02999973 1.193923 -0.1905407 -0.0300002 0.4086815 -0.3442314 -0.02598047 1.196528 -0.2053128 -0.025981 0.4105883 -0.3550453 -0.01499974 1.198435 -0.2161267 -0.01500022 0.4112863 -0.3590036 2.44153e-7 1.199132 -0.2200849 -2.59878e-7 0.4105884 -0.3550453 0.01500022 1.198435 -0.2161267 0.01499968 0.4086816 -0.3442314 0.025981 1.196528 -0.2053128 0.02598047 0.4060769 -0.3294593 0.0300002 1.193923 -0.1905407 0.02999973 0.4034721 -0.3146872 0.025981 1.191318 -0.1757686 0.02598047 0.4015653 -0.3038733 0.01500022 1.189411 -0.1649546 0.01499974 -0.5000001 -0.5 -0.5 -0.5000001 0.152829 -0.5 0.3569 -0.1423014 -0.5 0.5 -0.5 -0.5 -0.5000001 -0.5 0.5 -0.5000001 0.152829 0.5 0.3569 -0.1423014 0.5 0.5 -0.5 0.5</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-positions-array" count="8" stride="3">
+            <accessor source="#Turret-mesh-positions-array" count="32" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Cube-mesh-normals">
-          <float_array id="Cube-mesh-normals-array" count="36">-1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1 -1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1</float_array>
+        <source id="Turret-mesh-normals">
+          <float_array id="Turret-mesh-normals-array" count="168">-0.1677315 0.9512513 -0.2588183 -0.1227883 0.6963641 -0.7071068 -0.04494404 0.2548869 -0.9659258 0.04494285 -0.2548869 -0.9659258 0.1227874 -0.6963644 -0.7071067 0.1677311 -0.9512509 -0.25882 0.1677315 -0.9512509 0.2588199 0.1227884 -0.6963651 0.7071057 0.0449441 -0.2548873 0.9659258 -0.04494273 0.2548864 0.9659261 0.9848047 0.1736655 1.01526e-5 -0.1677312 0.9512516 0.258818 -0.1227872 0.6963632 0.707108 -0.9848082 -0.1736455 9.78319e-7 -1 0 0 0.3256433 0.9454928 0 0.9284584 0.3714365 0 0 -1 0 0 0 -1 0 0 1 -0.1677315 0.951251 -0.2588196 -0.1227883 0.6963645 -0.7071064 -0.04494404 0.2548869 -0.9659258 0.04494285 -0.254887 -0.9659258 0.1227873 -0.6963639 -0.7071074 0.1677312 -0.9512514 -0.2588185 0.1677315 -0.9512513 0.2588185 0.1227884 -0.6963649 0.7071059 0.0449441 -0.2548873 0.9659258 -0.04494273 0.2548865 0.965926 0.9848063 0.173657 0 0.9848065 0.1736552 0 0.9848076 0.1736493 -4.43519e-6 0.9848078 0.1736479 -1.98851e-6 0.9848078 0.1736477 -1.91351e-6 0.9848077 0.1736487 -1.91196e-6 0.9848078 0.1736475 -2.20953e-6 0.9848078 0.1736474 -2.20927e-6 0.9848089 0.1736418 -3.71614e-6 -0.1677312 0.9512512 0.2588194 -0.1227872 0.6963632 0.7071079 -0.9848075 -0.1736499 1.43313e-7 -0.9848078 -0.1736478 1.32522e-6 -0.9848078 -0.1736484 7.65115e-7 -0.9848078 -0.1736485 6.34784e-7 -0.9848077 -0.1736484 9.70462e-7 -0.9848077 -0.1736486 1.86701e-6 -0.9848077 -0.1736483 1.39952e-6 -0.9848078 -0.1736482 8.17218e-7 -0.9848078 -0.1736481 0 -1 0 0 0.3256433 0.9454928 0 0.9284584 0.3714365 0 0 -1 0 0 0 -1 0 0 1</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-normals-array" count="12" stride="3">
+            <accessor source="#Turret-mesh-normals-array" count="56" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Cube-mesh-colors">
-          <float_array id="Cube-mesh-colors-array" count="108">0.5725491 0.9254902 1 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0 1 0.4039216 0 1 0.4039216 0 1 0.4039216 0.9960784 0.003921568 0.8431373 1 0 0.8392157 1 0 0.8392157 1 0 0.1019608 1 0 0.1019608 1 0 0.1019608 1 0.6588236 0 1 0.6588236 0 1 0.6588236 0 0.1568627 0.007843136 1 0.1490196 0 1 0.1490196 0 1 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0 1 0.4039216 0 1 0.4039216 0 1 0.4039216 1 0 0.8392157 1 0 0.8392157 1 0 0.8392157 1 0 0.1019608 1 0 0.1019608 1 0 0.1019608 1 0.6588236 0 1 0.6588236 0 1 0.6588236 0 0.1490196 0 1 0.1490196 0 1 0.1490196 0 1</float_array>
+        <source id="Turret-mesh-colors">
+          <float_array id="Turret-mesh-colors-array" count="504">0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2470588 0 0.07450979 0.3803921 0 0.1137255 0.2941176 0 0.09019607 0.2470588 0 0.07450979 0.3058823 0 0.09019607 0.3058823 0 0.09019607 0.3803921 0 0.1137255 0.3019608 0 0.09019607 0.3019608 0 0.09019607 0.3803921 0 0.1137255 0.2901961 0 0.0862745 0.2901961 0 0.0862745 0.3803921 0 0.1137255 0.2705882 0 0.08235293 0.2705882 0 0.08235293 0.3803921 0 0.1137255 0.2509804 0 0.07843136 0.2509804 0 0.07843136 0.3803921 0 0.1137255 0.2352941 0 0.07058823 0.3803921 0 0.1137255 0.4117647 0.04705882 0.1568627 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0 1 0.4039216 0 1 0.4039216 0 1 0.4039216 0.9960784 0.003921568 0.8431373 1 0 0.8392157 1 0 0.8392157 1 0 0.1019608 1 0 0.1019608 1 0 0.1019608 1 0.6588236 0 1 0.6588236 0 1 0.6588236 0 0.1568627 0.007843136 1 0.1490196 0 1 0.1490196 0 1 0.2431373 0 0.07450979 0.2470588 0 0.07450979 0.3803921 0 0.1137255 0.2470588 0 0.07450979 0.2470588 0 0.07450979 0.3803921 0 0.1137255 0.2470588 0 0.07450979 0.2431373 0 0.07450979 0.3058823 0 0.09019607 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3019608 0 0.09019607 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2901961 0 0.0862745 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2705882 0 0.08235293 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2509804 0 0.07843136 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2352941 0 0.07058823 0.4117647 0.04705882 0.1568627 0.4156863 0.05490195 0.1647059 0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.2431373 0 0.07450979 0.2431373 0 0.07450979 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.3803921 0 0.1137255 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0.5725491 0.9254902 1 0 1 0.4039216 0 1 0.4039216 0 1 0.4039216 1 0 0.8392157 1 0 0.8392157 1 0 0.8392157 1 0 0.1019608 1 0 0.1019608 1 0 0.1019608 1 0.6588236 0 1 0.6588236 0 1 0.6588236 0 0.1490196 0 1 0.1568627 0.007843136 1 0.1490196 0 1</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-colors-array" count="36" stride="3">
+            <accessor source="#Turret-mesh-colors-array" count="168" stride="3">
               <param name="R" type="float"/>
               <param name="G" type="float"/>
               <param name="B" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Cube-mesh-vertices">
-          <input semantic="POSITION" source="#Cube-mesh-positions"/>
+        <vertices id="Turret-mesh-vertices">
+          <input semantic="POSITION" source="#Turret-mesh-positions"/>
         </vertices>
-        <polylist count="12">
-          <input semantic="VERTEX" source="#Cube-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Cube-mesh-normals" offset="1"/>
-          <input semantic="COLOR" source="#Cube-mesh-colors" offset="2"/>
-          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
-          <p>4 0 0 5 0 1 0 0 2 5 1 3 6 1 4 1 1 5 6 2 6 7 2 7 2 2 8 7 3 9 4 3 10 3 3 11 0 4 12 1 4 13 3 4 14 7 5 15 6 5 16 4 5 17 5 6 18 1 6 19 0 6 20 6 7 21 2 7 22 1 7 23 7 8 24 3 8 25 2 8 26 4 9 27 0 9 28 3 9 29 1 10 30 2 10 31 3 10 32 6 11 33 5 11 34 4 11 35</p>
+        <polylist count="56">
+          <input semantic="VERTEX" source="#Turret-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Turret-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Turret-mesh-colors" offset="2"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 2 1 3 3 1 4 4 1 5 4 2 6 5 2 7 6 2 8 6 3 9 7 3 10 8 3 11 8 4 12 9 4 13 10 4 14 10 5 15 11 5 16 12 5 17 12 6 18 13 6 19 14 6 20 14 7 21 15 7 22 16 7 23 16 8 24 17 8 25 18 8 26 18 9 27 19 9 28 20 9 29 9 10 30 13 10 31 11 10 32 22 11 33 23 11 34 0 11 35 20 12 36 21 12 37 22 12 38 14 13 39 10 13 40 12 13 41 28 14 42 29 14 43 24 14 44 29 15 45 30 15 46 25 15 47 30 16 48 31 16 49 26 16 50 31 17 51 28 17 52 27 17 53 24 18 54 25 18 55 27 18 56 31 19 57 30 19 58 29 19 59 1 20 60 3 20 61 2 20 62 3 21 63 5 21 64 4 21 65 5 22 66 7 22 67 6 22 68 7 23 69 9 23 70 8 23 71 9 24 72 11 24 73 10 24 74 11 25 75 13 25 76 12 25 77 13 26 78 15 26 79 14 26 80 15 27 81 17 27 82 16 27 83 17 28 84 19 28 85 18 28 86 19 29 87 21 29 88 20 29 89 3 30 90 1 30 91 23 30 92 3 31 93 23 31 94 21 31 95 5 32 96 3 32 97 7 32 98 3 33 99 21 33 100 7 33 101 21 34 102 19 34 103 7 34 104 19 35 105 17 35 106 7 35 107 7 36 108 17 36 109 9 36 110 17 37 111 15 37 112 9 37 113 15 38 114 13 38 115 9 38 116 23 39 117 1 39 118 0 39 119 21 40 120 23 40 121 22 40 122 22 41 123 0 41 124 20 41 125 20 42 126 0 42 127 18 42 128 18 43 129 0 43 130 16 43 131 16 44 132 0 44 133 14 44 134 14 45 135 0 45 136 10 45 137 10 46 138 0 46 139 8 46 140 0 47 141 2 47 142 8 47 143 2 48 144 4 48 145 8 48 146 4 49 147 6 49 148 8 49 149 29 50 150 25 50 151 24 50 152 30 51 153 26 51 154 25 51 155 31 52 156 27 52 157 26 52 158 28 53 159 24 53 160 27 53 161 25 54 162 26 54 163 27 54 164 28 55 165 31 55 166 29 55 167</p>
         </polylist>
       </mesh>
       <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
     </geometry>
-    <geometry id="Cuboid-mesh" name="Cuboid">
+    <geometry id="RightWing-mesh" name="RightWing">
       <mesh>
-        <source id="Cuboid-mesh-positions">
-          <float_array id="Cuboid-mesh-positions-array" count="24">2 1 -1 2 -1 -1 -2 -0.9999998 -1 -1.999999 1 -1 2.000001 0.9999995 1 1.999999 -1.000001 1 -2.000001 -0.9999997 1 -2 1 1</float_array>
+        <source id="RightWing-mesh-positions">
+          <float_array id="RightWing-mesh-positions-array" count="24">-1 -0.04999995 -1 -1 0.04999995 -1 1 0.04999995 -1 1 -0.04999995 -1 -1.507129 -0.2070105 1 -1.507129 -0.1732051 1 -0.4667876 -0.1732051 1 -0.4667876 -0.2070105 1</float_array>
           <technique_common>
-            <accessor source="#Cuboid-mesh-positions-array" count="8" stride="3">
+            <accessor source="#RightWing-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Cuboid-mesh-normals">
-          <float_array id="Cuboid-mesh-normals-array" count="36">0 0 -1 0 0 1 1 0 -4.76837e-7 0 -1 -2.98023e-7 -1 4.76837e-7 -2.38419e-7 1.3411e-7 1 2.38419e-7 0 0 -1 0 0 1 1 -1.13249e-6 6.55651e-7 -2.38419e-7 -1 0 -1 4.17233e-7 -2.98023e-7 0 1 1.78814e-7</float_array>
+        <source id="RightWing-mesh-normals">
+          <float_array id="RightWing-mesh-normals-array" count="36">-0.9693242 0 -0.2457861 0 0.99383 0.1109139 0.8063817 0 0.5913953 0 -0.9969327 -0.07826447 0 0 -1 0 0 1 -0.9693241 0 -0.2457861 0 0.9938301 0.1109139 0.8063817 0 0.5913953 0 -0.9969326 -0.07826447 0 0 -1 0 0 1</float_array>
           <technique_common>
-            <accessor source="#Cuboid-mesh-normals-array" count="12" stride="3">
+            <accessor source="#RightWing-mesh-normals-array" count="12" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Cuboid-mesh-colors">
-          <float_array id="Cuboid-mesh-colors-array" count="108">1 0.4039216 0.5568628 1 0.4549019 0.5921569 1 0.4039216 0.5568628 0.3411765 0.3215686 1 0.3411765 0.3215686 1 0.3411765 0.3215686 1 1 0.8156863 0.3882353 1 0.8156863 0.3882353 1 0.8156863 0.3882353 1 0.3372549 0.007843136 1 0.3333333 0 1 0.3333333 0 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.8745098 0.4078431 1 0.827451 0.4 1 0.8745098 0.4078431 1 1 0.4549019 0.5921569 1 0.4039216 0.5568628 1 0.4039216 0.5568628 0.3411765 0.3215686 1 0.3411765 0.3215686 1 0.3411765 0.3215686 1 1 0.8156863 0.3882353 1 0.8196079 0.4 1 0.8156863 0.3882353 1 0.3333333 0 1 0.3333333 0 1 0.3333333 0 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.827451 0.4 1 0.8745098 0.4078431 1 0.8745098 0.4078431 1</float_array>
+        <source id="RightWing-mesh-colors">
+          <float_array id="RightWing-mesh-colors-array" count="108">0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.2901961 0.2823529 0.2901961 0.2470588 0.2431373 0.2509804 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.2470588 0.2431373 0.2509804 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.2470588 0.2431373 0.2509804 0.2901961 0.2823529 0.2901961 0.2470588 0.2431373 0.2509804 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.3490196 0.3411765 0.3490196 0.2901961 0.2823529 0.2901961 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.3490196 0.3411765 0.3490196 0.2470588 0.2431373 0.2509804 0.2901961 0.2823529 0.2901961 0.2901961 0.2823529 0.2901961</float_array>
           <technique_common>
-            <accessor source="#Cuboid-mesh-colors-array" count="36" stride="3">
+            <accessor source="#RightWing-mesh-colors-array" count="36" stride="3">
               <param name="R" type="float"/>
               <param name="G" type="float"/>
               <param name="B" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Cuboid-mesh-vertices">
-          <input semantic="POSITION" source="#Cuboid-mesh-positions"/>
+        <vertices id="RightWing-mesh-vertices">
+          <input semantic="POSITION" source="#RightWing-mesh-positions"/>
+        </vertices>
+        <polylist count="12">
+          <input semantic="VERTEX" source="#RightWing-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#RightWing-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#RightWing-mesh-colors" offset="2"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>4 0 0 5 0 1 1 0 2 5 1 3 6 1 4 2 1 5 6 2 6 7 2 7 2 2 8 7 3 9 4 3 10 3 3 11 0 4 12 1 4 13 3 4 14 7 5 15 6 5 16 4 5 17 0 6 18 4 6 19 1 6 20 1 7 21 5 7 22 2 7 23 7 8 24 3 8 25 2 8 26 4 9 27 0 9 28 3 9 29 1 10 30 2 10 31 3 10 32 6 11 33 5 11 34 4 11 35</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="LeftWing-mesh" name="LeftWing">
+      <mesh>
+        <source id="LeftWing-mesh-positions">
+          <float_array id="LeftWing-mesh-positions-array" count="24">-1 -0.04999995 1 -1 0.04999995 1 1 0.04999995 1 1 -0.04999995 1 -1.507129 -0.2070105 -1 -1.507129 -0.1732051 -1 -0.4667876 -0.1732051 -1 -0.4667876 -0.2070105 -1</float_array>
+          <technique_common>
+            <accessor source="#LeftWing-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="LeftWing-mesh-normals">
+          <float_array id="LeftWing-mesh-normals-array" count="36">0.9693242 0 -0.2457861 0 -0.99383 0.1109139 -0.8063817 0 0.5913953 0 0.9969327 -0.07826447 0 0 -1 0 0 1 0.9693241 0 -0.2457861 0 -0.9938301 0.1109139 -0.8063817 0 0.5913953 0 0.9969326 -0.07826447 0 0 -1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#LeftWing-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="LeftWing-mesh-colors">
+          <float_array id="LeftWing-mesh-colors-array" count="108">0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.2784314 0.2745098 0.2784314 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.2078431 0.2039216 0.2117647 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.2078431 0.2039216 0.2117647 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.6352941 0.6313726 0.6352941 0.5490196 0.5450981 0.5490196 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.2784314 0.2745098 0.2784314 0.3882353 0.3803921 0.3882353 0.2784314 0.2745098 0.2784314 0.2784314 0.2745098 0.2784314 0.3882353 0.3803921 0.3882353 0.2078431 0.2039216 0.2117647 0.3882353 0.3803921 0.3882353 0.2078431 0.2039216 0.2117647 0.2078431 0.2039216 0.2117647 0.3882353 0.3803921 0.3882353 0.3372549 0.3333333 0.3411765 0.3882353 0.3803921 0.3882353 0.5490196 0.5450981 0.5490196 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353 0.3882353 0.3803921 0.3882353</float_array>
+          <technique_common>
+            <accessor source="#LeftWing-mesh-colors-array" count="36" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="LeftWing-mesh-vertices">
+          <input semantic="POSITION" source="#LeftWing-mesh-positions"/>
+        </vertices>
+        <polylist count="12">
+          <input semantic="VERTEX" source="#LeftWing-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#LeftWing-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#LeftWing-mesh-colors" offset="2"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>4 0 0 5 0 1 1 0 2 5 1 3 6 1 4 2 1 5 6 2 6 7 2 7 2 2 8 7 3 9 4 3 10 3 3 11 0 4 12 1 4 13 3 4 14 7 5 15 6 5 16 4 5 17 0 6 18 4 6 19 1 6 20 1 7 21 5 7 22 2 7 23 7 8 24 3 8 25 2 8 26 4 9 27 0 9 28 3 9 29 1 10 30 2 10 31 3 10 32 6 11 33 5 11 34 4 11 35</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="RightTail-mesh" name="RightTail">
+      <mesh>
+        <source id="RightTail-mesh-positions">
+          <float_array id="RightTail-mesh-positions-array" count="24">-0.6162493 -1 -0.05005776 -1 0.3273895 0.5821414 0.2958348 -0.1832236 0.2538047 1 -1 -0.07686972 -0.6152845 -1 0.064031 -1 0.3273895 0.5934479 0.2988019 -0.1832236 0.2932811 1 -1 -0.01668918</float_array>
+          <technique_common>
+            <accessor source="#RightTail-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="RightTail-mesh-normals">
+          <float_array id="RightTail-mesh-normals-array" count="36">-0.9595714 -0.2813482 0.00811541 0.3603202 0.9324355 -0.02708232 0.7587496 0.6513825 0 0 -1 0 -0.0150032 0.4264068 -0.9044071 0.1184269 -0.2618284 0.9578209 -0.9606596 -0.2777284 0 0.366607 0.9303758 0 0.7448788 0.6648467 -0.05598646 0 -1 0 -0.135526 0.2691884 -0.9535042 0.04659515 -0.3583794 0.9324125</float_array>
+          <technique_common>
+            <accessor source="#RightTail-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="RightTail-mesh-colors">
+          <float_array id="RightTail-mesh-colors-array" count="108">0.317647 0.3098039 0.3803921 0.2431373 0.2352941 0.2901961 0.317647 0.3098039 0.3803921 0.3058823 0.2980392 0.3647059 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.317647 0.3098039 0.3803921 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.3058823 0.2980392 0.3647059 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.317647 0.3098039 0.3803921 0.3058823 0.2980392 0.3647059 0.3058823 0.2980392 0.3647059 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.3058823 0.2980392 0.3647059</float_array>
+          <technique_common>
+            <accessor source="#RightTail-mesh-colors-array" count="36" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="RightTail-mesh-vertices">
+          <input semantic="POSITION" source="#RightTail-mesh-positions"/>
+        </vertices>
+        <polylist count="12">
+          <input semantic="VERTEX" source="#RightTail-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#RightTail-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#RightTail-mesh-colors" offset="2"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>4 0 0 5 0 1 0 0 2 5 1 3 6 1 4 2 1 5 6 2 6 7 2 7 3 2 8 7 3 9 4 3 10 3 3 11 0 4 12 1 4 13 3 4 14 7 5 15 6 5 16 5 5 17 5 6 18 1 6 19 0 6 20 1 7 21 5 7 22 2 7 23 2 8 24 6 8 25 3 8 26 4 9 27 0 9 28 3 9 29 1 10 30 2 10 31 3 10 32 4 11 33 7 11 34 5 11 35</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="LeftTail-mesh" name="LeftTail">
+      <mesh>
+        <source id="LeftTail-mesh-positions">
+          <float_array id="LeftTail-mesh-positions-array" count="24">-0.6162493 -1 0.05005776 -1 0.3273895 -0.5821414 0.2958348 -0.1832236 -0.2538047 1 -1 0.07686972 -0.6152845 -1 -0.064031 -1 0.3273895 -0.5934479 0.2988019 -0.1832236 -0.2932811 1 -1 0.01668918</float_array>
+          <technique_common>
+            <accessor source="#LeftTail-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="LeftTail-mesh-normals">
+          <float_array id="LeftTail-mesh-normals-array" count="36">0.9595714 0.2813482 0.00811541 -0.3603202 -0.9324355 -0.02708232 -0.7587496 -0.6513825 0 0 1 0 0.0150032 -0.4264068 -0.9044071 -0.1184269 0.2618284 0.9578209 0.9606596 0.2777284 0 -0.366607 -0.9303758 0 -0.7448788 -0.6648467 -0.05598646 0 1 0 0.135526 -0.2691884 -0.9535042 -0.04659515 0.3583794 0.9324125</float_array>
+          <technique_common>
+            <accessor source="#LeftTail-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="LeftTail-mesh-colors">
+          <float_array id="LeftTail-mesh-colors-array" count="108">0.317647 0.3098039 0.3803921 0.2431373 0.2352941 0.2901961 0.317647 0.3098039 0.3803921 0.3058823 0.2980392 0.3647059 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.317647 0.3098039 0.3803921 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.3058823 0.2980392 0.3647059 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.317647 0.3098039 0.3803921 0.3058823 0.2980392 0.3647059 0.3058823 0.2980392 0.3647059 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.2431373 0.2352941 0.2901961 0.3058823 0.2980392 0.3647059</float_array>
+          <technique_common>
+            <accessor source="#LeftTail-mesh-colors-array" count="36" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="LeftTail-mesh-vertices">
+          <input semantic="POSITION" source="#LeftTail-mesh-positions"/>
+        </vertices>
+        <polylist count="12">
+          <input semantic="VERTEX" source="#LeftTail-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#LeftTail-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#LeftTail-mesh-colors" offset="2"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>4 0 0 5 0 1 0 0 2 5 1 3 6 1 4 2 1 5 6 2 6 7 2 7 3 2 8 7 3 9 4 3 10 3 3 11 0 4 12 1 4 13 3 4 14 7 5 15 6 5 16 5 5 17 5 6 18 1 6 19 0 6 20 1 7 21 5 7 22 2 7 23 2 8 24 6 8 25 3 8 26 4 9 27 0 9 28 3 9 29 1 10 30 2 10 31 3 10 32 4 11 33 7 11 34 5 11 35</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="Ship-mesh" name="Ship">
+      <mesh>
+        <source id="Ship-mesh-positions">
+          <float_array id="Ship-mesh-positions-array" count="24">0.8000038 1 1.999998 1.500006 -0.5 2.999997 1.499997 -0.4999998 -1.500003 0.9999962 1 -2.000001 -0.7999962 0.9999995 2.000002 -1.499994 -0.5000006 3.000001 -1.500003 -0.4999997 -1.499998 -1.000004 1 -1.999998</float_array>
+          <technique_common>
+            <accessor source="#Ship-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Ship-mesh-normals">
+          <float_array id="Ship-mesh-normals-array" count="36">0.8935342 0.446767 0.04467499 -0.893534 0.446767 0.04467844 1.88044e-6 0.5547003 0.8320503 1.98682e-7 -1 0 -1.67753e-6 -0.3162271 -0.9486836 -2.98023e-7 1 1.49012e-7 0.9486833 0.3162277 -1.7969e-6 -0.9486833 0.3162279 1.87649e-6 1.08005e-6 0.5546995 0.8320508 0 -1 -2.11928e-7 -1.47019e-6 -0.3162274 -0.9486835 -1.78814e-7 1 0</float_array>
+          <technique_common>
+            <accessor source="#Ship-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Ship-mesh-colors">
+          <float_array id="Ship-mesh-colors-array" count="108">1 0.4039216 0.5568628 1 0.4549019 0.5921569 1 0.4039216 0.5568628 0.3411765 0.3215686 1 0.3411765 0.3215686 1 0.3411765 0.3215686 1 1 0.8156863 0.3882353 1 0.8156863 0.3882353 1 0.8156863 0.3882353 1 0.3372549 0.007843136 1 0.3333333 0 1 0.3333333 0 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.8745098 0.4078431 1 0.827451 0.4 1 0.8745098 0.4078431 1 1 0.4549019 0.5921569 1 0.4039216 0.5568628 1 0.4039216 0.5568628 0.3411765 0.3215686 1 0.3411765 0.3215686 1 0.3411765 0.3215686 1 1 0.8156863 0.3882353 1 0.8196079 0.4 1 0.8156863 0.3882353 1 0.3333333 0 1 0.3333333 0 1 0.3333333 0 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.8431373 1 0.3882353 0.827451 0.4 1 0.8745098 0.4078431 1 0.8745098 0.4078431 1</float_array>
+          <technique_common>
+            <accessor source="#Ship-mesh-colors-array" count="36" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Ship-mesh-vertices">
+          <input semantic="POSITION" source="#Ship-mesh-positions"/>
         </vertices>
         <polylist material="Material-material" count="12">
-          <input semantic="VERTEX" source="#Cuboid-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Cuboid-mesh-normals" offset="1"/>
-          <input semantic="COLOR" source="#Cuboid-mesh-colors" offset="2"/>
+          <input semantic="VERTEX" source="#Ship-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Ship-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Ship-mesh-colors" offset="2"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
-          <p>0 0 0 1 0 1 3 0 2 4 1 3 7 1 4 6 1 5 0 2 6 4 2 7 1 2 8 1 3 9 5 3 10 2 3 11 2 4 12 6 4 13 3 4 14 4 5 15 0 5 16 7 5 17 1 6 18 2 6 19 3 6 20 5 7 21 4 7 22 6 7 23 4 8 24 5 8 25 1 8 26 5 9 27 6 9 28 2 9 29 6 10 30 7 10 31 3 10 32 0 11 33 3 11 34 7 11 35</p>
+          <p>0 0 0 1 0 1 3 0 2 4 1 3 7 1 4 5 1 5 0 2 6 4 2 7 1 2 8 1 3 9 5 3 10 2 3 11 2 4 12 6 4 13 3 4 14 4 5 15 0 5 16 7 5 17 1 6 18 2 6 19 3 6 20 7 7 21 6 7 22 5 7 23 4 8 24 5 8 25 1 8 26 5 9 27 6 9 28 2 9 29 6 10 30 7 10 31 3 10 32 0 11 33 3 11 34 7 11 35</p>
         </polylist>
       </mesh>
       <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
@@ -145,18 +325,34 @@
   <library_controllers/>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="Cuboid" name="Cuboid" type="NODE">
+      <node id="Ship" name="Ship" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cuboid-mesh">
+        <instance_geometry url="#Ship-mesh">
           <bind_material>
             <technique_common>
               <instance_material symbol="Material-material" target="#Material-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
-        <node id="Cube" name="Cube" type="NODE">
-          <matrix sid="transform">1 0 0 1 0 1 0 1.5 0 0 1 0 0 0 0 1</matrix>
-          <instance_geometry url="#Cube-mesh"/>
+        <node id="Turret" name="Turret" type="NODE">
+          <matrix sid="transform">1.86364e-6 0 -1 1.91927e-6 0 1 0 1.5 1 0 1.86364e-6 1 0 0 0 1</matrix>
+          <instance_geometry url="#Turret-mesh"/>
+        </node>
+        <node id="RightWing" name="RightWing" type="NODE">
+          <matrix sid="transform">1.86364e-6 0 -1 -2.299999 0 1 0 -0.2 1 0 1.86364e-6 0.3000044 0 0 0 1</matrix>
+          <instance_geometry url="#RightWing-mesh"/>
+        </node>
+        <node id="LeftWing" name="LeftWing" type="NODE">
+          <matrix sid="transform">1.86364e-6 0 -1 2.3 0 1 0 -0.2 1 0 1.86364e-6 0.2999956 0 0 0 1</matrix>
+          <instance_geometry url="#LeftWing-mesh"/>
+        </node>
+        <node id="RightTail" name="RightTail" type="NODE">
+          <matrix sid="transform">1.86364e-6 0 -1 -0.934984 0 1 0 2 1 0 1.86364e-6 -1.383547 0 0 0 1</matrix>
+          <instance_geometry url="#RightTail-mesh"/>
+        </node>
+        <node id="LeftTail" name="LeftTail" type="NODE">
+          <matrix sid="transform">1.86364e-6 0 -1 0.9359118 0 1 0 2 1 0 1.86364e-6 -1.383551 0 0 0 1</matrix>
+          <instance_geometry url="#LeftTail-mesh"/>
         </node>
       </node>
     </visual_scene>
