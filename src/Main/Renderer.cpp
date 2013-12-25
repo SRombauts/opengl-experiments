@@ -32,7 +32,7 @@
 
 #include <cmath>    // cos, sin, tan
 
-/* We use a standard "Right Hand Coordinate System", like this:
+/* We use a standard "Right Hand Coordinate System", and the unit is the meter:
 static const float X_RIGHT  = 1.0f;     ///< Right coordinate
 static const float X_LEFT   = -1.0f;    ///< Left coordinate
 static const float Y_TOP    = 1.0f;     ///< Top coordinate
@@ -41,8 +41,8 @@ static const float Z_FRONT  = 1.0f;     ///< Front coordinate
 static const float Z_BACK   = -1.0f;    ///< Back coordinate
 */
 
-static const float _zNear           = 1.0f;     ///< Z coordinate or the near/front frustum plane from which to render
-static const float _zFar            = 1000.0f;  ///< Z coordinate or the far/back frustum plane to which to render
+static const float _zNear           = 0.1f;     ///< Z coordinate or the near/front frustum plane from which to render
+static const float _zFar            = 10000.0f; ///< Z coordinate or the far/back frustum plane to which to render
 
 
 /**
@@ -219,8 +219,13 @@ void Renderer::initScene() {
         mSceneHierarchy.addRootNode(HierarchyPtr);
         /// @todo here we get to the Cuboid & Cube models => use a dictionary (map) to get models by names
         mModelPtr  = HierarchyPtr;
+        mModelPtr->move(glm::vec3(-3.0f, -2.0f, -3.0f));
+        mModelPtr->yaw(1.57f); // arround y
+        mModelPtr->roll(0.2f); // arround z
+        mModelPtr->setRotationalSpeed(glm::vec3(-0.05f, -0.3f, 0.0f)); // pitch, yaw, roll
+        mModelPtr->setLinearSpeed(glm::vec3(0.0f, 0.0f, 3.0f));
         mTurretPtr = HierarchyPtr->getChildren().front();
-        mTurretPtr->setRotationalSpeed(glm::vec3(0.0f, 0.1f, 0.0f));
+        mTurretPtr->setRotationalSpeed(glm::vec3(0.0f, 0.8f, 0.0f));
     } else  {
         mLog.critic() << "initScene: no model file in \"" << importFilename << "\"";
         UTILS_THROW("compileShader: no model file in \"" << importFilename << "\"");
