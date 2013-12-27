@@ -219,8 +219,8 @@ void Renderer::initScene() {
         mSceneHierarchy.addRootNode(HierarchyPtr);
         /// @todo here we get to the Cuboid & Cube models => use a dictionary (map) to get models by names
         mModelPtr  = HierarchyPtr;
-        mModelPtr->move(glm::vec3(-3.0f, -2.0f, -3.0f));
-        mModelPtr->yaw(1.57f); // arround y
+        mModelPtr->move(glm::vec3(-3.0f, -1.0f, -4.0f));
+        mModelPtr->yaw(1.57f); // 90° horizontally arround y (to face right)
         mModelPtr->roll(0.2f); // arround z
         mModelPtr->setRotationalSpeed(glm::vec3(-0.05f, -0.3f, 0.0f)); // pitch, yaw, roll
         mModelPtr->setLinearSpeed(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -231,7 +231,13 @@ void Renderer::initScene() {
         UTILS_THROW("compileShader: no model file in \"" << importFilename << "\"");
     }
 
-    // Load a plane for some kind of fixe reference
+    // Load an experimental cockpit => toward a camera view in world
+    Node::Ptr CockpitPtr = loadFile("data/cockpit.dae");
+    CockpitPtr->move(glm::vec3(2.0f, 0.0f, 19.0f));
+    CockpitPtr->yaw(3.14f); // 180° horizontally arround y (to face back)
+    mSceneHierarchy.addRootNode(CockpitPtr);
+
+    // Load a ground/plane for some kind of fixe reference
     Node::Ptr PlanePtr = loadFile("data/plane.dae");
     mSceneHierarchy.addRootNode(PlanePtr);
 }
