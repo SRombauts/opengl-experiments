@@ -55,7 +55,6 @@ public:
 private:
     // Initialization
     void init();
-    void compileShader(std::vector<GLuint>& aShaderList, const GLenum aShaderType, const char* apShaderFilename) const;
     void initProgram();
     void initScene();
 

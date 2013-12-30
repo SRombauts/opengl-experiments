@@ -11,12 +11,12 @@
 
 #include "Main/Renderer.h"
 #include "Main/MatrixStack.h"
+#include "Main/ShaderProgram.h"
 #include "Utils/Exception.h"
 #include "Utils/Measure.h"
 #include "Utils/String.h"
 
 #include <GL/freeglut.h>
-#include <glutil/Shader.h>
 #include <glm/gtc/type_ptr.hpp>         // glm::value_ptr
 #include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
 
@@ -71,37 +71,6 @@ Renderer::Renderer() :
 Renderer::~Renderer() {
 }
 
-
-/**
- * @brief Compile a given type shader from the content of a file, and add it to the list
- *
- * @param[in,out]   aShaderList         List of compiled shaders, to be completed by this function
- * @param[in]       aShaderType         Type of shader to be compiled
- * @param[in]       apShaderFilename    Name of the shader file to compile
- *
- * @throw a std::exception in case of error (glutil::CompileLinkException or std::runtime_error)
- */
-void Renderer::compileShader(std::vector<GLuint>& aShaderList,
-                        const GLenum aShaderType,
-                        const char* apShaderFilename) const {
-    try {
-        std::ifstream ifShader(apShaderFilename);
-        if (ifShader.is_open()) {
-            std::ostringstream isShader;
-            isShader << ifShader.rdbuf();
-            mLog.debug() << "compileShader: compiling \"" << apShaderFilename << "\"...";
-            aShaderList.push_back(glutil::CompileShader(aShaderType, isShader.str()));
-        } else {
-            mLog.critic() << "compileShader: unavailable file \"" << apShaderFilename << "\"";
-            UTILS_THROW("compileShader: unavailable file " << apShaderFilename);
-        }
-    }
-    catch(glutil::CompileLinkException& e) {
-        mLog.info() << "compileShader: \"" << apShaderFilename << "\":\n" << e.what();
-        throw;  // rethrow to abort program
-    }
-}
-
 /**
  * @brief Initialization
  */
@@ -151,17 +120,15 @@ void Renderer::init() {
  * @brief compile shaders and link them in a program
  */
 void Renderer::initProgram() {
-    std::vector<GLuint> shaderList;
+    ShaderProgram   shaderProgram;
 
     // Compile the shader files (into intermediate compiled object)
     mLog.debug() << "initProgram: compiling shaders...";
-    compileShader(shaderList, GL_VERTEX_SHADER,   "data/ModelWorldCameraClip.vert");
-    compileShader(shaderList, GL_FRAGMENT_SHADER, "data/PassthroughColor.frag");
+    shaderProgram.compileShader(GL_VERTEX_SHADER,   "data/ModelWorldCameraClip.vert");
+    shaderProgram.compileShader(GL_FRAGMENT_SHADER, "data/PassthroughColor.frag");
     // Link them in a program (into the final executable to send to the GPU)
     mLog.debug() << "initProgram: linking program...";
-    mProgram = glutil::LinkProgram(shaderList);
-    // Now, the intermediate compiled shader can be deleted (the program contain them)
-    std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
+    mProgram = shaderProgram.linkProgram();
 
     // Get location of (vertex) attributes (input streams of (vertex) shader
     /// @todo test attribute and uniform != -1
