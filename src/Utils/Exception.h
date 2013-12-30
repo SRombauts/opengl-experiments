@@ -65,3 +65,8 @@ public:
 /// @brief Helper macro to throw an Exception with file/line/function information, using the string stream Formatter
 #define UTILS_THROW(x)  throw Utils::Exception(Utils::Formatter() \
                         << __FILE__ << ":" << TOSTRING(__LINE__) << ": " << __func__ << "(): " << x)
+
+
+/// @brief Helper macro to throw an Exception with file/line/function information, using the string stream Formatter
+#define UTILS_THROW_IF_FALSE(x) ((void)(!(x) && throw Utils::Exception(Utils::Formatter() \
+                                << __FILE__ << ":" << TOSTRING(__LINE__) << ": " << __func__ << "(): " << x)))

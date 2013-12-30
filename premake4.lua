@@ -46,7 +46,7 @@ project "OpenGL"
     includedirs "assimp/include/"
     libdirs "assimp/lib"
     
-    UseLibs {"glload", "freeglut", "glutil", "glm"}
+    UseLibs {"glload", "freeglut", "glm"}
     
     configuration "windows"
         defines "WIN32"
