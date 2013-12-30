@@ -264,9 +264,20 @@ void Input::mouseCallback(int aButton, int aState, int aX, int aY) {
     }
 }
 
+/// 2d screen coordinates
+struct coord2d {
+    int x;  ///< x integer coordinate
+    int y;  ///< y integer coordinate
+};
+/// 3d coordinates
+struct coord3d {
+    int x;  ///< x integer coordinate
+    int y;  ///< y integer coordinate
+    int z;  ///< z integer coordinate
+};
 
 /// Last known position of the mouse for mouse (passive) motion functions
-static glm::detail::tvec2<int> _lastMousePos;
+static coord2d _lastMousePos;
 
 /**
  * @brief GLUT mouse motion (while button pressed) callback function
@@ -330,8 +341,8 @@ void Input::mouseWheelCallback(int aNum, int aDirection, int aX, int aY) {
  * @param[in] aZ    Z coord of the joystick (between -1000 and 1000)
  */
 void Input::joystickCallback(unsigned int aButtonMask, int aX, int aY, int aZ) {
-    static unsigned int             _lastButtonMask = 0;
-    static glm::detail::tvec3<int>  _lastJoystickPos;
+    static unsigned int _lastButtonMask = 0;
+    static coord3d      _lastJoystickPos;
     if (   (_lastButtonMask != aButtonMask)
         || (_lastJoystickPos.x != aX) || (_lastJoystickPos.y != aY) || (_lastJoystickPos.z != aZ) ) {
         mLog.debug() << "joystickCallback(" << aButtonMask << "," << aX << "," << aY << "," << aZ << ")";

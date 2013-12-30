@@ -1,12 +1,18 @@
-[submodule "premake"]
-	path = premake
-	url = https://github.com/SRombauts/premake-binaries.git
-[submodule "unofficial-opengl-sdk"]
-	path = unofficial-opengl-sdk
-	url = https://github.com/SRombauts/unofficial-opengl-sdk.git
-[submodule "LoggerCpp"]
-	path = LoggerCpp
-	url = https://github.com/SRombauts/LoggerCpp.git
+[submodule "freeglut"]
+	path = freeglut
+	url = https://github.com/dcnieho/FreeGLUT.git
+[submodule "glload"]
+	path = glload
+	url = https://github.com/SRombauts/glload.git
+[submodule "glm"]
+	path = glm
+	url = https://github.com/g-truc/glm.git
 [submodule "assimp"]
 	path = assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "LoggerCpp"]
+	path = LoggerCpp
+	url = https://github.com/SRombauts/LoggerCpp.git
+[submodule "OculusSDK"]
+	path = OculusSDK
+	url = https://github.com/SRombauts/OculusSDK.git

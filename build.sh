@@ -1,15 +1,9 @@
-#!/bin/sh
-
-echo "Generating project..."
-premake/premake4 gmake
-make -j4
-
-echo "==== Running cpplint ===="
-python cpplint.py --verbose=3 --output=eclipse --linelength=120 src/*/*
-
-echo "==== Running cppcheck ===="
-cppcheck --quiet --enable=style --template=gcc src/
-
-echo "==== Running doxygen ===="
-doxygen > /dev/null
-
+# Copyright (c) 2013 Sébastien Rombauts (sebastien.rombauts@gmail.com)
+#
+# Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
+# or copy at http://opensource.org/licenses/MIT)
+mkdir -p build
+cd build
+cmake ..
+cmake --build .
+# ctest .
