@@ -10,6 +10,7 @@
  */
 
 #include "Main/Renderer.h"
+#include "Main/MatrixStack.h"
 #include "Utils/Exception.h"
 #include "Utils/Measure.h"
 #include "Utils/String.h"
@@ -537,7 +538,7 @@ void Renderer::display() {
     glUniform3fv(mDirToLightUnif, 1, glm::value_ptr(lightDirCameraSpace));
 
     // and initialize the "Model to Camera" matrix stack with it
-    glutil::MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
+    MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Use the matrix stack to manage the hierarchy of the scene

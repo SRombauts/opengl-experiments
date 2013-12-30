@@ -19,7 +19,6 @@
 #include <glload/gl_3_3_comp.h> // GLuint, GLenum
 #define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3...
-#include <glutil/MatrixStack.h>
 
 #include <assimp/scene.h>       // Assimp output data structure
 

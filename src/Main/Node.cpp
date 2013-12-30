@@ -10,8 +10,10 @@
  */
 
 #include "Main/Node.h"
+#include "Main/MatrixStack.h"
 
 #include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
+#include <glm/gtc/type_ptr.hpp>         // glm::value_ptr
 
 
 // We use a standard "Right Hand Coordinate System"
@@ -140,15 +142,15 @@ void Node::move(float aDeltaTime) {
  * @param[in] aModelToCameraMatrixStack "Model to Camera" matrix stack
  * @param[in] aModelToCameraMatrixUnif  Location of the "modelToCameraMatrix" vertex shader uniform input variable
  */
-void Node::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
-    glutil::PushStack push(aModelToCameraMatrixStack); // RAII PushStack
+void Node::draw(MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
+    MatrixStack::Push push(aModelToCameraMatrixStack); // RAII Push/Pop MatrixStack
 
-    // Re-calculate the relative Model to World transformations matrix, and apply it to the stack
+    // Re-calculate the relative Model to World transformations matrix, and right-multiply it to the stack
     // => this effectively build the absolute "modelToCameraMatrix"
-    aModelToCameraMatrixStack.ApplyMatrix(getMatrix());
+    aModelToCameraMatrixStack.multiply(getMatrix());
 
     // Set uniform values with this new "modelToCameraMatrix" matrix
-    glUniformMatrix4fv(aModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.Top()));
+    glUniformMatrix4fv(aModelToCameraMatrixUnif, 1, GL_FALSE, glm::value_ptr(aModelToCameraMatrixStack.top()));
 
     // Draw meshes of the current Node
     for (Mesh::List::const_iterator iMesh = mMeshesList.begin(); iMesh != mMeshesList.end(); ++iMesh) {

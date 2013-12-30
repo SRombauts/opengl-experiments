@@ -20,10 +20,11 @@
 #define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
-#include <glutil/MatrixStack.h>
 
 #include <vector>                       // std::vector
 #include <string>                       // std::string
+
+class MatrixStack;
 
 /**
  * @brief Node of a Scene graph
@@ -65,7 +66,7 @@ public:
     void move(float aDeltaTime);
 
     // Draw
-    void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
+    void draw(MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
     // Getters/Setters
     inline const std::string& getName() const;

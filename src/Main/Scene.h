@@ -11,12 +11,12 @@
 #pragma once
 
 #include "Main/Node.h"
+#include "Main/MatrixStack.h"
 
 #include <glload/gl_3_3_comp.h>         // GLuint, GLenum
 #define GLM_FORCE_RADIANS // Using radians
 #include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
-#include <glutil/MatrixStack.h>
 
 #include <vector>                       // std::vector
 
@@ -36,7 +36,7 @@ public:
     inline void move(float aDeltaTime);
 
     // Draw
-    inline void draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
+    inline void draw(MatrixStack& aModelToCameraMatrixStack, GLuint aModelToWorldMatrixUnif) const;
 
     // Getters/Setters
     inline const Node::List&    getRootNodes() const;
@@ -68,7 +68,7 @@ inline void Scene::move(float aDeltaTime) {
  * @param[in] aModelToCameraMatrixStack "Model to Camera" matrix stack
  * @param[in] aModelToCameraMatrixUnif  Location of the "modelToCameraMatrix" vertex shader uniform input variable
  */
-inline void Scene::draw(glutil::MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
+inline void Scene::draw(MatrixStack& aModelToCameraMatrixStack, GLuint aModelToCameraMatrixUnif) const {
     // Root of the stack : no transformation, no need to push the stack
 
     // Ask root Nodes to draw themselves
