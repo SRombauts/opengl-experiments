@@ -17,6 +17,8 @@
 
 #include "Utils/Utils.h"
 
+#include "Main/OculusHMD.h"
+
 /**
  * @brief Application managing the lifecycle of GLUT and the rendering
  */
@@ -30,6 +32,9 @@ private:
 
     Renderer    mRenderer;  ///< Manage OpenGL rendering
     Input       mInput;     ///< Manage GLUT input callbacks
+
+    // @todo OculusHMD need a "clean" interface without "OVR.h" to pass to the renderer
+//  OculusHMD   mOculusHMD; ///< Manage Oculus Head Mounted Display inputs
 
 private:
     /// disallow copy constructor and assignment operator

@@ -3,7 +3,7 @@
  * @ingroup Main
  * @brief   Simple experiments in C++ using the Unofficial OpenGL SDK
  *
- * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+ * Copyright (c) 2012-2014 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
@@ -22,7 +22,6 @@
 
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
 #include <GL/freeglut.h>
-
 
 /**
  * @brief Main method - main entry point of application
@@ -83,7 +82,9 @@ int main(int argc, char** argv) {
         log.error() << "You must have at least OpenGL 3.3";
         glutDestroyWindow(window);
     } else {
+        OculusHMD oculus;
         // Create and initialize the application
+        // and try to detect an Oculus Rift Head Mounted Display
         App app;
 
         // Main Loop (specifically asking to continue here on exiting main loop)

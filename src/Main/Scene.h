@@ -22,7 +22,8 @@
 
 
 /**
- * @brief Container for root Nodes of a hierarchical Scene graph
+ * @brief   Container for root Nodes of a hierarchical Scene graph
+ * @ingroup Main
  *
  *  This base level of a scene graph does not have a matrix of transformation of its own.
  * It does not contain any mesh objects, and thus do no drawing at all.

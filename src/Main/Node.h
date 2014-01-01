@@ -47,8 +47,11 @@ public:
 
     // Basic direct movements
     void move(const glm::vec3& aTranslation);
+    // Pitch: rotation around X axis
     void pitch(float aAngle);
+    // Yaw: rotation around Y axis
     void yaw(float aAngle);
+    // Roll: rotation around Z axis
     void roll(float aAngle);
 
     // Set speeds
