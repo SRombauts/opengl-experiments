@@ -4,7 +4,7 @@
 # or copy at http://opensource.org/licenses/MIT) 
 
 cmake_minimum_required(VERSION 2.6)
-project(OpenGL)
+project(glExperiments)
 
 # Define useful variables to handle OS/Compiler differences
 if (MSVC)
@@ -30,11 +30,11 @@ set(CPPLINT_ARG_LINELENGTH "--linelength=120")
 
 ## OpenGL Experiments ##
 
-# add the subdirectory of the sources
+# All includes are relative to the "src" directory 
 include_directories("${PROJECT_SOURCE_DIR}/src")
 
 # add sources for the executable
-add_executable(OpenGL
+add_executable(glExperiments
  src/Main/App.h src/Main/App.cpp
  src/Main/Input.h src/Main/Input.cpp
  src/Main/Main.cpp
@@ -81,7 +81,8 @@ add_subdirectory(assimp)
 include_directories("${PROJECT_SOURCE_DIR}/assimp/include")
 
 # add the subdirectory of the LoggerCpp library (but disable any other build)
-set(LOGGERCPP_RUN_CPPLINT  OFF CACHE BOOL "Run cpplint.py tool for Google C++ Styleguide.")
+set(LOGGERCPP_BUILD_EXAMPLE OFF CACHE BOOL "Build the example of LoggerCpp.")
+set(LOGGERCPP_RUN_CPPLINT  OFF CACHE BOOL "Run cpplint.py tool for Google C++ StyleGuide.")
 set(LOGGERCPP_RUN_CPPCHECK OFF CACHE BOOL "Run cppcheck C++ static analysis tool.")
 set(LOGGERCPP_RUN_DOXYGEN  OFF CACHE BOOL "Run Doxygen C++ documentation tool.")
 add_subdirectory(LoggerCpp)
@@ -101,35 +102,44 @@ include_directories("${PROJECT_SOURCE_DIR}/OculusSDK/LibOVR/include")
 ## Linking ##
 
 # link the executable with all required libraries
-target_link_libraries(OpenGL freeglut_static glload assimp LoggerCpp OculusVR)
+target_link_libraries(glExperiments freeglut_static glload assimp LoggerCpp OculusVR)
 
 
-## Other Tools ##
+# Optional additional targets:
 
-# List all sources/headers files for cpplint:
-# adding a file still require explicittly modifing the CMakeLists.txt
-# so that CMake know that it should rebuild the project (it is best practice)
-file(GLOB all_source_files
-    "${PROJECT_SOURCE_DIR}/src/Main/*.*"
-    "${PROJECT_SOURCE_DIR}/src/Utils/*.*"
-)
+option(OPENGL_EXPERIMENTS_RUN_CPPLINT "Run cpplint.py tool for Google C++ StyleGuide." ON)
+if (OPENGL_EXPERIMENTS_RUN_CPPLINT)
+  # List all sources/headers files for cpplint:
+  # adding a file still require explicittly modifing the CMakeLists.txt
+  # so that CMake know that it should rebuild the project (it is best practice)
+  file(GLOB all_source_files
+      "${PROJECT_SOURCE_DIR}/src/Main/*.*"
+      "${PROJECT_SOURCE_DIR}/src/Utils/*.*"
+  )
 
-# add a cpplint target to the "all" target
-add_custom_target(OpenGL_cpplint
- ALL
- COMMAND python cpplint.py ${CPPLINT_ARG_OUTPUT} ${CPPLINT_ARG_VERBOSE} ${CPPLINT_ARG_LINELENGTH} ${all_source_files}
- WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-)
+  # add a cpplint target to the "all" target
+  add_custom_target(glExperiments_cpplint
+   ALL
+   COMMAND python cpplint.py ${CPPLINT_ARG_OUTPUT} ${CPPLINT_ARG_VERBOSE} ${CPPLINT_ARG_LINELENGTH} ${all_source_files}
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endif()
 
-# add a cppcheck target to the "all" target
-add_custom_target(OpenGL_cppcheck
- ALL
- COMMAND cppcheck -j 4 cppcheck --enable=style --quiet ${CPPCHECK_ARG_TEMPLATE} ${PROJECT_SOURCE_DIR}/src
-)
+option(OPENGL_EXPERIMENTS_RUN_CPPCHECK "Run cppcheck C++ static analysis tool." ON)
+if (OPENGL_EXPERIMENTS_RUN_CPPCHECK)
+  # add a cppcheck target to the "all" target
+  add_custom_target(glExperiments_cppcheck
+   ALL
+   COMMAND cppcheck -j 4 cppcheck --enable=style --quiet ${CPPCHECK_ARG_TEMPLATE} ${PROJECT_SOURCE_DIR}/src
+  )
+endif()
 
-# add a Doxygen target to the "all" target
-add_custom_target(OpenGL_doxygen
- ALL
- COMMAND doxygen Doxyfile > ${DEV_NULL}
- WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-)
+option(OPENGL_EXPERIMENTS_RUN_DOXYGEN "Run Doxygen C++ documentation tool." ON)
+if (OPENGL_EXPERIMENTS_RUN_DOXYGEN)
+  # add a Doxygen target to the "all" target
+  add_custom_target(glExperiments_doxygen
+   ALL
+   COMMAND doxygen Doxyfile > ${DEV_NULL}
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+endif()
