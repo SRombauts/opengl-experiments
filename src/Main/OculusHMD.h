@@ -12,6 +12,8 @@
 
 #include "LoggerCpp/Logger.h"
 
+#include "Utils/shared_ptr.hpp"
+
 #include "OVR.h" // NOLINT(build/include): OculusVR fault!
 
 
@@ -31,13 +33,14 @@ public:
     ~OculusHMD();
 
 private:
-    Log::Logger                     mLog;           ///< Logger object to output runtime information
-    OVR::System                     mSystem;        ///< LibOVR core system: needs to be Init before any OVR Kernel use
-    OVR::Ptr<OVR::DeviceManager>    mManagerPtr;    ///< Device Manager provides access to devices supported by OVR
-    OVR::Ptr<OVR::HMDDevice>        mHMDPtr;        ///< Represents an Oculus HMD device unit
-    OVR::HMDInfo                    mHMDInfo;       ///< Describes the HMD allowing us to configure rendering
-    OVR::Ptr<OVR::SensorDevice>     mSensorPtr;     ///< Sensors data interface of the HMD Device
-    OVR::Ptr<OVR::Profile>          mUserProfilePtr; ///< Profile of the user (Eye height, IPD...)
-    OVR::SensorFusion               mSensorFusion;  ///< Accumulates Gyro/Accelero/Magneto to keep track of orientation
-    OVR::Util::Render::StereoConfig mStereoConfig;  ///< Stereo view parameters
+    typedef Utils::shared_ptr<OVR::SensorFusion> SensorFusionPtr;   ///< Share pointer of SensorFusion result object
+
+    Log::Logger                     mLog;               ///< Logger object to output runtime information
+    OVR::Ptr<OVR::DeviceManager>    mManagerPtr;        ///< Device Manager provides access to devices supported by OVR
+    OVR::Ptr<OVR::HMDDevice>        mHMDPtr;            ///< Represents an Oculus HMD device unit
+    OVR::HMDInfo                    mHMDInfo;           ///< Describes the HMD allowing us to configure rendering
+    OVR::Ptr<OVR::SensorDevice>     mSensorPtr;         ///< Sensors data interface of the HMD Device
+    OVR::Ptr<OVR::Profile>          mUserProfilePtr;    ///< Profile of the user (Eye height, IPD...)
+    SensorFusionPtr                 mSensorFusionPtr;   ///< Follow Gyro/Accelero/Magneto to keep track of orientation
+    OVR::Util::Render::StereoConfig mStereoConfig;      ///< Stereo view parameters
 };

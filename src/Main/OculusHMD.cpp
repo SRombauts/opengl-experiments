@@ -15,13 +15,17 @@
  * @brief Constructor
  */
 OculusHMD::OculusHMD() :
-    mLog("OculusHMD"),
-    mSystem(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All)) {
+    mLog("OculusHMD") {
+
+    // LibOVR core system: needs to be Initialized before any OVR Kernel use
+    // (NOTE, using a mSystem member variable to automate this does crash VS debugger at shutdown)
+    OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
+
+    mSensorFusionPtr.reset(new OVR::SensorFusion());
 
     // Access to the first Oculus HMD device found
-// TODO THIS BLOCK the end of the application
-    mManagerPtr = OVR::DeviceManager::Create();
-    mHMDPtr = mManagerPtr->EnumerateDevices<OVR::HMDDevice>().CreateDevice();
+    mManagerPtr = *(OVR::DeviceManager::Create());
+    mHMDPtr = *(mManagerPtr->EnumerateDevices<OVR::HMDDevice>().CreateDevice());
     if (mHMDPtr) {
         // Get detailed information about the device and its capabilities
         bool bHasInfo = mHMDPtr->GetDeviceInfo(&mHMDInfo);
@@ -38,31 +42,30 @@ OculusHMD::OculusHMD() :
                             << " EyeHeight=" << mUserProfilePtr->GetEyeHeight()
                             << " IPD=" << mUserProfilePtr->GetIPD();
 
-            // Access sensor interface of the HMD device
-            mSensorPtr = mHMDPtr->GetSensor();
-            if (mSensorPtr) {
-                // We need to attach sensor to SensorFusion object for it to receive
-                // body frame messages and update orientation. SFusion.GetOrientation()
-                // is used in OnIdle() to orient the view.
-// TODO Crash !
-//              mSensorFusion.AttachToSensor(mSensorPtr);
+                // Access sensor interface of the HMD device
+                mSensorPtr = *(mHMDPtr->GetSensor());
+                if (mSensorPtr) {
+                    // We need to attach sensor to SensorFusion object for it to receive
+                    // body frame messages and update orientation. SFusion.GetOrientation()
+                    // is used in OnIdle() to orient the view.
+                    mSensorFusionPtr->AttachToSensor(mSensorPtr);
 
-                // Enable prediction with the default delta of 30ms (0.03s)
-                mSensorFusion.SetPredictionEnabled(true);
+                    // Enable prediction with the default delta of 30ms (0.03s)
+                    mSensorFusionPtr->SetPredictionEnabled(true);
 
-                // TODO call periodically:
+                    // TODO call periodically:
+                    mLog.debug() << "GetOrientationh...";
 
-                // Extract Pitch, Yaw, Roll instead of directly using the orientation
-                OVR::Quatf hmdOrient = mSensorFusion.GetOrientation();
-                float pitch = 0.0f;
-                float yaw = 0.0f;
-                float roll = 0.0f;
-                hmdOrient.GetEulerAngles<OVR::Axis_Y, OVR::Axis_X, OVR::Axis_Z>(&pitch, &yaw, &roll);
-                mLog.debug() << "Current Orientation pitch=" << pitch << ", yaw=" << yaw << ", roll=" << roll;
-                // NOTE: We can get a matrix from orientation as follows:
-                OVR::Matrix4f hmdMat(hmdOrient);
-            }
-
+                    // Extract Pitch, Yaw, Roll instead of directly using the orientation
+                    OVR::Quatf hmdOrient = mSensorFusionPtr->GetOrientation();
+                    float pitch = 0.0f;
+                    float yaw = 0.0f;
+                    float roll = 0.0f;
+                    hmdOrient.GetEulerAngles<OVR::Axis_Y, OVR::Axis_X, OVR::Axis_Z>(&pitch, &yaw, &roll);
+                    mLog.debug() << "Current Orientation pitch=" << pitch << ", yaw=" << yaw << ", roll=" << roll;
+                    // NOTE: We can get a matrix from orientation as follows:
+                    OVR::Matrix4f hmdMat(hmdOrient);
+                }
             } else {
                 mLog.error() << "No user profile";
             }
@@ -78,7 +81,13 @@ OculusHMD::OculusHMD() :
  * @brief Destructor
  */
 OculusHMD::~OculusHMD() {
+    mUserProfilePtr.Clear();
     mSensorPtr.Clear();
     mHMDPtr.Clear();
+    mManagerPtr.Clear();
+
+    mSensorFusionPtr.reset();
+
+    OVR::System::Destroy();
 }
 
