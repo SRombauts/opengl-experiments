@@ -33,18 +33,27 @@ set(CPPLINT_ARG_LINELENGTH "--linelength=120")
 # All includes are relative to the "src" directory 
 include_directories("${PROJECT_SOURCE_DIR}/src")
 
-# add sources for the executable
-add_executable(glExperiments
+# adding a new file require explicittly modifing the CMakeLists.txt
+# so that CMake know that it should rebuild the project (it is best practice)
+
+# list of sources files of the "Main" module
+set(OPENGL_EXPERIMENTS_SRC_MAIN
  src/Main/App.h src/Main/App.cpp
  src/Main/Input.h src/Main/Input.cpp
  src/Main/Main.cpp
  src/Main/MatrixStack.h
  src/Main/Mesh.h src/Main/Mesh.cpp
  src/Main/Node.h src/Main/Node.cpp
+ src/Main/OculusHMD.h src/Main/OculusHMD.cpp
  src/Main/Physic.h src/Main/Physic.cpp
  src/Main/Renderer.h src/Main/Renderer.cpp
  src/Main/Scene.h src/Main/Scene.cpp
  src/Main/ShaderProgram.h src/Main/ShaderProgram.cpp
+)
+source_group(Main FILES ${OPENGL_EXPERIMENTS_SRC_MAIN})
+
+# list of sources files of the "Utils" module
+set(OPENGL_EXPERIMENTS_SRC_UTILS
  src/Utils/Exception.h
  src/Utils/Formatter.h
  src/Utils/FPS.h src/Utils/FPS.cpp
@@ -54,6 +63,13 @@ add_executable(glExperiments
  src/Utils/Time.h src/Utils/Time.cpp
  src/Utils/Timer.h src/Utils/Timer.cpp
  src/Utils/Utils.h
+)
+source_group(Utils FILES ${OPENGL_EXPERIMENTS_SRC_UTILS})
+
+# add sources for the executable :
+add_executable(glExperiments
+ ${OPENGL_EXPERIMENTS_SRC_MAIN}
+ ${OPENGL_EXPERIMENTS_SRC_UTILS}
 )
 
 ## Libraries ##
@@ -109,37 +125,29 @@ target_link_libraries(glExperiments freeglut_static glload assimp LoggerCpp Ocul
 
 option(OPENGL_EXPERIMENTS_RUN_CPPLINT "Run cpplint.py tool for Google C++ StyleGuide." ON)
 if (OPENGL_EXPERIMENTS_RUN_CPPLINT)
-  # List all sources/headers files for cpplint:
-  # adding a file still require explicittly modifing the CMakeLists.txt
-  # so that CMake know that it should rebuild the project (it is best practice)
-  file(GLOB all_source_files
-      "${PROJECT_SOURCE_DIR}/src/Main/*.*"
-      "${PROJECT_SOURCE_DIR}/src/Utils/*.*"
-  )
-
-  # add a cpplint target to the "all" target
-  add_custom_target(glExperiments_cpplint
-   ALL
-   COMMAND python cpplint.py ${CPPLINT_ARG_OUTPUT} ${CPPLINT_ARG_VERBOSE} ${CPPLINT_ARG_LINELENGTH} ${all_source_files}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
+    # add a cpplint target to the "all" target
+    add_custom_target(glExperiments_cpplint
+     ALL
+     COMMAND python cpplint.py ${CPPLINT_ARG_OUTPUT} ${CPPLINT_ARG_VERBOSE} ${CPPLINT_ARG_LINELENGTH} ${OPENGL_EXPERIMENTS_SRC_MAIN} ${OPENGL_EXPERIMENTS_SRC_UTILS}
+     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
 endif()
 
 option(OPENGL_EXPERIMENTS_RUN_CPPCHECK "Run cppcheck C++ static analysis tool." ON)
 if (OPENGL_EXPERIMENTS_RUN_CPPCHECK)
-  # add a cppcheck target to the "all" target
-  add_custom_target(glExperiments_cppcheck
-   ALL
-   COMMAND cppcheck -j 4 cppcheck --enable=style --quiet ${CPPCHECK_ARG_TEMPLATE} ${PROJECT_SOURCE_DIR}/src
-  )
+    # add a cppcheck target to the "all" target
+    add_custom_target(glExperiments_cppcheck
+     ALL
+     COMMAND cppcheck -j 4 cppcheck --enable=style --quiet ${CPPCHECK_ARG_TEMPLATE} ${PROJECT_SOURCE_DIR}/src
+    )
 endif()
 
 option(OPENGL_EXPERIMENTS_RUN_DOXYGEN "Run Doxygen C++ documentation tool." ON)
 if (OPENGL_EXPERIMENTS_RUN_DOXYGEN)
-  # add a Doxygen target to the "all" target
-  add_custom_target(glExperiments_doxygen
-   ALL
-   COMMAND doxygen Doxyfile > ${DEV_NULL}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
+    # add a Doxygen target to the "all" target
+    add_custom_target(glExperiments_doxygen
+     ALL
+     COMMAND doxygen Doxyfile > ${DEV_NULL}
+     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
 endif()
