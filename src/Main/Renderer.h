@@ -24,6 +24,9 @@
 
 #include <vector>
 
+namespace Utils {
+    class FPS;
+}
 
 /**
  * @brief Management of OpenGL drawing/rendering
@@ -35,7 +38,7 @@ public:
 
     // called by Input freeglut callbacks
     void reshape(int aW, int aH);
-    void display();
+    void display(Utils::FPS& aFPs);
 
     // Calculate new position and orientation given current Node movements
     inline void move(float aDeltaTime);

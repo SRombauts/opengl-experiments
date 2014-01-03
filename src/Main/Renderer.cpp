@@ -13,6 +13,7 @@
 #include "Main/MatrixStack.h"
 #include "Main/ShaderProgram.h"
 #include "Utils/Exception.h"
+#include "Utils/FPS.h"
 #include "Utils/Measure.h"
 #include "Utils/String.h"
 
@@ -484,8 +485,10 @@ void Renderer::reshape(int aW, int aH) {
 
 /**
  * @brief GLUT display callback function
+ *
+ * @param[in] aFPS  Measurement of rendering time (and inter-frame timing)
  */
-void Renderer::display() {
+void Renderer::display(Utils::FPS& aFPS) {
     // mLog.debug() << "displayCallback()";
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -514,6 +517,12 @@ void Renderer::display() {
     // Unbind the Vertex Program
     glUseProgram(0);
 
-    glutSwapBuffers();
+    glFlush();
+
+    // Calculate the time to render => ratio between time to render and inter-frame time (if vsynch)
+    // @todo This is not accurate as it does not account for time to flip buffers (but swap block if vsynch)
+    aFPS.measure();
+
+    glutSwapBuffers();      // Swap front & back buffers, waiting for vsynch if driver configured for it
     glutPostRedisplay();    // Ask for refresh ; only needed if animation are present
 }

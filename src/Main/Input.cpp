@@ -176,8 +176,10 @@ void Input::displayCallback() {
     // FPS and frame duration calculations
     bool bNewCalculatedFPS = mFPS.calculate();
     if (bNewCalculatedFPS) {
-        mLog.notice() << mFPS.getCalculatedFPS() << "fps (avg " << mFPS.getAverageInterFrameUs()/1000.0
-                      << "ms, worst " << mFPS.getWorstInterFrameUs()/1000.0 << "ms)";
+        mLog.notice() << mFPS.getCalculatedFPS() << "fps (avg " << mFPS.getAverageInterFrameUs()/1000.0 << "ms, worst "
+                      << mFPS.getWorstInterFrameUs()/1000.0 << "ms) RenderTime "
+                      << mFPS.getLastRenderTimeUs()/1000.0 << "ms ("
+                      << mFPS.getLastRenderTimeUs()*100.0/mFPS.getElapsedTimeUs() << "%)";
     }
 
     // Check current key pressed
@@ -191,7 +193,7 @@ void Input::displayCallback() {
     mRenderer.setCameraOrientation(orientation);
 
     // Delegate management of OpenGL rendering
-    mRenderer.display();
+    mRenderer.display(mFPS);
 }
 
 /**

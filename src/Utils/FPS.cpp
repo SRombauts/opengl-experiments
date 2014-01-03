@@ -47,8 +47,8 @@ bool FPS::calculate() {
     static time_t   _firstTickUs    = Utils::Time::getTickUs();
     static time_t   _prevTickUs     = Utils::Time::getTickUs();
     time_t          curTickUs       = Utils::Time::getTickUs();
-    time_t          totalUs         = (curTickUs - _firstTickUs);
-    time_t          frameUs         = (curTickUs - _prevTickUs);
+    time_t          totalUs         = Utils::Time::diff(_firstTickUs, curTickUs);
+    time_t          frameUs         = Utils::Time::diff(_prevTickUs, curTickUs);
 
     _prevTickUs = curTickUs;
     ++_nbFrames;
@@ -72,6 +72,15 @@ bool FPS::calculate() {
     }
 
     return bNewCalculatedFPS;
+}
+
+/**
+ * @brief   Measure frame render-time, since calculate() was called
+ */
+void FPS::measure() {
+    time_t  curTickUs   = Utils::Time::getTickUs();
+
+    mLastRenderTimeUs = Utils::Time::diff(mCurrentFrameTickUs, curTickUs);
 }
 
 } // namespace Utils
