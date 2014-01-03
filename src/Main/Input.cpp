@@ -13,6 +13,8 @@
 #include "Main/Renderer.h"
 #include "Main/Node.h"
 
+#include "Main/OculusHMD.h" // Warning, conflicts with some standard header (string...)
+
 #include "Utils/Time.h"
 
 #include <GL/freeglut.h>
@@ -27,11 +29,13 @@ Input* Input::_mpSelf = nullptr;
 /**
  * @brief Constructor
  *
- * @param[in] aRenderer Reference to the renderer managing OpenGL drawing
+ * @param[in] aRenderer     Reference to the renderer managing OpenGL drawing
+ * @param[in] aOculusHMD    Reference to the Oculus Head Mounted Display interface
  */
-Input::Input(Renderer& aRenderer) :
+Input::Input(Renderer& aRenderer, OculusHMD& aOculusHMD) :
     mLog("Input"),
     mRenderer(aRenderer),
+    mOculusHMD(aOculusHMD),
     mKeyPressed(256, false),
     mSpecialKeyPressed(128, false),
     mFPS(1000000) {
@@ -181,6 +185,10 @@ void Input::displayCallback() {
 
     // Do all movements based on Node speed
     mRenderer.move(mFPS.getElapsedTimeUs()/1000000.0f);
+
+    // Get orientation of the Oculus Head Mounted Display
+    glm::fquat orientation = mOculusHMD.getOrientation();
+    mRenderer.setCameraOrientation(orientation);
 
     // Delegate management of OpenGL rendering
     mRenderer.display();

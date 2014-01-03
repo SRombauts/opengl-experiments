@@ -16,7 +16,7 @@
  */
 App::App() :
     mLog("App"),
-    mInput(mRenderer) {
+    mInput(mRenderer, mOculusHMD) {
 }
 /**
  * @brief Destructor

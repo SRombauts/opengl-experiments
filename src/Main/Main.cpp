@@ -82,8 +82,6 @@ int main(int argc, char** argv) {
         log.error() << "You must have at least OpenGL 3.3";
         glutDestroyWindow(window);
     } else {
-        // TODO : testing...
-        OculusHMD oculus;
         // Create and initialize the application
         // and try to detect an Oculus Rift Head Mounted Display
         App app;

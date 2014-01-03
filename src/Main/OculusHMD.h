@@ -16,6 +16,7 @@
 
 #include "OVR.h" // NOLINT(build/include): OculusVR fault!
 
+#include <glm/gtc/quaternion.hpp>       // glm::fquat
 
 /**
  * @brief   Manage interface with the Oculus Head Mounted Display
@@ -32,6 +33,9 @@ public:
     OculusHMD();
     ~OculusHMD();
 
+    // Get quaternion of orientation of the HMD
+    glm::fquat getOrientation() const;
+
 private:
     typedef Utils::shared_ptr<OVR::SensorFusion> SensorFusionPtr;   ///< Share pointer of SensorFusion result object
 
@@ -41,6 +45,6 @@ private:
     OVR::HMDInfo                    mHMDInfo;           ///< Describes the HMD allowing us to configure rendering
     OVR::Ptr<OVR::SensorDevice>     mSensorPtr;         ///< Sensors data interface of the HMD Device
     OVR::Ptr<OVR::Profile>          mUserProfilePtr;    ///< Profile of the user (Eye height, IPD...)
-    SensorFusionPtr                 mSensorFusionPtr;   ///< Follow Gyro/Accelero/Magneto to keep track of orientation
+    SensorFusionPtr                 mSensorFusionPtr;   ///< Fusion Gyro/Accelero/Magneto to keep track of orientation
     OVR::Util::Render::StereoConfig mStereoConfig;      ///< Stereo view parameters
 };

@@ -21,6 +21,8 @@
 
 // Manage OpenGL rendering
 class Renderer;
+// Manage Oculus Head Mounted Display inputs
+class OculusHMD;
 
 
 /**
@@ -28,7 +30,7 @@ class Renderer;
  */
 class Input {
 public:
-    explicit Input(Renderer& aRenderer);
+    explicit Input(Renderer& aRenderer, OculusHMD& aOculusHMD);
     ~Input(); // not virtual because no virtual methods and class not derived
 
     inline bool isKeyPressed(unsigned char aKey) const;
@@ -73,6 +75,7 @@ private:
     Log::Logger         mLog;                   ///< Logger object to output runtime information
 
     Renderer&           mRenderer;              ///< Reference to the renderer managing OpenGL drawing
+    OculusHMD&          mOculusHMD;             ///< Reference to the Oculus Head Mounted Display interface
 
     std::vector<bool>   mKeyPressed;            ///< Current state of regular keyboard keys
     std::vector<bool>   mSpecialKeyPressed;     ///< Current state of special keyboard keys
