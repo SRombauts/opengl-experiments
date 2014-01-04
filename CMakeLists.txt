@@ -66,10 +66,18 @@ set(OPENGL_EXPERIMENTS_SRC_UTILS
 )
 source_group(Utils FILES ${OPENGL_EXPERIMENTS_SRC_UTILS})
 
+# list of "data" files ; source for vertex and fragment shaders
+set(OPENGL_EXPERIMENTS_DATA
+ data/ModelWorldCameraClip.vert
+ data/PassthroughColor.frag
+)
+source_group(data FILES ${OPENGL_EXPERIMENTS_DATA})
+
 # add sources for the executable :
 add_executable(glExperiments
  ${OPENGL_EXPERIMENTS_SRC_MAIN}
  ${OPENGL_EXPERIMENTS_SRC_UTILS}
+ ${OPENGL_EXPERIMENTS_DATA}
 )
 
 ## Libraries ##
