@@ -64,25 +64,25 @@ OculusHMD::OculusHMD() :
 }
 
 /**
+ * @brief Reset orientation of the HMD
+ */
+void OculusHMD::resetOrientation() {
+    mSensorFusionPtr->Reset();
+}
+
+/**
  * @brief Get quaternion of orientation of the HMD
  *
  * @return A GLM quaternion of orientation
+ *
+ * @todo Refactor interface to avoid this double return
  */
 glm::fquat OculusHMD::getOrientation() const {
     if (mSensorFusionPtr) {
         OVR::Quatf hmdOrientation = mSensorFusionPtr->GetOrientation();
-        glm::fquat orientation
-
-/*
-        // Extract Pitch, Yaw, Roll instead of directly using the orientation
-        float pitch = 0.0f;
-        float yaw = 0.0f;
-        float roll = 0.0f;
-        hmdOrientation.GetEulerAngles<OVR::Axis_Y, OVR::Axis_X, OVR::Axis_Z>(&pitch, &yaw, &roll);
-        mLog.debug() << "Current Orientation pitch=" << pitch << ", yaw=" << yaw << ", roll=" << roll;
-        // NOTE: We can get a matrix from orientation as follows:
-        OVR::Matrix4f hmdMat(hmdOrientation);
-*/
+        return glm::fquat(hmdOrientation.w, hmdOrientation.x, hmdOrientation.y, hmdOrientation.z);
+    } else {
+        return glm::fquat();
     }
 }
 

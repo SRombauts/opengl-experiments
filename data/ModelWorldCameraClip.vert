@@ -9,8 +9,8 @@ layout(location = 2) in vec3 normal;
 smooth out vec4 smoothColor;
 
 // 5 input uniform (matrix of transformation, and light parameters)
-uniform mat4 modelToCameraMatrix;   // "Model to Camera" matrix, positioning the model into camera space
-uniform mat4 cameraToClipMatrix;    // "Camera to Clip" matrix,  defining the perspective transformation
+uniform mat4 modelToCameraMatrix;   // "Model to Camera" matrix, positioning the model into camera space (the "view" matrix)
+uniform mat4 cameraToClipMatrix;    // "Camera to Clip" matrix,  defining the perspective projection
 uniform vec3 dirToLight;            // Vector of directional light orientation (oriented toward the light)
 uniform vec4 lightIntensity;        // Directional light intensity and color
 uniform vec4 ambientIntensity;      // Ambiant light intensity and color

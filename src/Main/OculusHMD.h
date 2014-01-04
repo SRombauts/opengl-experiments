@@ -33,6 +33,9 @@ public:
     OculusHMD();
     ~OculusHMD();
 
+    // Reset orientation of the HMD
+    void resetOrientation();
+
     // Get quaternion of orientation of the HMD
     glm::fquat getOrientation() const;
 

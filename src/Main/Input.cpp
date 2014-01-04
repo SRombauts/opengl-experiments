@@ -49,7 +49,6 @@ Input::~Input() {
     _mpSelf = nullptr;
 }
 
-
 /**
  * @brief Initialization
  */
@@ -107,13 +106,10 @@ void Input::checkKeys() {
         // Move right the camera
         mRenderer.move(0.01f * Node::UNIT_X_RIGHT);
     }
-    if (isKeyPressed('x') || isKeyPressed('X')) {
-        // Roll left the camera
-        mRenderer.roll(-0.01f);
-    }
-    if (isKeyPressed('c') || isKeyPressed('C')) {
-        // Roll right the camera
-        mRenderer.roll(0.01f);
+
+    if (isKeyPressed(' ')) {
+        // Space to reset orientation
+        mOculusHMD.resetOrientation();
     }
 
     if (isKeyPressed('r') || isKeyPressed('R')) {
@@ -297,15 +293,6 @@ static coord2d _lastMousePos;
  */    
 void Input::mouseMotionCallback(int aX, int aY) {
     mLog.debug() << "mouseMotionCallback(" << aX << "," << aY << ")";
-
-    if (aY != _lastMousePos.y) {
-        mRenderer.pitch(0.01f * (aY - _lastMousePos.y));
-        _lastMousePos.y = aY;
-    }
-    if (aX != _lastMousePos.x) {
-        mRenderer.yaw(0.01f * (aX - _lastMousePos.x));
-        _lastMousePos.x = aX;
-    }
 }
 
 /**

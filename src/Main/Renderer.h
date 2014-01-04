@@ -46,9 +46,7 @@ public:
     // called by Input::checkKeys()
     // camera:
     void move(const glm::vec3& aTranslation);
-    void pitch(float aAngle);
-    void yaw(float aAngle);
-    void roll(float aAngles);
+    void setCameraOrientation(const glm::fquat& aCameraOrientation);
     // model:
     void modelMove(const glm::vec3& aTranslation);
     void modelPitch(float aAngle);
@@ -80,7 +78,7 @@ private:
     GLuint mLightIntensityUnif;         ///< Location of the "lightIntensity" vertex shader uniform input variable
     GLuint mAmbientIntensityUnif;       ///< Location of the "ambientIntensity" vertex shader uniform input variable
 
-    glm::fquat  mCameraOrientation;     ///< Axis and angle of rotation of the camera
+    glm::fquat  mCameraOrientation;     ///< Quaternion of camera orientation
     glm::vec3   mCameraTranslation;     ///< Vector of translation of the camera
 
     glm::vec4   mDirToLight;            ///< Vector of directional light orientation (oriented toward the light)

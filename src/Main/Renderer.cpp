@@ -380,39 +380,12 @@ void Renderer::move(const glm::vec3& aTranslation) {
 }
 
 /**
- * @brief Pitch, rotate the camera vertically around its current relative horizontal X axis
+ * @brief Set directly the quaternion of camera orientation (from Oculus HMD)
  *
- * @param[in] aAngle    Rotation in radians
+ * @param[in] aCameraOrientation    Quaternion of camera orientation
  */
-void Renderer::pitch(float aAngle) {
-    mLog.info() << "pitch(" << aAngle << ")";
-
-    // Offset the given quaternion by the given angle (in radians) and normalized axis
-    Node::rotateLeftMultiply(mCameraOrientation, aAngle, Node::UNIT_X_RIGHT); // left-multiply
-}
-
-/**
- * @brief Yaw, rotate the camera horizontally around its current relative vertical Y axis
- *
- * @param[in] aAngle    Rotation in radians
- */
-void Renderer::yaw(float aAngle) {
-    mLog.info() << "yaw(" << aAngle << ")";
-
-    // Offset the given quaternion by the given angle (in radians) and normalized axis
-    Node::rotateLeftMultiply(mCameraOrientation, aAngle, Node::UNIT_Y_UP); // left-multiply
-}
-
-/**
- * @brief Roll, rotate the camera around its current relative viewing Z axis
- *
- * @param[in] aAngle    Rotation in radians
- */
-void Renderer::roll(float aAngle) {
-    mLog.info() << "roll(" << aAngle << ")";
-
-    // Offset the given quaternion by the given angle (in radians) and normalized axis
-    Node::rotateLeftMultiply(mCameraOrientation, aAngle, Node::UNIT_Z_FRONT); // left-multiply
+void Renderer::setCameraOrientation(const glm::fquat& aCameraOrientation) {
+    mCameraOrientation = aCameraOrientation;
 }
 
 /**
@@ -424,8 +397,8 @@ void Renderer::roll(float aAngle) {
  * @return "worldToCameradMatrix"
  */
 glm::mat4 Renderer::transform() {
-    // We begin to built the rotation matrix from the orientation quaternion:
-    glm::mat4 rotations = glm::mat4_cast(mCameraOrientation);
+    // We begin to built the rotation matrix from the conjugate of the orientation quaternion:
+    glm::mat4 rotations = glm::mat4_cast(glm::conjugate(mCameraOrientation));
 
     // Then we apply translations to the rotation matrix
     return glm::translate(rotations, -mCameraTranslation);
