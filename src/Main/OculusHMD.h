@@ -33,6 +33,9 @@ public:
     OculusHMD();
     ~OculusHMD();
 
+    // Load default information if no real device found
+    void fakeInfo();
+
     // Reset orientation of the HMD
     void resetOrientation();
 
@@ -43,11 +46,9 @@ private:
     typedef Utils::shared_ptr<OVR::SensorFusion> SensorFusionPtr;   ///< Share pointer of SensorFusion result object
 
     Log::Logger                     mLog;               ///< Logger object to output runtime information
-    OVR::Ptr<OVR::DeviceManager>    mManagerPtr;        ///< Device Manager provides access to devices supported by OVR
-    OVR::Ptr<OVR::HMDDevice>        mHMDPtr;            ///< Represents an Oculus HMD device unit
+    OVR::System                     mSystem;            //!< Init Oculus Core system (memory allocator, threads)
     OVR::HMDInfo                    mHMDInfo;           ///< Describes the HMD allowing us to configure rendering
     OVR::Ptr<OVR::SensorDevice>     mSensorPtr;         ///< Sensors data interface of the HMD Device
-    OVR::Ptr<OVR::Profile>          mUserProfilePtr;    ///< Profile of the user (Eye height, IPD...)
     SensorFusionPtr                 mSensorFusionPtr;   ///< Fusion Gyro/Accelero/Magneto to keep track of orientation
     OVR::Util::Render::StereoConfig mStereoConfig;      ///< Stereo view parameters
 };

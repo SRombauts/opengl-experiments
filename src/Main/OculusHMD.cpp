@@ -17,9 +17,14 @@
 OculusHMD::OculusHMD() :
     mLog("OculusHMD") {
 
+    // Those vars are reference counted; no need to keep them arround explicitly,
+    // they will be freed when Sensor & SensorFusion will be cleared (in OculusHMD destructor)
+    OVR::Ptr<OVR::DeviceManager>    mManagerPtr;        ///< Device Manager provides access to devices supported by OVR
+    OVR::Ptr<OVR::HMDDevice>        mHMDPtr;            ///< Represents an Oculus HMD device unit
+    OVR::Ptr<OVR::Profile>          mUserProfilePtr;    ///< Profile of the user (Eye height, IPD...)
+
     // LibOVR core system: needs to be Initialized before any OVR Kernel use
-    // (NOTE, using a mSystem member variable to automate this does crash VS debugger at shutdown)
-    OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
+//  OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All)); // done by mSystem constructor
 
     // Access to the first Oculus HMD device found
     mManagerPtr = *(OVR::DeviceManager::Create());
@@ -52,16 +57,55 @@ OculusHMD::OculusHMD() :
                     // Enable prediction with the default delta of 30ms (0.03s)
                     mSensorFusionPtr->SetPredictionEnabled(true);
                 }
+                mUserProfilePtr.Clear();
             } else {
                 mLog.error() << "No user profile";
             }
         } else {
             mLog.error() << "No HMD info";
+            fakeInfo();
         }
+        mHMDPtr.Clear();
     } else {
         mLog.notice() << "No HMD found";
     }
+    mManagerPtr.Clear();
 }
+
+/**
+ * @brief Destructor
+ */
+OculusHMD::~OculusHMD() {
+    mSensorPtr.Clear();
+    mSensorFusionPtr.reset();
+
+//  OVR::System::Destroy(); // done by mSystem destructor
+}
+
+/**
+ * @brief Load default HMD information to fake its presence for development purpose
+ */
+void OculusHMD::fakeInfo() {
+    mHMDInfo.HResolution = 1280;
+    mHMDInfo.VResolution = 800;
+    mHMDInfo.HScreenSize = 0.149759993f;
+    mHMDInfo.VScreenSize = 0.0935999975f;
+    mHMDInfo.VScreenCenter = 0.0467999987f;
+    mHMDInfo.EyeToScreenDistance    = 0.0410000011f;
+    mHMDInfo.LensSeparationDistance = 0.0635000020f;
+    mHMDInfo.InterpupillaryDistance = 0.0640000030f;
+    mHMDInfo.DistortionK[0] = 1.00000000f;
+    mHMDInfo.DistortionK[1] = 0.219999999f;
+    mHMDInfo.DistortionK[2] = 0.239999995f;
+    mHMDInfo.DistortionK[3] = 0.000000000f;
+    mHMDInfo.ChromaAbCorrection[0] = 0.995999992f;
+    mHMDInfo.ChromaAbCorrection[1] = -0.00400000019f;
+    mHMDInfo.ChromaAbCorrection[2] = 1.01400006f;
+    mHMDInfo.ChromaAbCorrection[3] = 0.000000000f;
+    mHMDInfo.DesktopX = 0;
+    mHMDInfo.DesktopY = 0;
+}
+
 
 /**
  * @brief Reset orientation of the HMD
@@ -84,19 +128,5 @@ glm::fquat OculusHMD::getOrientation() const {
     } else {
         return glm::fquat();
     }
-}
-
-/**
- * @brief Destructor
- */
-OculusHMD::~OculusHMD() {
-    mUserProfilePtr.Clear();
-    mSensorPtr.Clear();
-    mHMDPtr.Clear();
-    mManagerPtr.Clear();
-
-    mSensorFusionPtr.reset();
-
-    OVR::System::Destroy();
 }
 
