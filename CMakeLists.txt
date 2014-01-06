@@ -86,8 +86,8 @@ add_executable(glExperiments
 set(FREEGLUT_BUILD_SHARED_LIBS OFF CACHE BOOL "Build FreeGLUT shared library.")
 set(FREEGLUT_BUILD_DEMOS OFF CACHE BOOL       "Build FreeGLUT demos.")
 add_definitions(-DFREEGLUT_STATIC)
-add_subdirectory(freeglut/freeglut)
-include_directories("${PROJECT_SOURCE_DIR}/freeglut/freeglut/include")
+add_subdirectory(freeglut/freeglut/freeglut)
+include_directories("${PROJECT_SOURCE_DIR}/freeglut/freeglut/freeglut/include")
 
 # add the subdirectory of the glload static library
 add_subdirectory(glload) 
