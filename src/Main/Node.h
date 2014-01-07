@@ -17,8 +17,7 @@
 #include "Utils/Utils.h"
 
 #include <glload/gl_3_3_comp.h>         // GLuint, GLenum
-#define GLM_FORCE_RADIANS // Using radians
-#include <glm/glm.hpp>                  // glm::mat4, glm::vec3...
+#include <glm/glm.hpp>                  // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
 
 #include <vector>                       // std::vector

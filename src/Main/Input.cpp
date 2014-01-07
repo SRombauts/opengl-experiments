@@ -18,8 +18,7 @@
 #include "Utils/Time.h"
 
 #include <GL/freeglut.h>
-#define GLM_FORCE_RADIANS // Using radians
-#include <glm/glm.hpp>          // glm::mat4, glm::vec3...
+#include <glm/glm.hpp>          // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
 
 
 // Definition of the static pointer to the unique Input instance

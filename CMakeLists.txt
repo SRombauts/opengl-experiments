@@ -22,19 +22,22 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(DEV_NULL                "/dev/null")
     set(SYSTEM_LIBRARIES        "GL GLU Xrandr Xi")
     # GCC flags
-    add_definitions(-rdynamic -fstack-protector-all -Wall -Wextra -pedantic -Weffc++ -Wformat-security -Winit-self -Wswitch-default -Wswitch-enum -Wfloat-equal -Wundef -Wshadow -Wcast-qual -Wconversion -Wlogical-op -Winline -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn)
-    add_definitions(-std=c++0x)  # -std=c++11
+    # TODO: how to define for some libs only
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic -fstack-protector-all -Wall -Wextra -pedantic -Weffc++ -Wformat-security -Winit-self -Wswitch-default -Wswitch-enum -Wfloat-equal -Wundef -Wshadow -Wcast-qual -Wconversion -Wlogical-op -Winline -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn)
+    message(STATUS "C++11 activated")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")  # -std=c++11
 endif ()
 set(CPPLINT_ARG_VERBOSE "--verbose=3")
 set(CPPLINT_ARG_LINELENGTH "--linelength=120")
 
-## OpenGL Experiments ##
+
+## Core source code ##
 
 # All includes are relative to the "src" directory 
 include_directories("${PROJECT_SOURCE_DIR}/src")
 
 # adding a new file require explicittly modifing the CMakeLists.txt
-# so that CMake know that it should rebuild the project (it is best practice)
+# so that CMake knows that it should rebuild the project (it is best practice)
 
 # list of sources files of the "Main" module
 set(OPENGL_EXPERIMENTS_SRC_MAIN
@@ -80,6 +83,7 @@ add_executable(glExperiments
  ${OPENGL_EXPERIMENTS_DATA}
 )
 
+
 ## Libraries ##
 
 # add the subdirectory of the freeglut static library (but disable any other build)
@@ -95,6 +99,7 @@ include_directories("${PROJECT_SOURCE_DIR}/glload/include")
 
 # add the subdirectory of the glm library (header only)
 add_subdirectory(glm/glm)
+add_definitions(-DGLM_FORCE_RADIANS) # use only modern API in radians
 include_directories("${PROJECT_SOURCE_DIR}/glm")
 
 # add the subdirectory of the assimp static library (but disable tool builds)
@@ -120,7 +125,7 @@ if (MSVC)
     add_definitions(-DUNICODE -D_UNICODE)
 endif ()
 add_subdirectory(OculusSDK/LibOVR)
-include_directories("${PROJECT_SOURCE_DIR}/OculusSDK/LibOVR/include")
+include_directories("${PROJECT_SOURCE_DIR}/OculusSDK/LibOVR/Include")
 
 
 ## Linking ##
