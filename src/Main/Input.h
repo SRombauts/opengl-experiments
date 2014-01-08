@@ -40,6 +40,7 @@ private:
     // Initialization
     void init();
     void registerCallbacks();
+    void deinit();
 
     // Check current pressed keyboard keys at the beginning of each frame
     void checkKeys();
@@ -77,8 +78,8 @@ private:
     Renderer&           mRenderer;              ///< Reference to the renderer managing OpenGL drawing
     OculusHMD&          mOculusHMD;             ///< Reference to the Oculus Head Mounted Display interface
 
-    std::vector<bool>   mKeyPressed;            ///< Current state of regular keyboard keys
-    std::vector<bool>   mSpecialKeyPressed;     ///< Current state of special keyboard keys
+    std::vector<bool>   mKeyPressed;            ///< Current state of regular keyboard keys (cache)
+    std::vector<bool>   mSpecialKeyPressed;     ///< Current state of special keyboard keys (cache)
 
     Utils::FPS          mFPS;                   ///< FPS and inter-frame times calculation
 

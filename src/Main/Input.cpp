@@ -45,6 +45,7 @@ Input::Input(Renderer& aRenderer, OculusHMD& aOculusHMD) :
  * @brief Destructor
  */
 Input::~Input() {
+    deinit();
     _mpSelf = nullptr;
 }
 
@@ -62,6 +63,10 @@ void Input::init() {
 void Input::registerCallbacks() {
     mLog.debug() << "registerCallbacks...";
 
+    // No need to repeat key pressed; we are saving key states in the mKeyPressed & mSpecialKeyPressed tables
+    glutIgnoreKeyRepeat(1);
+    glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+
     glutReshapeFunc(reshapeCallbackStatic);
     glutDisplayFunc(displayCallbackStatic);
     glutKeyboardFunc(keyboardCallbackStatic);
@@ -76,10 +81,17 @@ void Input::registerCallbacks() {
 }
 
 /**
+* @brief Restore some states on exit
+*/
+void Input::deinit() {
+    glutSetKeyRepeat(GLUT_KEY_REPEAT_DEFAULT);
+}
+
+/**
 * @brief Check current pressed keyboard keys
 */
 void Input::checkKeys() {
-    if (isKeyPressed(27)) {
+    if (isKeyPressed(27)) { // 27 = ESCAPE key
         // Exit on Escape
         glutLeaveMainLoop();
     }
@@ -197,6 +209,9 @@ void Input::displayCallback() {
 
     // Delegate management of OpenGL rendering
     mRenderer.display(mFPS);
+
+    // Ask for refresh when possible/reasonable
+    glutPostRedisplay();
 }
 
 /**
@@ -209,7 +224,7 @@ void Input::displayCallback() {
 void Input::keyboardCallback(unsigned char aKey, int aX, int aY) {
     mLog.debug() << "keyboardCallback(" << static_cast<int>(aKey) << "='" << aKey
                         << "'," << aX << "," << aY << ")";
-
+    // Save the state of the key pressed in the current state table
     mKeyPressed[aKey] = true;
 }
 
@@ -223,7 +238,7 @@ void Input::keyboardCallback(unsigned char aKey, int aX, int aY) {
 void Input::keyboardUpCallback(unsigned char aKey, int aX, int aY) {
     mLog.debug() << "keyboardUpCallback(" << static_cast<int>(aKey) << "='" << aKey
                         << "'," << aX << "," << aY << ")";
-
+    // Clear the state of the key pressed in the current state table
     mKeyPressed[aKey] = false;
 }
 
@@ -236,7 +251,7 @@ void Input::keyboardUpCallback(unsigned char aKey, int aX, int aY) {
  */
 void Input::keyboardSpecialCallback(int aKey, int aX, int aY) {
     mLog.debug() << "keyboardCallback(" << aKey << "," << aX << "," << aY << ")";
-
+    // Save the state of the key pressed in the current state table
     mSpecialKeyPressed[aKey] = true;
 }
 
@@ -249,7 +264,7 @@ void Input::keyboardSpecialCallback(int aKey, int aX, int aY) {
  */
 void Input::keyboardSpecialUpCallback(int aKey, int aX, int aY) {
     mLog.debug() << "keyboardSpecialUpCallback(" << aKey << "," << aX << "," << aY << ")";
-
+    // Clear the state of the key pressed in the current state table
     mSpecialKeyPressed[aKey] = false;
 }
 

@@ -497,5 +497,4 @@ void Renderer::display(Utils::FPS& aFPS) {
     aFPS.measure();
 
     glutSwapBuffers();      // Swap front & back buffers, waiting for vsynch if driver configured for it
-    glutPostRedisplay();    // Ask for refresh ; only needed if animation are present
 }

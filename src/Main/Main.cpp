@@ -18,6 +18,9 @@
  * @ingroup Main
  */
 
+/// Running into fullscreen freeglut game mode
+#define OPENGL_EXPERIMENT_FULLSCREEN_GAME_MODE
+
 #include "Main/App.h"
 
 #include <glload/gl_load.hpp>   // Need to be included before other gl library
@@ -68,19 +71,44 @@ int main(int argc, char** argv) {
                       | GLUT_SRGB);         // ask for gamma corrected rendering for sRGB colorspace
     // Configure number of samples of multisampling : 4x is the default value, 8x/16x are not guaranted in all hardware
     glutSetOption(GLUT_MULTISAMPLE, 4);
-    glutInitWindowSize(640, 480);
-    glutInitWindowPosition(700, 0);
+
+#ifndef OPENGL_EXPERIMENT_FULLSCREEN_GAME_MODE
+    glutInitWindowSize(640, 720); // 1/2 Oculus Rift DK 1 (1280 x 720)
+    glutInitWindowPosition(640, 0);
 
     log.notice() << "creating window...";
     int window = glutCreateWindow("OpenGL Experiments");
+#else // OPENGL_EXPERIMENT_FULLSCREEN_GAME_MODE
+    // setting the game mode replaces the above calls to set the window size and position.
+//  static const char* _gameModeString = "1280x720:32";
+    static const char* _gameModeString = "1920x1080:32";
+    glutGameModeString(_gameModeString);
+    if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) {
+        log.info() << "Entering fullscreen game mode '" << _gameModeString << "'...";
+        glutEnterGameMode();
+    } else {
+        log.notice() << "The selected mode '" << _gameModeString << "' is not available";
+        _gameModeString = "1680x1050:32";
+        glutGameModeString(_gameModeString);
+        if (glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) {
+            log.info() << "Entering fullscreen game mode '" << _gameModeString << "'...";
+            glutEnterGameMode();
+        } else {
+            log.critic() << "The selected mode '" <<  _gameModeString << "' is not available, exiting";
+            exit(1);
+        }
+    }
+#endif // OPENGL_EXPERIMENT_FULLSCREEN_GAME_MODE
 
-    log.debug() << "loading functions...";
+    log.debug() << "loading OpenGL functions into the window context...";
     glload::LoadFunctions();
     log.notice() << "OpenGL version is " << glload::GetMajorVersion() << "." << glload::GetMinorVersion();
 
     if (0 == glload::IsVersionGEQ(3, 3)) {
         log.error() << "You must have at least OpenGL 3.3";
+#ifndef OPENGL_EXPERIMENT_FULLSCREEN_GAME_MODE
         glutDestroyWindow(window);
+#endif // OPENGL_EXPERIMENT_FULLSCREEN_GAME_MODE
     } else {
         // Create and initialize the application
         // and try to detect an Oculus Rift Head Mounted Display
