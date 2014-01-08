@@ -15,7 +15,8 @@
  * @brief Constructor
  */
 OculusHMD::OculusHMD() :
-    mLog("OculusHMD") {
+    mLog("OculusHMD"),
+    mPredictionLookaheadMs(30) {
 
     // Those vars are reference counted; no need to keep them arround explicitly,
     // they will be freed when Sensor & SensorFusion will be cleared (in OculusHMD destructor)
@@ -55,7 +56,8 @@ OculusHMD::OculusHMD() :
                     mSensorFusionPtr->AttachToSensor(mSensorPtr);
 
                     // Enable prediction with the default delta of 30ms (0.03s)
-                    mSensorFusionPtr->SetPredictionEnabled(true);
+                 // mSensorFusionPtr->SetPredictionEnabled(true);
+                    setPrediction(mPredictionLookaheadMs);
                 }
                 mUserProfilePtr.Clear();
             } else {
@@ -106,6 +108,39 @@ void OculusHMD::fakeInfo() {
     mHMDInfo.DesktopY = 0;
 }
 
+/**
+ * @brief Set prediction lookahead in miliseconds
+ *
+ * @param[in] aPredictionDeltaMs    prediction lookahead amount in miliseconds
+ */
+void OculusHMD::setPrediction(int aPredictionDeltaMs) {
+    mPredictionLookaheadMs = aPredictionDeltaMs;
+    if (mSensorPtr && mSensorFusionPtr) {
+        // Enable prediction with the provided delta (default is 30ms 0.03s)
+        mSensorFusionPtr->SetPrediction(0.001f * aPredictionDeltaMs);
+        mLog.info() << "SetPrediction(" << aPredictionDeltaMs << "ms) = " << (0.001f * aPredictionDeltaMs);
+    }
+}
+
+/**
+ * @brief Increment prediction lookahead by one milisecond
+ */
+void OculusHMD::incrPrediction() {
+    if (100 > mPredictionLookaheadMs) {
+        ++mPredictionLookaheadMs;
+        setPrediction(mPredictionLookaheadMs);
+    }
+}
+
+/**
+ * @brief Decrement prediction lookahead by one milisecond
+ */
+void OculusHMD::decrPrediction() {
+    if (0 < mPredictionLookaheadMs) {
+        --mPredictionLookaheadMs;
+        setPrediction(mPredictionLookaheadMs);
+    }
+}
 
 /**
  * @brief Reset orientation of the HMD

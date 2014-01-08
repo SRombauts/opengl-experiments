@@ -110,6 +110,14 @@ void Input::checkKeys() {
         // Space to reset orientation
         mOculusHMD.resetOrientation();
     }
+    if (isKeyPressed('+')) {
+        // + to increase Occulus HMD predication lookahead by one second (default is 30ms)
+        mOculusHMD.incrPrediction();
+    }
+    if (isKeyPressed('-')) {
+        // - to decrease Occulus HMD predication lookahead by one second (default is 30ms)
+        mOculusHMD.decrPrediction();
+    }
 
     if (isKeyPressed('r') || isKeyPressed('R')) {
         // Move front the model
