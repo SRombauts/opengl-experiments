@@ -1,66 +1,28 @@
 OpenGL Experiments in C++
 -------------------------
 
+Basic experiments on OpenGL targeting the Oculus Rift Head Mounted Display (HMD) device.
+
 ### License
 
-Copyright (c) 2012 Sébastien Rombauts (sebastien.rombauts@gmail.com)
+Copyright (c) 2012-2014 Sébastien Rombauts (sebastien.rombauts@gmail.com)
 
 Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
 or copy at http://opensource.org/licenses/MIT)
 
 ### Getting and Building the dependencies
 
-1. Get the dependencies recursively (premake, unofficial-opengl-sdk, freeglut, glm)
+1. Get the submodules (LoggerCpp, OculusSDK, assimp, freeglut, glload, glm)
 
 ```bash
 git submodule init
-git submodule update --recursive
+git submodule update
 ```
 
-2. Build freeglut in the unofficial-opengl-sdk
-
-On Linux :
+2. Get the development libraries under Linux :
 
 ```bash
 sudo apt-get install libxrandr-dev libxi-dev
-
-cd unofficial-opengl-sdk/freeglut/freeglut
-cmake . -DCMAKE_BUILD_TYPE=Debug
-cmake --build . --target freeglut_static
-mv lib/libglut.a lib/libfreeglut_staticd.a
-cmake . -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target freeglut_static
-mv lib/libglut.a lib/libfreeglut_static.a
-```
-
-On Windows :
-
-```bash
-cd unofficial-opengl-sdk\freeglut\freeglut
-cmake ..    # cmake .. -G "Visual Studio 10"
-cmake --build . --target freeglut_static --config Debug
-move lib\Debug\* lib
-cmake --build . --target freeglut_static --config Release
-move lib\Release\* lib
-```
-
-3. Building the other libs :
-On Linux :
-
-```bash
-sudo apt-get install libxrandr-dev libxi-dev
-
-cd unofficial-opengl-sdk
-../premake/premake4 gmake
-make
-```
-
-On Windows :
-
-```bash
-cd unofficial-opengl-sdk
-..\premake\premake4.exe vs2010
-[open and build solution]
 ```
 
 ### Building the application
@@ -68,13 +30,13 @@ cd unofficial-opengl-sdk
 On Linux :
 
 ```bash
-premake/premake4 gmake
-make
+cmake .
+cmake --build .     # of simply "make"
 ```
 
 On Windows :
 
 ```bash
-premake\premake4.exe vs2010
-[open and build solution]
+cmake . -G "Visual Studio 10"
+cmake --build .     # or simply [open and build solution]
 ```

@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+# Copyright (c) 2012-2014 Sebastien Rombauts (sebastien.rombauts@gmail.com)
 #
 # Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
 # or copy at http://opensource.org/licenses/MIT) 
@@ -11,20 +11,20 @@ if (MSVC)
     set(CPPLINT_ARG_OUTPUT      "--output=vs7")
     set(CPPCHECK_ARG_TEMPLATE   "--template=vs")
     set(DEV_NULL                "NUL")
-    set(SYSTEM_LIBRARIES        "")
+    set(SYSTEM_LIBRARIES        opengl32.lib)
     # disable Visual Studio usual warnings
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    # For Oculus LibOVR debug build
+    # For OculusVR / LibOVR debug build
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -DOVR_BUILD_DEBUG")
 elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(CPPLINT_ARG_OUTPUT      "--output=eclipse")
     set(CPPCHECK_ARG_TEMPLATE   "--template=gcc")
     set(DEV_NULL                "/dev/null")
-    set(SYSTEM_LIBRARIES        "GL GLU Xrandr Xi")
+    set(SYSTEM_LIBRARIES        GL Xrandr Xi)
     # GCC flags
     # TODO: how to define for some libs only
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic -fstack-protector-all -Wall -Wextra -pedantic -Weffc++ -Wformat-security -Winit-self -Wswitch-default -Wswitch-enum -Wfloat-equal -Wundef -Wshadow -Wcast-qual -Wconversion -Wlogical-op -Winline -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn)
-    message(STATUS "C++11 activated")
+    message(STATUS "C++11 activated for std::shared_ptr")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")  # -std=c++11
 endif ()
 set(CPPLINT_ARG_VERBOSE "--verbose=3")
@@ -93,6 +93,16 @@ add_definitions(-DFREEGLUT_STATIC)
 add_subdirectory(freeglut/freeglut/freeglut)
 include_directories("${PROJECT_SOURCE_DIR}/freeglut/freeglut/freeglut/include")
 
+# add the subdirectory of the glfw static library (but disable any other build)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation")
+set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target")
+set(GLFW_DOCUMENT_INTERNALS OFF CACHE BOOL "Include internals in documentation")
+add_subdirectory(glfw)
+include_directories("${PROJECT_SOURCE_DIR}/glfw/include")
+
 # add the subdirectory of the glload static library
 add_subdirectory(glload) 
 include_directories("${PROJECT_SOURCE_DIR}/glload/include")
@@ -131,7 +141,7 @@ include_directories("${PROJECT_SOURCE_DIR}/OculusSDK/LibOVR/Include")
 ## Linking ##
 
 # link the executable with all required libraries
-target_link_libraries(glExperiments freeglut_static glload assimp LoggerCpp OculusVR)
+target_link_libraries(glExperiments glfw freeglut_static glload assimp LoggerCpp OculusVR ${SYSTEM_LIBRARIES})
 
 
 # Optional additional targets:
