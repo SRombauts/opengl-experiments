@@ -3,7 +3,7 @@
  * @ingroup Main
  * @brief   Management of OpenGL drawing/rendering
  *
- * Copyright (c) 2012-2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+ * Copyright (c) 2012-2014 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
@@ -63,7 +63,7 @@ private:
     Node::Ptr loadNode(const aiScene* apScene, const aiNode* apNode);
 
     /// @todo Generalize like the Node class (but Camera is the inverse of Model)
-    glm::mat4 transform();
+    glm::mat4 getWorldToCameraMatrix(int aIdxEye);
 
 private:
     Log::Logger mLog;                   ///< Logger object to output runtime information
@@ -88,6 +88,9 @@ private:
     Scene       mSceneHierarchy;        ///< Scene node hierarchy
     Node::Ptr   mModelPtr;              ///< The loadble/movable model
     Node::Ptr   mTurretPtr;             ///< The turret sub-model
+
+    int         mScreenWidth;           ///< Screen width
+    int         mScreenHeight;          ///< Screen height
 
 private:
     /// disallow copy constructor and assignment operator

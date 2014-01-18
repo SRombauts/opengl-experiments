@@ -60,7 +60,9 @@ Renderer::Renderer() :
     mCameraTranslation(0.0f, 0.0f, 20.0f),
     mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector!
     mLightIntensity(0.8f, 0.8f, 0.8f, 1.0f),
-    mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f) {
+    mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f),
+    mScreenWidth(0),
+    mScreenHeight(0) {
     init();
 }
 
@@ -392,14 +394,23 @@ void Renderer::setCameraOrientation(const glm::fquat& aCameraOrientation) {
  *  We want to apply translations first, then rotations, but matrix have to be multiplied in reverse order :
  * out = (rotations * translations) * in;
  *
+ * @param[in] aIdxEye   Index of the eye (0: left, 1: right)
+ *
  * @return "worldToCameradMatrix"
  */
-glm::mat4 Renderer::transform() {
+glm::mat4 Renderer::getWorldToCameraMatrix(int aIdxEye) {
     // We begin to built the rotation matrix from the conjugate of the orientation quaternion:
     glm::mat4 rotations = glm::mat4_cast(glm::conjugate(mCameraOrientation));
 
-    // Then we apply translations to the rotation matrix
-    return glm::translate(rotations, -mCameraTranslation);
+    // Then we apply head/global translations to the rotation matrix
+    glm::mat4 worldToHeadMatrix = glm::translate(rotations, -mCameraTranslation);
+
+    /// @todo use a neck-head-eye model to get eye translation vector
+    float eye = (0 == aIdxEye)?(-1.0f):(1.0f);
+    glm::vec3 eyeTranslation(eye, 0.0f, 0.0f);
+
+    // And the, we apply the eye translation and return the resulting matrix
+    return glm::translate(worldToHeadMatrix, -eyeTranslation);
 }
 
 /**
@@ -433,7 +444,7 @@ void Renderer::modelRoll(float aAngle) {
 }
 
 /**
- * @brief GLFW reshape callback function
+ * @brief Reshape method
  *
  *  Called once at the start of the rendering, and then for each window resizing.
  *
@@ -442,20 +453,20 @@ void Renderer::modelRoll(float aAngle) {
  */
 void Renderer::reshape(int aW, int aH) {
     mLog.info() << "reshape(" << aW << "," << aH << ")";
+    mScreenWidth = aW;
+    mScreenHeight = aH;
 
     // Define the "Camera to Clip" matrix for the perspective transformation
-    glm::mat4 cameraToClipMatrix = glm::perspective<float>(45.0f, (aW / static_cast<float>(aH)), _zNear, _zFar);
+    glm::mat4 cameraToClipMatrix = glm::perspective<float>(45.0f, ((aW/2) / static_cast<float>(aH)), _zNear, _zFar);
 
     // Set uniform values with the new "Camera to Clip" matrix
     glUseProgram(mProgram);
     glUniformMatrix4fv(mCameraToClipMatrixUnif, 1, GL_FALSE, glm::value_ptr(cameraToClipMatrix));
     glUseProgram(0);
-
-    glViewport(0, 0, (GLsizei)aW, (GLsizei)aH);
 }
 
 /**
- * @brief GLFW display callback function
+ * @brief Display method
  */
 void Renderer::display() {
     // mLog.debug() << "displayCallback()";
@@ -467,21 +478,33 @@ void Renderer::display() {
     // Use the linked program of compiled shaders
     glUseProgram(mProgram);
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-    /// @todo This camera related calculation need to go into a Camera class into the Scene
-    // re-calculate the "World to Camera" matrix,
-    glm::mat4 worldToCamerMatrix = transform();
+    // Stereo rendering
+    for (int idxEye = 0; idxEye <= 1; ++idxEye) {
+        /// @todo Use a config class for each eye
+        if (0 == idxEye) {
+            // Left eye rendering :
+            glViewport(0, 0, (GLsizei)(mScreenWidth/2), (GLsizei)mScreenHeight);
+        } else {
+            // Right eye rendering :
+            glViewport((GLsizei)(mScreenWidth/2), 0, (GLsizei)(mScreenWidth/2), (GLsizei)mScreenHeight);
+        }
 
-    // mDirToLight have to be recalculated with each camera orientation change
-    glm::vec4 lightDirCameraSpace = worldToCamerMatrix * mDirToLight;
-    glUniform3fv(mDirToLightUnif, 1, glm::value_ptr(lightDirCameraSpace));
+        ////////////////////////////////////////////////////////////////////////////////////////
+        /// @todo This camera related calculation need to go into a Camera class into the Scene
+        // re-calculate the "World to Camera" matrix,
+        glm::mat4 worldToCamerMatrix = getWorldToCameraMatrix(idxEye);
 
-    // and initialize the "Model to Camera" matrix stack with it
-    MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
-    /////////////////////////////////////////////////////////////////////////////////////////////////
+        // mDirToLight have to be recalculated with each camera orientation change
+        glm::vec4 lightDirCameraSpace = worldToCamerMatrix * mDirToLight;
+        glUniform3fv(mDirToLightUnif, 1, glm::value_ptr(lightDirCameraSpace));
 
-    // Use the matrix stack to manage the hierarchy of the scene
-    mSceneHierarchy.draw(modelToCameraMatrixStack, mModelToCameraMatrixUnif);
+        // and initialize the "Model to Camera" matrix stack with it
+        MatrixStack modelToCameraMatrixStack(worldToCamerMatrix);
+        ////////////////////////////////////////////////////////////////////////////////////////
+
+        // Use the matrix stack to manage the hierarchy of the scene
+        mSceneHierarchy.draw(modelToCameraMatrixStack, mModelToCameraMatrixUnif);
+    }
 
     // Unbind the Vertex Program
     glUseProgram(0);
