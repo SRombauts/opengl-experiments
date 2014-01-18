@@ -45,7 +45,7 @@ bool Timer::isTimeElapsed(time_t aCurrentTickUs) {
 
     if (elapsedTimeUs >= mIntervalUs) {
         bNewTimerTick = true;
-        // TODO SRombauts manage overflow => if fps is not enough to maintain accuracy
+        /// @todo manage overflow => if fps is not enough to maintain accuracy
         mStartTickUs += mIntervalUs;
     }
 

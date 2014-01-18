@@ -1,6 +1,3 @@
-[submodule "freeglut"]
-	path = freeglut
-	url = https://github.com/dcnieho/FreeGLUT.git
 [submodule "glload"]
 	path = glload
 	url = https://github.com/SRombauts/glload.git

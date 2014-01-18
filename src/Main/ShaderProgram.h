@@ -14,7 +14,8 @@
 
 #include "Utils/Utils.h"
 
-#include <glload/gl_3_3_comp.h> // GLuint, GLenum
+// NOTE: Needs to be included before any other gl/glfw/freeglut header
+#include <glload/gl_3_3.h>  // GLuint, GLenum, and OpenGL 3.3 core function APIs
 
 #include <vector>
 #include <string>

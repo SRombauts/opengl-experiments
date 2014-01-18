@@ -3,7 +3,7 @@
  * @ingroup Utils
  * @brief   Frame-Per-Seconds and inter-frame timing calculation
  *
- * Copyright (c) 2013 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+ * Copyright (c) 2013-2014 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
  * Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
  * or copy at http://opensource.org/licenses/MIT)
@@ -17,39 +17,39 @@
 namespace Utils {
 
 /**
- * @brief Frame-Per-Seconds and inter-frame timing calculation
+ * @brief   Frame-Per-Seconds and inter-frame timing calculation
  * @ingroup Utils
  */
 class FPS {
 public:
-    explicit FPS(time_t aCalculationIntervalUs);
+    explicit FPS(float aCalculationInterval);
     ~FPS(); // not virtual because no virtual methods and class not derived
 
-    // Inter-frame timings and FPS calculation
-    bool calculate();
-    // Measure frame render-time, since calculate() was called
-    void measure();
+    // Inter-frame timings and FPS calculation, calculated at the start of a frame
+    bool start(double aStartFrameTime);
+    // Measure frame render-time, since start() was called, at the end of the rendering
+    void end(double aEndRenderTime);
 
     // Getters
-    inline time_t   getCurrentFrameTickUs()     const;
-    inline time_t   getElapsedTimeUs()          const;
-    inline float    getCalculatedFPS()          const;
-    inline time_t   getAverageInterFrameUs()    const;
-    inline time_t   getWorstInterFrameUs()      const;
-    inline time_t   getLastRenderTimeUs()       const;
+    inline double getStartFrameTime()    const;
+    inline float getElapsedTime()       const;
+    inline float getCalculatedFPS()     const;
+    inline float getAverageInterFrame() const;
+    inline float getWorstInterFrame()   const;
+    inline float getLastRenderTime()    const;
 
 private:
-    time_t  mCalculationIntervalUs; ///< Number of microseconds between FPS calculations
+    const float mCalculationInterval;   ///< Configured duration between FPS calculations
 
     // Inter-frame timing calculations
-    time_t  mCurrentFrameTickUs;    ///< Tick of the beginning of the current frame, in microseconds
-    time_t  mElapsedTimeUs;         ///< Time elapsed since the previous frame, in microseconds
-    float   mCalculatedFPS;         ///< Frame-Per-Second value calculated during the last second
-    time_t  mAverageInterFrameUs;   ///< Average inter-frame time during the last second, in microseconds
-    time_t  mWorstInterFrameUs;     ///< Worst inter-frame time during the last second, in microseconds
+    double  mStartFrameTime;            ///< Time of the beginning of the current frame
+    float   mElapsedTime;               ///< Time elapsed since the previous frame
+    float   mCalculatedFPS;             ///< Frame-Per-Second value calculated during the last second
+    float   mAverageInterFrame;         ///< Average inter-frame time during the last second
+    float   mWorstInterFrame;           ///< Worst inter-frame time during the last second
 
     // Render time calculation
-    time_t  mLastRenderTimeUs;      ///< Duration of the last frame rendering
+    float   mLastRenderTime;            ///< Duration of the last frame rendering
 
 private:
     /// disallow copy constructor and assignment operator
@@ -58,17 +58,17 @@ private:
 
 
 /**
- * @brief Get tick of the current frame, in microseconds
+ * @brief Get tick of the current frame
  */
-inline time_t FPS::getCurrentFrameTickUs() const {
-    return mCurrentFrameTickUs;
+inline double FPS::getStartFrameTime() const {
+    return mStartFrameTime;
 }
 
 /**
- * @brief Get time elapsed since the previous frame, in microseconds
+ * @brief Get time elapsed since the previous frame
  */
-inline time_t FPS::getElapsedTimeUs() const {
-    return mElapsedTimeUs;
+inline float FPS::getElapsedTime() const {
+    return mElapsedTime;
 }
 
 /**
@@ -79,24 +79,24 @@ inline float FPS::getCalculatedFPS() const {
 }
 
 /**
- * @brief Get the average inter-frame time during the last second, in microseconds
+ * @brief Get the average inter-frame time during the last second
  */
-inline time_t FPS::getAverageInterFrameUs() const {
-    return mAverageInterFrameUs;
+inline float FPS::getAverageInterFrame() const {
+    return mAverageInterFrame;
 }
 
 /**
- * @brief Get the worst inter-frame time during the last second, in microseconds
+ * @brief Get the worst inter-frame time during the last second
  */
-inline time_t FPS::getWorstInterFrameUs() const {
-    return mWorstInterFrameUs;
+inline float FPS::getWorstInterFrame() const {
+    return mWorstInterFrame;
 }
 
 /**
  * @brief Get the duration of the last frame rendering
  */
-inline time_t FPS::getLastRenderTimeUs() const {
-    return mLastRenderTimeUs;
+inline float FPS::getLastRenderTime() const {
+    return mLastRenderTime;
 }
 
 } // namespace Utils

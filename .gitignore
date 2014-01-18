@@ -3,8 +3,6 @@ Release
 build
 lib
 glExperiments
-freeglut.pc
-config.h
 doc
 
 CMakeCache.txt

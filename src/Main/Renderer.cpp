@@ -13,11 +13,9 @@
 #include "Main/MatrixStack.h"
 #include "Main/ShaderProgram.h"
 #include "Utils/Exception.h"
-#include "Utils/FPS.h"
 #include "Utils/Measure.h"
 #include "Utils/String.h"
 
-#include <GL/freeglut.h>
 #include <glm/gtc/type_ptr.hpp>         // glm::value_ptr
 #include <glm/gtc/matrix_transform.hpp> // glm::perspective, glm::rotate, glm::translate
 
@@ -435,15 +433,15 @@ void Renderer::modelRoll(float aAngle) {
 }
 
 /**
- * @brief GLUT reshape callback function
+ * @brief GLFW reshape callback function
  *
  *  Called once at the start of the rendering, and then for each window resizing.
  *
- * @param[in] aW    Largeur utile de la fenêtre
- * @param[in] aH    Hauteur utile de la fenêtre
+ * @param[in] aW    Useful window width
+ * @param[in] aH    Useful window height
  */
 void Renderer::reshape(int aW, int aH) {
-    mLog.info() << "reshapeCallback(" << aW << "," << aH << ")";
+    mLog.info() << "reshape(" << aW << "," << aH << ")";
 
     // Define the "Camera to Clip" matrix for the perspective transformation
     glm::mat4 cameraToClipMatrix = glm::perspective<float>(45.0f, (aW / static_cast<float>(aH)), _zNear, _zFar);
@@ -457,11 +455,9 @@ void Renderer::reshape(int aW, int aH) {
 }
 
 /**
- * @brief GLUT display callback function
- *
- * @param[in] aFPS  Measurement of rendering time (and inter-frame timing)
+ * @brief GLFW display callback function
  */
-void Renderer::display(Utils::FPS& aFPS) {
+void Renderer::display() {
     // mLog.debug() << "displayCallback()";
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -491,10 +487,4 @@ void Renderer::display(Utils::FPS& aFPS) {
     glUseProgram(0);
 
     glFlush();
-
-    // Calculate the time to render => ratio between time to render and inter-frame time (if vsynch)
-    // @todo This is not accurate as it does not account for time to flip buffers (but swap block if vsynch)
-    aFPS.measure();
-
-    glutSwapBuffers();      // Swap front & back buffers, waiting for vsynch if driver configured for it
 }

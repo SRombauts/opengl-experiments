@@ -16,7 +16,8 @@
 #include "Main/Node.h"
 #include "Utils/Utils.h"
 
-#include <glload/gl_3_3_comp.h> // GLuint, GLenum
+// NOTE: Needs to be included before any other gl/glfw/freeglut header
+#include <glload/gl_3_3.h>      // GLuint, GLenum, and OpenGL 3.3 core function APIs
 #include <glm/glm.hpp>          // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
 
 #include <assimp/scene.h>       // Assimp output data structure
@@ -35,9 +36,9 @@ public:
     Renderer();
     ~Renderer();
 
-    // called by Input freeglut callbacks
+    // called by gflw through Input
     void reshape(int aW, int aH);
-    void display(Utils::FPS& aFPs);
+    void display();
 
     // Calculate new position and orientation given current Node movements
     inline void move(float aDeltaTime);

@@ -42,7 +42,6 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 # list of sources files of the "Main" module
 set(OPENGL_EXPERIMENTS_SRC_MAIN
  src/Main/App.h src/Main/App.cpp
- src/Main/Input.h src/Main/Input.cpp
  src/Main/Main.cpp
  src/Main/MatrixStack.h
  src/Main/Mesh.h src/Main/Mesh.cpp
@@ -86,13 +85,6 @@ add_executable(glExperiments
 
 ## Libraries ##
 
-# add the subdirectory of the freeglut static library (but disable any other build)
-set(FREEGLUT_BUILD_SHARED_LIBS OFF CACHE BOOL "Build FreeGLUT shared library.")
-set(FREEGLUT_BUILD_DEMOS OFF CACHE BOOL       "Build FreeGLUT demos.")
-add_definitions(-DFREEGLUT_STATIC)
-add_subdirectory(freeglut/freeglut/freeglut)
-include_directories("${PROJECT_SOURCE_DIR}/freeglut/freeglut/freeglut/include")
-
 # add the subdirectory of the glfw static library (but disable any other build)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
@@ -115,7 +107,6 @@ include_directories("${PROJECT_SOURCE_DIR}/glm")
 # add the subdirectory of the assimp static library (but disable tool builds)
 set(ASSIMP_BUILD_STATIC_LIB ON CACHE BOOL "Build a static (.a) version of the library")
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "If the supplementary tools for Assimp are built in addition to the library.")
-add_definitions(-DFREEGLUT_STATIC -DASSIMP_BUILD_STATIC_LIB=ON)
 add_subdirectory(assimp)
 include_directories("${PROJECT_SOURCE_DIR}/assimp/include")
 
@@ -141,7 +132,7 @@ include_directories("${PROJECT_SOURCE_DIR}/OculusSDK/LibOVR/Include")
 ## Linking ##
 
 # link the executable with all required libraries
-target_link_libraries(glExperiments glfw freeglut_static glload assimp LoggerCpp OculusVR ${SYSTEM_LIBRARIES})
+target_link_libraries(glExperiments glfw glload assimp LoggerCpp OculusVR ${SYSTEM_LIBRARIES})
 
 
 # Optional additional targets:

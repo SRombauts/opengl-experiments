@@ -13,11 +13,12 @@
 #include "Main/Node.h"
 #include "Main/MatrixStack.h"
 
-#include <glload/gl_3_3_comp.h>         // GLuint, GLenum
-#include <glm/glm.hpp>                  // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
-#include <glm/gtc/quaternion.hpp>       // glm::fquat
+// NOTE: Needs to be included before any other gl/glfw/freeglut header
+#include <glload/gl_3_3.h>          // GLuint, GLenum, and OpenGL 3.3 core function APIs
+#include <glm/glm.hpp>              // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
+#include <glm/gtc/quaternion.hpp>   // glm::fquat
 
-#include <vector>                       // std::vector
+#include <vector>                   // std::vector
 
 
 /**
@@ -45,8 +46,8 @@ public:
 private:
     Node::List  mRootNodes; ///< Root Nodes of the current Scene
 
-    // TODO(SRombauts) Add Camera (or stereoscopic camera) object
-    // TODO(SRombauts) Add Lights objects
+    /// @todo Add Camera (or stereoscopic camera) object
+    /// @todo Add Lights objects
 };
 
 
