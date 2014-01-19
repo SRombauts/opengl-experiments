@@ -38,8 +38,7 @@ public:
 
     // Set prediction lookahead amount in ms
     void setPrediction(int aPredictionDeltaMs);
-    void incrPrediction();
-    void decrPrediction();
+    void incrPrediction(int aOffset);
 
     // Reset orientation of the HMD
     void resetOrientation();

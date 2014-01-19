@@ -43,6 +43,9 @@ public:
     // Calculate new position and orientation given current Node movements
     inline void move(float aDeltaTime);
 
+    // Increment/decrement the screen center offset
+    inline void incrScreenCenterOffset(float aOffset);
+
     // called by Input::checkKeys()
     // camera:
     void move(const glm::vec3& aTranslation);
@@ -91,6 +94,7 @@ private:
 
     int         mScreenWidth;           ///< Screen width
     int         mScreenHeight;          ///< Screen height
+    float       mScreenCenterOffset;    ///< Screen center offset for each eye, in meters
 
 private:
     /// disallow copy constructor and assignment operator
@@ -105,4 +109,14 @@ private:
  */
 inline void Renderer::move(float aDeltaTime) {
     mSceneHierarchy.move(aDeltaTime);
+}
+
+/**
+ * @brief Increment/decrement the screen center offset
+ *
+ * @param[in] aOffset Horizontal offset (in meters) to add/remove
+ */ 
+inline void Renderer::incrScreenCenterOffset(float aOffset) {
+    mScreenCenterOffset += aOffset;
+    mLog.info() << "SetScreenCenterOffset(" << mScreenCenterOffset << "m)";
 }

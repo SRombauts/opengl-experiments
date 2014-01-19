@@ -119,13 +119,21 @@ void App::checkKeys() {
         // Space to reset orientation
         mOculusHMD.resetOrientation();
     }
-    if (isKeyPressed(GLFW_KEY_EQUAL)) {
-        // = to increase Occulus HMD predication lookahead by one second (default is 30ms)
-        mOculusHMD.incrPrediction();
+    if (isKeyPressed(GLFW_KEY_KP_ADD)) {
+        // + to increase Occulus HMD predication lookahead by one second (default is 30ms)
+        mOculusHMD.incrPrediction(1);
     }
-    if (isKeyPressed(GLFW_KEY_MINUS)) {
+    if (isKeyPressed(GLFW_KEY_KP_SUBTRACT)) {
         // - to decrease Occulus HMD predication lookahead by one second (default is 30ms)
-        mOculusHMD.decrPrediction();
+        mOculusHMD.incrPrediction(-1);
+    }
+    if (isKeyPressed(GLFW_KEY_KP_MULTIPLY)) {
+        // * to increase Occulus HMD screen center offset
+        mRenderer.incrScreenCenterOffset(0.001f);
+    }
+    if (isKeyPressed(GLFW_KEY_KP_DIVIDE)) {
+        // / to decrease Occulus HMD screen center offset
+        mRenderer.incrScreenCenterOffset(-0.001f);
     }
 
     if (isKeyPressed(GLFW_KEY_R)) {

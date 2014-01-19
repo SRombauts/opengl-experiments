@@ -45,6 +45,10 @@ OculusHMD::OculusHMD() :
                 mLog.info() << "User profile Height=" << mUserProfilePtr->GetPlayerHeight()
                             << " EyeHeight=" << mUserProfilePtr->GetEyeHeight()
                             << " IPD=" << mUserProfilePtr->GetIPD();
+                mStereoConfig.SetIPD(mUserProfilePtr->GetIPD());
+
+                mLog.info() << "Calculated appropriate FOV: " << mStereoConfig.GetYFOVDegrees() << "deg";
+                mLog.info() << "Calculated screen center offset: " << mStereoConfig.GetProjectionCenterOffset() << "m";
 
                 // Access sensor interface of the HMD device
                 mSensorPtr = *(mHMDPtr->GetSensor());
@@ -123,21 +127,13 @@ void OculusHMD::setPrediction(int aPredictionDeltaMs) {
 }
 
 /**
- * @brief Increment prediction lookahead by one milisecond
+ * @brief Increment/decrement prediction lookahead by some miliseconds
+ *
+ * @param[in] aOffset Offset to add/remove to the lookahead in miliseconds
  */
-void OculusHMD::incrPrediction() {
+void OculusHMD::incrPrediction(int aOffset) {
     if (100 > mPredictionLookaheadMs) {
-        ++mPredictionLookaheadMs;
-        setPrediction(mPredictionLookaheadMs);
-    }
-}
-
-/**
- * @brief Decrement prediction lookahead by one milisecond
- */
-void OculusHMD::decrPrediction() {
-    if (0 < mPredictionLookaheadMs) {
-        --mPredictionLookaheadMs;
+        mPredictionLookaheadMs += aOffset;
         setPrediction(mPredictionLookaheadMs);
     }
 }

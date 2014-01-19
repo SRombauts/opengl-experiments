@@ -57,12 +57,13 @@ Renderer::Renderer() :
     mModelToCameraMatrixUnif(-1),
     mCameraToClipMatrixUnif(-1),
     mCameraOrientation(),
-    mCameraTranslation(0.0f, 0.0f, 20.0f),
+    mCameraTranslation(0.0f, 0.0f, 30.0f),
     mDirToLight(0.866f, -0.5f, 0.0f, 0.0f), // Normalized vector!
     mLightIntensity(0.8f, 0.8f, 0.8f, 1.0f),
     mAmbientIntensity(0.2f, 0.2f, 0.2f, 1.0f),
     mScreenWidth(0),
-    mScreenHeight(0) {
+    mScreenHeight(0),
+    mScreenCenterOffset(2.0f) {
     init();
 }
 
@@ -202,8 +203,8 @@ void Renderer::initScene() {
 
     // Load an experimental cockpit => toward a camera view in world
     Node::Ptr CockpitPtr = loadFile("data/cockpit.dae");
-    CockpitPtr->move(glm::vec3(2.0f, 0.0f, 19.0f));
-    CockpitPtr->yaw(3.14f); // 180° horizontally arround y (to face back)
+    CockpitPtr->move(glm::vec3(0.0f, 0.0f, 0.0f));
+//  CockpitPtr->yaw(3.14f); // 180° horizontally arround y (to face back)
     mSceneHierarchy.addRootNode(CockpitPtr);
 
     // Load a ground/plane for some kind of fixe reference
@@ -406,11 +407,13 @@ glm::mat4 Renderer::getWorldToCameraMatrix(int aIdxEye) {
     glm::mat4 worldToHeadMatrix = glm::translate(rotations, -mCameraTranslation);
 
     /// @todo use a neck-head-eye model to get eye translation vector
-    float eye = (0 == aIdxEye)?(-1.0f):(1.0f);
+//  float eye = (0 == aIdxEye)?(-0.0315f):(0.0315f);        // Default Lens separation & IPD of 63.5mm
+    float eye = (0 == aIdxEye)?(mScreenCenterOffset):(-mScreenCenterOffset);    // Calculated screen center offset
+
     glm::vec3 eyeTranslation(eye, 0.0f, 0.0f);
 
     // And the, we apply the eye translation and return the resulting matrix
-    return glm::translate(worldToHeadMatrix, -eyeTranslation);
+    return glm::translate(worldToHeadMatrix, eyeTranslation);
 }
 
 /**
