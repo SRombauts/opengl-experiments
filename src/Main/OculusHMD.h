@@ -1,7 +1,7 @@
 /**
  * @file    OculusHMD.h
  * @ingroup Main
- * @brief   Container for root Nodes of a hierarchical OculusHMD graph
+ * @brief   Interface with the Oculus Head Mounted Display.
  *
  * Copyright (c) 2014 Sebastien Rombauts (sebastien.rombauts@gmail.com)
  *
@@ -10,31 +10,27 @@
  */
 #pragma once
 
-#include "LoggerCpp/Logger.h"
-
 #include "Utils/shared_ptr.hpp"
-
-#include "OVR.h" // NOLINT(build/include): OculusVR fault!
 
 #include <glm/gtc/quaternion.hpp>       // glm::fquat
 
+
+/// Private Implémentation (PIMPL) of the interface, hiding the "OVR.h" include file and all its redefined types.
+class OculusHMDImpl;
+
+
 /**
- * @brief   Manage interface with the Oculus Head Mounted Display
+ * @brief   Interface with the Oculus Head Mounted Display.
  * @ingroup Main
  *
  * - Get device properties
  * - Get user configuration
  * - Access head orientation
- *
- * @todo OculusHMD need a "clean" interface without "OVR.h" to pass to the renderer
 */
 class OculusHMD {
 public:
     OculusHMD();
     ~OculusHMD();
-
-    // Load default information if no real device found
-    void fakeInfo();
 
     // Set prediction lookahead amount in ms
     void setPrediction(int aPredictionDeltaMs);
@@ -47,14 +43,5 @@ public:
     glm::fquat getOrientation() const;
 
 private:
-    typedef Utils::shared_ptr<OVR::SensorFusion> SensorFusionPtr;   ///< Share pointer of SensorFusion result object
-
-    Log::Logger                     mLog;               ///< Logger object to output runtime information
-    OVR::System                     mSystem;            //!< Init Oculus Core system (memory allocator, threads)
-    OVR::HMDInfo                    mHMDInfo;           ///< Describes the HMD allowing us to configure rendering
-    OVR::Ptr<OVR::SensorDevice>     mSensorPtr;         ///< Sensors data interface of the HMD Device
-    SensorFusionPtr                 mSensorFusionPtr;   ///< Fusion Gyro/Accelero/Magneto to keep track of orientation
-    OVR::Util::Render::StereoConfig mStereoConfig;      ///< Stereo view parameters
-
-    unsigned int                    mPredictionLookaheadMs; ///< Prediction Lookahead in miliseconds (default is 30ms)
+    Utils::shared_ptr<OculusHMDImpl>    mImplPtr;   ///< Opaque pointer to the Private Implementation (PIMPL)
 };

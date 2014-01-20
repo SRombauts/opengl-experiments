@@ -57,7 +57,7 @@ void App::loop() {
                           << FPS.getLastRenderTime()*100.0f/FPS.getElapsedTime() << "%)";
         }
 
-        // Check current key pressed
+        // Check current key pressed, and move/orient models accordingly
         checkKeys();
 
         // Do all movements based on Node speed

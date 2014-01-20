@@ -14,8 +14,6 @@ if (MSVC)
     set(SYSTEM_LIBRARIES        opengl32.lib)
     # disable Visual Studio usual warnings
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    # For OculusVR / LibOVR debug build
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -DOVR_BUILD_DEBUG")
 elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(CPPLINT_ARG_OUTPUT      "--output=eclipse")
     set(CPPCHECK_ARG_TEMPLATE   "--template=gcc")
@@ -47,6 +45,7 @@ set(OPENGL_EXPERIMENTS_SRC_MAIN
  src/Main/Mesh.h src/Main/Mesh.cpp
  src/Main/Node.h src/Main/Node.cpp
  src/Main/OculusHMD.h src/Main/OculusHMD.cpp
+ src/Main/OculusHMDImpl.h src/Main/OculusHMDImpl.cpp
  src/Main/Physic.h src/Main/Physic.cpp
  src/Main/Renderer.h src/Main/Renderer.cpp
  src/Main/Scene.h src/Main/Scene.cpp
@@ -118,13 +117,13 @@ set(LOGGERCPP_RUN_DOXYGEN  OFF CACHE BOOL "Run Doxygen C++ documentation tool.")
 add_subdirectory(LoggerCpp)
 include_directories("${PROJECT_SOURCE_DIR}/LoggerCpp/include")
 
-## Oculus SDK library in last position ##
-# add the subdirectory of the Oculus SDK LibOVR library
+## Oculus SDK library : in last position, see WARNING below ##
 if (MSVC)
     # Oculus LibOVR uses unicode (WCHAR/wchar_t) windows API
     # WARNING: this can affect any further library! Keep in last position.
     add_definitions(-DUNICODE -D_UNICODE)
 endif ()
+# add the subdirectory of the Oculus SDK LibOVR library
 add_subdirectory(OculusSDK/LibOVR)
 include_directories("${PROJECT_SOURCE_DIR}/OculusSDK/LibOVR/Include")
 
