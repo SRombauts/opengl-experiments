@@ -71,6 +71,7 @@ Renderer::Renderer() :
  * @brief Destructor
  */
 Renderer::~Renderer() {
+    glDeleteProgram(mProgram);
 }
 
 /**

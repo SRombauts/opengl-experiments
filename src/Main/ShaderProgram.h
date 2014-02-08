@@ -24,6 +24,8 @@
 /**
  * @brief   Compile and link shaders into a program object
  * @ingroup Main
+ *
+ * @todo Add a makeProgram(vertexShaderFilename, fragmentShaderFilename) method
  */
 class ShaderProgram {
 public:

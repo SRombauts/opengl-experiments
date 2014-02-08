@@ -68,12 +68,13 @@ void ShaderProgram::compileShader(const GLenum  aShaderType,
  *
  * @throw a std::exception in case of error (std::runtime_error)
  */
-GLuint ShaderProgram::compileShader(GLenum aShaderType, const std::string& aShaderSource) const {
-    const char *shaderSource = aShaderSource.c_str();
+GLuint ShaderProgram::compileShader(GLenum              aShaderType,
+                                    const std::string&  aShaderSource) const {
+    const char* pShaderSource = aShaderSource.c_str();
 
     // Create a shader, give it the source code, and compile it
     GLuint shader = glCreateShader(aShaderType);
-    glShaderSource(shader, 1, &shaderSource, NULL);
+    glShaderSource(shader, 1, &pShaderSource, NULL);
     glCompileShader(shader);
 
     // Check shader status, and get error message if a problem occured
