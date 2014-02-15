@@ -12,11 +12,11 @@
 
 #include "LoggerCpp/Logger.h"
 
-#include "Utils/shared_ptr.hpp"
+#include <memory>                   // std::unique_ptr
 
 #include "OVR.h" // NOLINT(build/include): OculusVR fault!
 
-#include <glm/gtc/quaternion.hpp>       // glm::fquat
+#include <glm/gtc/quaternion.hpp>   // glm::fquat
 
 /**
  * @brief   Private interface with the Oculus Head Mounted Display.
@@ -45,7 +45,7 @@ public:
     glm::fquat getOrientation() const;
 
 private:
-    typedef Utils::shared_ptr<OVR::SensorFusion> SensorFusionPtr;   ///< Share pointer of SensorFusion result object
+    typedef std::unique_ptr<OVR::SensorFusion>  SensorFusionPtr;    ///< Share pointer of SensorFusion result object
 
     Log::Logger                     mLog;               ///< Logger object to output runtime information
     OVR::System                     mSystem;            //!< Init Oculus Core system (memory allocator, threads)

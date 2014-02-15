@@ -13,7 +13,7 @@
 #include "Main/Mesh.h"
 #include "Main/Physic.h"
 
-#include "Utils/shared_ptr.hpp"     // std::shared_ptr replacement
+#include <memory>                   // std::shared_ptr
 #include "Utils/Utils.h"
 
 // NOTE: Needs to be included before any other gl/glfw/freeglut header
@@ -38,7 +38,8 @@ public:
     static const glm::vec3 UNIT_Z_FRONT;    ///< Unit vector to the "front of the world"
 
 public:
-    typedef Utils::shared_ptr<Node> Ptr;        ///< Shared Pointer to a Node
+    // TODO unique_ptr ?
+    typedef std::shared_ptr<Node>   Ptr;        ///< Shared Pointer to a Node
     typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to a Node
 
 public:

@@ -10,14 +10,14 @@
  */
 #pragma once
 
-#include "Utils/shared_ptr.hpp" // std::shared_ptr replacement
+#include <memory>           // std::shared_ptr
 
 // NOTE: Needs to be included before any other gl/glfw/freeglut header
-#include <glload/gl_3_3.h>      // GLuint, GLenum, and OpenGL 3.3 core function APIs
-#include <glm/glm.hpp>          // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
+#include <glload/gl_3_3.h>  // GLuint, GLenum, and OpenGL 3.3 core function APIs
+#include <glm/glm.hpp>      // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
 
-#include <vector>               // std::vector
-#include <string>               // std::string
+#include <vector>           // std::vector
+#include <string>           // std::string
 
 /**
  * @brief Description of a mesh/model at a Node of the Scene
@@ -25,7 +25,8 @@
  */
 class Mesh {
 public:
-    typedef Utils::shared_ptr<Mesh> Ptr;        ///< Shared Pointer to a Mesh
+    // TODO unique_ptr ?
+    typedef std::shared_ptr<Mesh>   Ptr;        ///< Shared Pointer to a Mesh
     typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers of Mesh
 
     typedef std::vector<glm::vec3>  VertexData; ///< A Vector of Vertex data composed of 3 float elements

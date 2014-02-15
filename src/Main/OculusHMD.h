@@ -10,9 +10,9 @@
  */
 #pragma once
 
-#include "Utils/shared_ptr.hpp"
+#include <memory>                   // std::unique_ptr
 
-#include <glm/gtc/quaternion.hpp>       // glm::fquat
+#include <glm/gtc/quaternion.hpp>   // glm::fquat
 
 
 /// Private Implémentation (PIMPL) of the interface, hiding the "OVR.h" include file and all its redefined types.
@@ -43,5 +43,5 @@ public:
     glm::fquat getOrientation() const;
 
 private:
-    Utils::shared_ptr<OculusHMDImpl>    mImplPtr;   ///< Opaque pointer to the Private Implementation (PIMPL)
+    std::unique_ptr<OculusHMDImpl>  mImplPtr;   ///< Opaque pointer to the Private Implementation (PIMPL)
 };

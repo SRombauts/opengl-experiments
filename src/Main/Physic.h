@@ -10,14 +10,12 @@
  */
 #pragma once
 
-#include "Utils/shared_ptr.hpp" // std::shared_ptr replacement
-
 // NOTE: Needs to be included before any other gl/glfw/freeglut header
-#include <glload/gl_3_3.h>      // GLuint, GLenum, and OpenGL 3.3 core function APIs
-#include <glm/glm.hpp>          // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
+#include <glload/gl_3_3.h>  // GLuint, GLenum, and OpenGL 3.3 core function APIs
+#include <glm/glm.hpp>      // glm::mat4, glm::vec3... (GLM_FORCE_RADIANS defined at the project level)
 
-#include <vector>               // std::vector
-#include <string>               // std::string
+#include <vector>           // std::vector
+#include <string>           // std::string
 
 /**
  * @brief Physical properties of a Node
