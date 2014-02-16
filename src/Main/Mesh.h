@@ -10,7 +10,7 @@
  */
 #pragma once
 
-#include <memory>           // std::shared_ptr
+#include <memory>           // std::unique_ptr
 
 // NOTE: Needs to be included before any other gl/glfw/freeglut header
 #include <glload/gl_3_3.h>  // GLuint, GLenum, and OpenGL 3.3 core function APIs
@@ -25,9 +25,8 @@
  */
 class Mesh {
 public:
-    // TODO unique_ptr ?
-    typedef std::shared_ptr<Mesh>   Ptr;        ///< Shared Pointer to a Mesh
-    typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers of Mesh
+    typedef std::unique_ptr<Mesh>   Ptr;        ///< Unique (unshared) Smart Pointer to a Mesh
+    typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to Meshes
 
     typedef std::vector<glm::vec3>  VertexData; ///< A Vector of Vertex data composed of 3 float elements
     typedef std::vector<GLshort>    IndexData;  ///< A Vector of Index data composed of short elements

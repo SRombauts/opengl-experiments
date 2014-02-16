@@ -38,9 +38,8 @@ public:
     static const glm::vec3 UNIT_Z_FRONT;    ///< Unit vector to the "front of the world"
 
 public:
-    // TODO unique_ptr ?
-    typedef std::shared_ptr<Node>   Ptr;        ///< Shared Pointer to a Node
-    typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to a Node
+    typedef std::shared_ptr<Node>   Ptr;        ///< Shared Smart Pointer to a Node
+    typedef std::vector<Ptr>        List;       ///< List (std::vector) of pointers to Nodes
 
 public:
     explicit Node(const char* apName);
@@ -76,7 +75,7 @@ public:
     inline const std::string& getName() const;
     inline const List&  getChildren() const;
     inline       void   addChildNode(const Node::Ptr& aChildNodePtr);
-    inline       void   addMesh(const Mesh::Ptr& aMeshPtr);
+    inline       void   addMesh(Mesh::Ptr& aMeshPtr);
 
     // Rotate a given quaternion by an axis and an angle
     static void rotateRightMultiply(glm::fquat& aCameraOrientation, float aAngRad, const glm::vec3 &aAxis);
@@ -185,6 +184,6 @@ inline void Node::addChildNode(const Node::Ptr& aChildNodePtr) {
  *
  * @param[in] aMeshPtr Draw call to add
  */
-inline void Node::addMesh(const Mesh::Ptr& aMeshPtr) {
-    mMeshesList.push_back(aMeshPtr);
+inline void Node::addMesh(Mesh::Ptr& aMeshPtr) {
+    mMeshesList.push_back(std::move(aMeshPtr));
 }

@@ -22,7 +22,7 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     # GCC flags
     # TODO: how to define for some libs only
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic -fstack-protector-all -Wall -Wextra -pedantic -Weffc++ -Wformat-security -Winit-self -Wswitch-default -Wswitch-enum -Wfloat-equal -Wundef -Wshadow -Wcast-qual -Wconversion -Wlogical-op -Winline -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn)
-    message(STATUS "C++11 activated for std::shared_ptr")
+    message(STATUS "C++11 activated for std::unique_ptr")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")  # -std=c++11
 endif ()
 set(CPPLINT_ARG_VERBOSE "--verbose=3")
@@ -59,7 +59,6 @@ set(OPENGL_EXPERIMENTS_SRC_UTILS
  src/Utils/Formatter.h
  src/Utils/FPS.h src/Utils/FPS.cpp
  src/Utils/Measure.h
- src/Utils/shared_ptr.hpp
  src/Utils/String.h
  src/Utils/Time.h src/Utils/Time.cpp
  src/Utils/Timer.h src/Utils/Timer.cpp

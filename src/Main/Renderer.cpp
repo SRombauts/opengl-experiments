@@ -340,7 +340,7 @@ Node::Ptr Renderer::loadNode(const aiScene* apScene, const aiNode* apNode) {
             // here vertexData and vertexIndex are of no more use, std::vector memory will be deallocated
             // here pScene is of no more use, Assimp::Importer will release it
 
-            NodePtr->addMesh(MeshPtr);
+            NodePtr->addMesh(std::move(MeshPtr));
         }
 
         // Load all children of the current Node recursively
