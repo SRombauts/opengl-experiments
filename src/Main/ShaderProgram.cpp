@@ -31,12 +31,34 @@ ShaderProgram::~ShaderProgram() {
 }
 
 /**
- * @brief Compile a shader of the given type from the content of a file, and add it to the list
+ * @brief Compile and link a typical program composed of a vertex and a fragment shader.
  *
- * @param[in] aShaderType       Type of shader to be compiled
- * @param[in] apShaderFilename  Name of the shader file to compile
+ * @param[in] apVertexShaderFilename    Name of the vertex shader file to compile.
+ * @param[in] apFragmentShaderFilename  Name of the fragment shader file to compile.
  *
- * @throw a std::exception in case of error (std::runtime_error)
+ * @return Id of the created program object.
+ *
+ * @throw a std::exception in case of error (std::runtime_error).
+ */
+GLuint ShaderProgram::makeProgram(const char* apVertexShaderFilename, const char* apFragmentShaderFilename) {
+    // Compile the shader files (into intermediate compiled object)
+    mLog.debug() << "makeProgram: compiling shaders...";
+    compileShader(GL_VERTEX_SHADER, apVertexShaderFilename);
+    compileShader(GL_FRAGMENT_SHADER, apFragmentShaderFilename);
+
+    // Link them in a program (into the final executable to send to the GPU)
+    mLog.debug() << "makeProgram: linking program...";
+    GLuint program = linkProgram();
+    return program;
+}
+
+/**
+ * @brief Compile a shader of the given type from the content of a file, and add it to the list.
+ *
+ * @param[in] aShaderType       Type of shader to be compiled.
+ * @param[in] apShaderFilename  Name of the shader file to compile.
+ *
+ * @throw a std::exception in case of error (std::runtime_error).
  */
 void ShaderProgram::compileShader(const GLenum  aShaderType,
                                   const char*   apShaderFilename) {
@@ -59,14 +81,14 @@ void ShaderProgram::compileShader(const GLenum  aShaderType,
 }
 
 /**
- * @brief Compile a shader of the given type from the source code provided as a string
+ * @brief Compile a shader of the given type from the source code provided as a string.
  *
- * @param[in] aShaderType   Type of shader to be compiled
- * @param[in] aShaderSource Shader source code to compile
+ * @param[in] aShaderType   Type of shader to be compiled.
+ * @param[in] aShaderSource Shader source code to compile.
  *
- * @return Id of the created shader object
+ * @return Id of the created shader object.
  *
- * @throw a std::exception in case of error (std::runtime_error)
+ * @throw a std::exception in case of error (std::runtime_error).
  */
 GLuint ShaderProgram::compileShader(GLenum              aShaderType,
                                     const std::string&  aShaderSource) const {
@@ -97,11 +119,11 @@ GLuint ShaderProgram::compileShader(GLenum              aShaderType,
 }
 
 /**
- * @brief Link a list of shaders into a program object
+ * @brief Link a list of shaders into a program object.
  *
- * @return Id of the created program object
+ * @return Id of the created program object.
  *
- * @throw a std::exception in case of error (std::runtime_error)
+ * @throw a std::exception in case of error (std::runtime_error).
  */
 GLuint ShaderProgram::linkProgram() const {
     // Create a program, attach shaders to it, and link the program

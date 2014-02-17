@@ -126,15 +126,12 @@ void Renderer::initProgram() {
     ShaderProgram   shaderProgram;
 
     // Compile the shader files (into intermediate compiled object)
-    mLog.debug() << "initProgram: compiling shaders...";
-    shaderProgram.compileShader(GL_VERTEX_SHADER,   "data/ModelWorldCameraClip.vert");
-    shaderProgram.compileShader(GL_FRAGMENT_SHADER, "data/PassthroughColor.frag");
-    // Link them in a program (into the final executable to send to the GPU)
-    mLog.debug() << "initProgram: linking program...";
-    mProgram = shaderProgram.linkProgram();
+    // and Link them in a program (into the final executable to send to the GPU)
+    mLog.debug() << "initProgram: compiling shaders and linking program...";
+    mProgram = shaderProgram.makeProgram("data/ModelWorldCameraClip.vert", "data/PassthroughColor.frag");
 
     // Get location of (vertex) attributes (input streams of (vertex) shader
-    /// @todo test attribute and uniform != -1
+    /// @todo test (THROW) attribute and uniform != -1
     mPositionAttrib = glGetAttribLocation(mProgram, "position");        // layout(location = 0) in vec4 position;
     mColorAttrib    = glGetAttribLocation(mProgram, "diffuseColor");    // layout(location = 1) in vec4 diffuseColor;
     mNormalAttrib   = glGetAttribLocation(mProgram, "normal");          // layout(location = 2) in vec4 normal;

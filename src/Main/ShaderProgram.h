@@ -24,14 +24,16 @@
 /**
  * @brief   Compile and link shaders into a program object
  * @ingroup Main
- *
- * @todo Add a makeProgram(vertexShaderFilename, fragmentShaderFilename) method
  */
 class ShaderProgram {
 public:
     ShaderProgram();
     ~ShaderProgram();
 
+    // Compile and link a typical program composed of a vertex and a fragment shader
+    GLuint  makeProgram(const char* apVertexShaderFilename, const char* apFragmentShaderFilename);
+
+    // Compile and link a program with arbitrary shader types
     void    compileShader(const GLenum aShaderType, const char* apShaderFilename);
     GLuint  linkProgram() const;
 
